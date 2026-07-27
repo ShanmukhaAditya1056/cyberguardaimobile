@@ -7,6 +7,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_gradients.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/automation_ids.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../data/repositories/phishing_repository.dart';
 import '../../../data/services/permission_service.dart';
@@ -112,11 +113,15 @@ class _PhishingScreenState extends ConsumerState<PhishingScreen>
         title: Text(AppLocalizations.of(context)!.phishingScanner,
             style: AppTextStyles.title),
         actions: [
-          IconButton(
-            tooltip: AppLocalizations.of(context)!.scanQrCode,
-            icon: const Icon(Icons.qr_code_scanner_rounded,
-                color: AppColors.textDark),
-            onPressed: () => GoRouter.of(context).push('/phishing/qr'),
+          Semantics(
+            identifier: AutoId.phishingQrBtn,
+            container: true,
+            child: IconButton(
+              tooltip: AppLocalizations.of(context)!.scanQrCode,
+              icon: const Icon(Icons.qr_code_scanner_rounded,
+                  color: AppColors.textDark),
+              onPressed: () => GoRouter.of(context).push('/phishing/qr'),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.info_outline, color: AppColors.textDark),
@@ -208,8 +213,20 @@ class _GlassTabBar extends StatelessWidget {
           unselectedLabelColor: AppColors.white50,
           dividerColor: Colors.transparent,
           tabs: [
-            Tab(text: l.phishingUrlTab),
-            Tab(text: l.phishingSmsTab),
+            Tab(
+              child: Semantics(
+                identifier: AutoId.phishingTabUrl,
+                container: true,
+                child: Text(l.phishingUrlTab),
+              ),
+            ),
+            Tab(
+              child: Semantics(
+                identifier: AutoId.phishingTabSms,
+                container: true,
+                child: Text(l.phishingSmsTab),
+              ),
+            ),
           ],
         ),
       ),
@@ -294,6 +311,7 @@ class _UrlScannerTab extends StatelessWidget {
                 hint: 'https://example.com',
                 icon: Icons.public_rounded,
                 keyboardType: TextInputType.url,
+                autoIdent: AutoId.phishingUrlInput,
                 onSubmitted: (_) => onScan(),
                 suffix: urlCtrl.text.isNotEmpty
                     ? IconButton(
@@ -315,6 +333,7 @@ class _UrlScannerTab extends StatelessWidget {
                       color: Colors.white,
                       textColor: BlinkCard.blueAccent,
                       height: 46,
+                      autoIdent: AutoId.phishingPasteBtn,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -327,6 +346,7 @@ class _UrlScannerTab extends StatelessWidget {
                       isLoading: state.isScanning,
                       color: BlinkCard.blueAccent,
                       height: 46,
+                      autoIdent: AutoId.phishingScanBtn,
                     ),
                   ),
                 ],
@@ -777,6 +797,7 @@ class _SmsScannerTab extends ConsumerWidget {
                       icon: Icons.refresh_rounded,
                       height: 44,
                       color: BlinkCard.lavenderAccent,
+                      autoIdent: AutoId.phishingSmsLoadBtn,
                       onTap: () async {
                         final granted =
                             await PermissionService.requestSmsPermission(
@@ -799,6 +820,7 @@ class _SmsScannerTab extends ConsumerWidget {
                         gradient: AppGradients.warning,
                         icon: Icons.radar,
                         height: 40,
+                        autoIdent: AutoId.phishingSmsScanAllBtn,
                         onTap: () =>
                             ref.read(phishingProvider.notifier).scanAllSms(),
                       ),

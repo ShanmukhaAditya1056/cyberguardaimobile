@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../data/services/hive_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/blink_card.dart';
+import '../../core/utils/automation_ids.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -128,7 +129,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
               alignment: Alignment.topRight,
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: TextButton(
+                child: Semantics(
+                  identifier: AutoId.onboardingSkip,
+                  button: true,
+                  container: true,
+                  child: TextButton(
                   onPressed: _skip,
                   child: Text(
                     AppLocalizations.of(context)!.onboardSkip,
@@ -138,6 +143,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
+                  ),
                   ),
                 ),
               ),
@@ -176,6 +182,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                     ),
                     const SizedBox(height: 24),
                     BlinkButton(
+                      autoIdent: AutoId.onboardingNext,
                       label: _currentPage == _pages.length - 1
                           ? AppLocalizations.of(context)!.onboardGrantStart
                           : AppLocalizations.of(context)!.onboardContinue,

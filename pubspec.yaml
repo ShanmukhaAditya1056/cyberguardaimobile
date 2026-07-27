@@ -67,6 +67,9 @@ dependencies:
   mobile_scanner: ^5.1.1
   image_picker: ^1.0.7
 
+  # Screenshot AI scanner — on-device OCR (feature: Screenshot Scanner)
+  google_mlkit_text_recognition: ^0.13.1
+
   # Localisation (feature #15)
   flutter_localizations:
     sdk: flutter

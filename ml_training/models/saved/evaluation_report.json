@@ -1,0 +1,173 @@
+{
+  "phishing_distilbert": {
+    "model_size_kb": 0.0,
+    "accuracy": 1.0,
+    "auc": 1.0,
+    "confusion_matrix": [
+      [
+        920,
+        0
+      ],
+      [
+        0,
+        2000
+      ]
+    ],
+    "classification_report": {
+      "safe": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 920.0
+      },
+      "phishing": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2000.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2920.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2920.0
+      }
+    }
+  },
+  "malware_random_forest": {
+    "model_size_kb": 0.0,
+    "accuracy": 0.9916666666666667,
+    "auc": 0.9996937779017858,
+    "cv_mean": 0.9930833333333332,
+    "cv_std": 0.0011055415967851287,
+    "confusion_matrix": [
+      [
+        1113,
+        7
+      ],
+      [
+        13,
+        1267
+      ]
+    ],
+    "top_features": [
+      "target_sdk",
+      "is_sideloaded",
+      "bind_accessibility_service",
+      "receive_sms",
+      "request_install_packages",
+      "total_permissions",
+      "read_sms",
+      "receive_boot_completed",
+      "bind_device_admin",
+      "send_sms"
+    ]
+  },
+  "malware_lightgbm": {
+    "model_size_kb": 0.0,
+    "accuracy": 0.9945833333333334,
+    "auc": 0.9998465401785714,
+    "confusion_matrix": [
+      [
+        1113,
+        7
+      ],
+      [
+        6,
+        1274
+      ]
+    ],
+    "feature_importance": {
+      "read_sms": 315.0108957029879,
+      "send_sms": 271.9137491164729,
+      "receive_sms": 658.9230962935835,
+      "record_audio": 83.54425951838493,
+      "camera": 187.66266893129796,
+      "read_contacts": 16.71412292154855,
+      "write_contacts": 9.206476978957653,
+      "read_call_log": 608.0384858228499,
+      "process_outgoing_calls": 276.98117237351835,
+      "bind_accessibility_service": 1631.3652608459815,
+      "bind_device_admin": 553.3469111698796,
+      "request_install_packages": 736.0092383464798,
+      "receive_boot_completed": 391.7432133636903,
+      "foreground_service": 26.341113924980164,
+      "read_external_storage": 260.1811367496848,
+      "write_external_storage": 242.13836346846074,
+      "access_fine_location": 82.8300324305892,
+      "access_coarse_location": 114.5956154530868,
+      "use_biometric": 327.26739872084,
+      "use_fingerprint": 58.63422260293737,
+      "total_permissions": 1518.4176036499266,
+      "target_sdk": 94833.28168052435,
+      "min_sdk": 167.2079496360966,
+      "apk_size_mb": 541.0420068295207,
+      "is_sideloaded": 12202.376058748923
+    }
+  },
+  "malware_gnn": {
+    "model_size_kb": 0.0,
+    "accuracy": 0.94625,
+    "best_accuracy": 0.94625,
+    "confusion_matrix": [
+      [
+        1079,
+        41
+      ],
+      [
+        88,
+        1192
+      ]
+    ]
+  },
+  "wifi_isolation_forest": {
+    "model_size_kb": 0.0,
+    "contamination": 0.05,
+    "n_estimators": 200,
+    "training_samples": 300,
+    "anomalies_tested": 3,
+    "anomalies_detected": 2,
+    "detection_rate": 0.6666666666666666,
+    "feature_means": [
+      -51.26,
+      2.46,
+      0.2633333333333333,
+      43.35666666666667,
+      100.0,
+      0.21666666666666667,
+      2.285433333333333,
+      3.7866666666666666
+    ],
+    "feature_scales": [
+      14.91103841677925,
+      0.4983974317750845,
+      0.44044169749115364,
+      22.41910172647919,
+      1.0,
+      0.41197356981027583,
+      1.0080086700464876,
+      1.2971078940816332
+    ],
+    "feature_names": [
+      "rssi",
+      "encryption_code",
+      "is_public",
+      "dns_response_ms",
+      "beacon_interval",
+      "bssid_changes",
+      "rssi_variance",
+      "frequency_ghz"
+    ]
+  },
+  "malware_ensemble": {
+    "accuracy": 0.9814791666666667,
+    "ensemble_method": "weighted_average_35_40_25"
+  }
+}

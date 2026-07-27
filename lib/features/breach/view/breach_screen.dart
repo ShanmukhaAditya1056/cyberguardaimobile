@@ -11,6 +11,7 @@ import '../../../data/services/hive_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/smart_back_button.dart';
 import '../provider/breach_provider.dart';
+import '../../../core/utils/automation_ids.dart';
 
 /// HaveIBeenPwned-style breach monitor:
 ///   PART 1  Input section          (email / phone tab, k-anonymity note)
@@ -197,7 +198,11 @@ class _InputSection extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Input
-          TextField(
+          Semantics(
+            identifier: AutoId.breachEmailInput,
+            textField: true,
+            container: true,
+            child: TextField(
             controller: controller,
             onChanged: onChanged,
             onSubmitted: (_) => onCheck?.call(),
@@ -234,12 +239,17 @@ class _InputSection extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             ),
           ),
+          ),
           const SizedBox(height: 14),
 
           // Check button
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
+            child: Semantics(
+              identifier: AutoId.breachCheckBtn,
+              button: true,
+              container: true,
+              child: FilledButton(
               onPressed: onCheck,
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
@@ -256,6 +266,7 @@ class _InputSection extends StatelessWidget {
                   : Text(AppLocalizations.of(context)!.checkBreach,
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.w700)),
+            ),
             ),
           ),
           const SizedBox(height: 10),

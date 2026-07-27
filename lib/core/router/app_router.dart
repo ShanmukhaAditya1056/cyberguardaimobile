@@ -5,7 +5,12 @@ import '../../data/services/hive_service.dart';
 import '../../features/alerts/view/alerts_screen.dart';
 import '../../features/breach/view/breach_screen.dart';
 import '../../features/dashboard/view/dashboard_screen.dart';
+import '../../features/fusion/view/arbitration_log_screen.dart';
+import '../../features/fusion/view/threat_scan_screen.dart';
+import '../../features/interceptor/view/link_warning_screen.dart';
 import '../../features/malware/view/app_detail_screen.dart';
+import '../../features/risk/view/predictive_risk_screen.dart';
+import '../../features/screenshot/view/screenshot_scanner_screen.dart';
 import '../../features/malware/view/malware_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/phishing/view/phishing_screen.dart';
@@ -79,6 +84,37 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/alerts',
       builder: (_, __) => const AlertsScreen(),
+    ),
+
+    // Smart Link Interceptor warning (Feature 1) — shown reactively when a
+    // risky link is intercepted. Reads the pending verdict from the provider.
+    GoRoute(
+      path: '/intercept',
+      builder: (_, __) => const LinkWarningScreen(),
+    ),
+
+    // Threat Fusion scan (Feature 4)
+    GoRoute(
+      path: '/fusion',
+      builder: (_, __) => const ThreatScanScreen(),
+    ),
+
+    // Arbitration / detection-conflict log (Feature 2)
+    GoRoute(
+      path: '/arbitration',
+      builder: (_, __) => const ArbitrationLogScreen(),
+    ),
+
+    // Predictive Risk dashboard (Feature 5)
+    GoRoute(
+      path: '/risk',
+      builder: (_, __) => const PredictiveRiskScreen(),
+    ),
+
+    // Screenshot AI scanner (Feature 3)
+    GoRoute(
+      path: '/screenshot',
+      builder: (_, __) => const ScreenshotScannerScreen(),
     ),
 
     // Settings

@@ -51,6 +51,26 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!-- Smart Link Interceptor: register as a handler for tapped web
+                 links so CyberGuard appears in the "Open with" chooser and can
+                 vet a URL before a browser loads it. We deliberately do NOT set
+                 autoVerify/default — the user opts in by choosing CyberGuard,
+                 keeping behaviour transparent and policy-compliant. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="http"/>
+                <data android:scheme="https"/>
+            </intent-filter>
+
+            <!-- Accept links shared from WhatsApp / Telegram / Gmail etc. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
         </activity>
 
         <meta-data

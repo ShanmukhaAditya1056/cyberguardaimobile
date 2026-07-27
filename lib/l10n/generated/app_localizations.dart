@@ -1817,6 +1817,708 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'N/A'**
   String get wifiNA;
+
+  /// No description provided for @cyberDefense.
+  ///
+  /// In en, this message translates to:
+  /// **'Cyber Defense'**
+  String get cyberDefense;
+
+  /// No description provided for @defenseThreatFusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Threat Fusion'**
+  String get defenseThreatFusion;
+
+  /// No description provided for @defenseScreenshotScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot Scan'**
+  String get defenseScreenshotScan;
+
+  /// No description provided for @defensePredictiveRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Predictive Risk'**
+  String get defensePredictiveRisk;
+
+  /// No description provided for @defenseArbitrationLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Arbitration Log'**
+  String get defenseArbitrationLog;
+
+  /// No description provided for @linkProtection.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Protection'**
+  String get linkProtection;
+
+  /// No description provided for @linkInterceptorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Link Interceptor'**
+  String get linkInterceptorTitle;
+
+  /// No description provided for @linkInterceptorSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan links you open from other apps before they load'**
+  String get linkInterceptorSub;
+
+  /// No description provided for @cloudIntelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud threat intelligence'**
+  String get cloudIntelTitle;
+
+  /// No description provided for @cloudIntelSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Check links against Google Safe Browsing (sends the tapped link to Google). Off by default.'**
+  String get cloudIntelSub;
+
+  /// No description provided for @saveLinkHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save link history'**
+  String get saveLinkHistoryTitle;
+
+  /// No description provided for @saveLinkHistorySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Store scanned links on this device. Off = nothing is kept.'**
+  String get saveLinkHistorySub;
+
+  /// No description provided for @defaultBrowserTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set CyberGuard as default browser'**
+  String get defaultBrowserTitle;
+
+  /// No description provided for @defaultBrowserSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Required to check links before they open. CyberGuard scans each link, then hands safe ones to your browser.'**
+  String get defaultBrowserSub;
+
+  /// No description provided for @defaultBrowserActive.
+  ///
+  /// In en, this message translates to:
+  /// **'CyberGuard is your default browser — tapped links are protected.'**
+  String get defaultBrowserActive;
+
+  /// No description provided for @defaultBrowserSetCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as Default Browser'**
+  String get defaultBrowserSetCta;
+
+  /// No description provided for @cloudIntelDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable cloud threat intelligence?'**
+  String get cloudIntelDialogTitle;
+
+  /// No description provided for @cloudIntelDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When on, intercepted links are checked against Google Safe Browsing. The link you tapped is sent to Google for this check. Nothing else leaves your device. You can turn this off anytime.'**
+  String get cloudIntelDialogBody;
+
+  /// No description provided for @commonEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get commonEnable;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @threatBandSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe (0-30)'**
+  String get threatBandSafe;
+
+  /// No description provided for @threatBandSuspicious.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspicious (31-60)'**
+  String get threatBandSuspicious;
+
+  /// No description provided for @threatBandDangerous.
+  ///
+  /// In en, this message translates to:
+  /// **'Dangerous (61-80)'**
+  String get threatBandDangerous;
+
+  /// No description provided for @threatBandCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical (81-100)'**
+  String get threatBandCritical;
+
+  /// No description provided for @threatLevelSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe'**
+  String get threatLevelSafe;
+
+  /// No description provided for @threatLevelSuspicious.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspicious'**
+  String get threatLevelSuspicious;
+
+  /// No description provided for @threatLevelDangerous.
+  ///
+  /// In en, this message translates to:
+  /// **'Dangerous'**
+  String get threatLevelDangerous;
+
+  /// No description provided for @threatLevelCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get threatLevelCritical;
+
+  /// No description provided for @confidencePct.
+  ///
+  /// In en, this message translates to:
+  /// **'confidence {pct}%'**
+  String confidencePct(int pct);
+
+  /// No description provided for @warnDangerousTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dangerous Website Detected'**
+  String get warnDangerousTitle;
+
+  /// No description provided for @warnSuspiciousTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspicious Website'**
+  String get warnSuspiciousTitle;
+
+  /// No description provided for @warnRiskScore.
+  ///
+  /// In en, this message translates to:
+  /// **'RISK SCORE'**
+  String get warnRiskScore;
+
+  /// No description provided for @warnOverrideDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked by trusted threat intelligence override.'**
+  String get warnOverrideDefault;
+
+  /// No description provided for @warnConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Detection sources disagreed — verdict reconciled by arbitration.'**
+  String get warnConflict;
+
+  /// No description provided for @warnDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'DESTINATION'**
+  String get warnDestination;
+
+  /// No description provided for @warnVia.
+  ///
+  /// In en, this message translates to:
+  /// **'via {app}'**
+  String warnVia(String app);
+
+  /// No description provided for @warnWhyFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'WHY THIS IS FLAGGED'**
+  String get warnWhyFlagged;
+
+  /// No description provided for @warnSources.
+  ///
+  /// In en, this message translates to:
+  /// **'INTELLIGENCE SOURCES'**
+  String get warnSources;
+
+  /// No description provided for @warnGoBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Back (Recommended)'**
+  String get warnGoBack;
+
+  /// No description provided for @warnContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Anyway'**
+  String get warnContinue;
+
+  /// No description provided for @warnReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this link'**
+  String get warnReport;
+
+  /// No description provided for @warnReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported. Thank you.'**
+  String get warnReported;
+
+  /// No description provided for @warnOpenDangerousTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a dangerous site?'**
+  String get warnOpenDangerousTitle;
+
+  /// No description provided for @warnOpenDangerousBody.
+  ///
+  /// In en, this message translates to:
+  /// **'CyberGuard rated this link as high-risk. Opening it could expose your credentials or device. Continue at your own risk?'**
+  String get warnOpenDangerousBody;
+
+  /// No description provided for @warnOpenAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Open anyway'**
+  String get warnOpenAnyway;
+
+  /// No description provided for @warnPrivacyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'No URLs are stored unless you enable link history in Settings.'**
+  String get warnPrivacyNote;
+
+  /// No description provided for @fusionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Threat Fusion Scan'**
+  String get fusionTitle;
+
+  /// No description provided for @fusionPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Check a link across all intelligence sources'**
+  String get fusionPrompt;
+
+  /// No description provided for @fusionRunScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Run Fusion Scan'**
+  String get fusionRunScan;
+
+  /// No description provided for @fusionUnified.
+  ///
+  /// In en, this message translates to:
+  /// **'UNIFIED'**
+  String get fusionUnified;
+
+  /// No description provided for @fusionSourceAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'SOURCE ATTRIBUTION'**
+  String get fusionSourceAttribution;
+
+  /// No description provided for @fusionExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'EXPLANATION'**
+  String get fusionExplanation;
+
+  /// No description provided for @fusionConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources disagreed — reconciled by arbitration.'**
+  String get fusionConflict;
+
+  /// No description provided for @fusionTrust.
+  ///
+  /// In en, this message translates to:
+  /// **'trust {weight}'**
+  String fusionTrust(int weight);
+
+  /// No description provided for @arbitrationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Arbitration Log'**
+  String get arbitrationTitle;
+
+  /// No description provided for @arbitrationClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear log'**
+  String get arbitrationClear;
+
+  /// No description provided for @arbitrationEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No conflicts yet'**
+  String get arbitrationEmptyTitle;
+
+  /// No description provided for @arbitrationEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When detection sources disagree or a trusted source overrides CyberGuard, the decision is recorded here.'**
+  String get arbitrationEmptyBody;
+
+  /// No description provided for @arbitrationOverride.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted override → {level}'**
+  String arbitrationOverride(String level);
+
+  /// No description provided for @arbitrationConflictTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Source conflict → {level}'**
+  String arbitrationConflictTitle(String level);
+
+  /// No description provided for @riskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Predictive Risk'**
+  String get riskTitle;
+
+  /// No description provided for @riskNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get riskNoData;
+
+  /// No description provided for @riskBandLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get riskBandLow;
+
+  /// No description provided for @riskBandMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get riskBandMedium;
+
+  /// No description provided for @riskBandHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get riskBandHigh;
+
+  /// No description provided for @riskSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'{band} RISK'**
+  String riskSuffix(String band);
+
+  /// No description provided for @riskForecastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Threat Forecast'**
+  String get riskForecastTitle;
+
+  /// No description provided for @riskTimelineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'7-Day Risk Timeline'**
+  String get riskTimelineTitle;
+
+  /// No description provided for @riskWhyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why your risk is {band}'**
+  String riskWhyTitle(String band);
+
+  /// No description provided for @riskRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendations'**
+  String get riskRecommendations;
+
+  /// No description provided for @forecastPhishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Phishing Attack'**
+  String get forecastPhishing;
+
+  /// No description provided for @forecastCredentialTheft.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential Theft'**
+  String get forecastCredentialTheft;
+
+  /// No description provided for @forecastMalware.
+  ///
+  /// In en, this message translates to:
+  /// **'Malware Infection'**
+  String get forecastMalware;
+
+  /// No description provided for @rfPhishingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Phishing links encountered'**
+  String get rfPhishingTitle;
+
+  /// No description provided for @rfPhishingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} flagged in the last 7 days'**
+  String rfPhishingDetail(int count);
+
+  /// No description provided for @rfSmsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspicious SMS received'**
+  String get rfSmsTitle;
+
+  /// No description provided for @rfSmsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} phishing SMS detected'**
+  String rfSmsDetail(int count);
+
+  /// No description provided for @rfWifiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Wi-Fi networks used'**
+  String get rfWifiTitle;
+
+  /// No description provided for @rfWifiDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} low-trust networks connected'**
+  String rfWifiDetail(int count);
+
+  /// No description provided for @rfMalwareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Risky apps installed'**
+  String get rfMalwareTitle;
+
+  /// No description provided for @rfMalwareDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} high-risk apps detected'**
+  String rfMalwareDetail(int count);
+
+  /// No description provided for @rfInterceptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Links blocked recently'**
+  String get rfInterceptTitle;
+
+  /// No description provided for @rfInterceptDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} dangerous links intercepted'**
+  String rfInterceptDetail(int count);
+
+  /// No description provided for @rfBreachTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials in a known breach'**
+  String get rfBreachTitle;
+
+  /// No description provided for @rfBreachDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account appears in breached data'**
+  String get rfBreachDetail;
+
+  /// No description provided for @rfTrendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Security score declining'**
+  String get rfTrendTitle;
+
+  /// No description provided for @rfTrendDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Protection dropped {pts} pts recently'**
+  String rfTrendDetail(int pts);
+
+  /// No description provided for @recBreach.
+  ///
+  /// In en, this message translates to:
+  /// **'Change passwords for breached accounts and enable 2FA.'**
+  String get recBreach;
+
+  /// No description provided for @recPhishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid tapping links in unexpected messages; verify the sender.'**
+  String get recPhishing;
+
+  /// No description provided for @recWifi.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid sensitive logins on public Wi-Fi; use a trusted network.'**
+  String get recWifi;
+
+  /// No description provided for @recMalware.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and uninstall high-risk apps; install only from Play Store.'**
+  String get recMalware;
+
+  /// No description provided for @recInterceptor.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the Smart Link Interceptor enabled for ongoing protection.'**
+  String get recInterceptor;
+
+  /// No description provided for @recHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re in good shape — keep CyberGuard protections enabled.'**
+  String get recHealthy;
+
+  /// No description provided for @screenshotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot Scanner'**
+  String get screenshotTitle;
+
+  /// No description provided for @screenshotPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a suspicious page screenshot'**
+  String get screenshotPrompt;
+
+  /// No description provided for @screenshotDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Detects fake bank, UPI, OTP, login, KYC, lottery and support scams. Images are analysed on-device.'**
+  String get screenshotDesc;
+
+  /// No description provided for @screenshotGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get screenshotGallery;
+
+  /// No description provided for @screenshotCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get screenshotCamera;
+
+  /// No description provided for @screenshotScam.
+  ///
+  /// In en, this message translates to:
+  /// **'SCAM'**
+  String get screenshotScam;
+
+  /// No description provided for @screenshotLooksClean.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks clean'**
+  String get screenshotLooksClean;
+
+  /// No description provided for @screenshotBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand referenced: {brand}'**
+  String screenshotBrand(String brand);
+
+  /// No description provided for @screenshotIndicators.
+  ///
+  /// In en, this message translates to:
+  /// **'INDICATORS'**
+  String get screenshotIndicators;
+
+  /// No description provided for @screenshotExtractedText.
+  ///
+  /// In en, this message translates to:
+  /// **'EXTRACTED TEXT'**
+  String get screenshotExtractedText;
+
+  /// No description provided for @scamFakeBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake bank page'**
+  String get scamFakeBank;
+
+  /// No description provided for @scamFakeUpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake UPI / payment page'**
+  String get scamFakeUpi;
+
+  /// No description provided for @scamFakeOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake OTP request'**
+  String get scamFakeOtp;
+
+  /// No description provided for @scamFakeLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake login page'**
+  String get scamFakeLogin;
+
+  /// No description provided for @scamFakeKyc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake KYC form'**
+  String get scamFakeKyc;
+
+  /// No description provided for @scamFakeLottery.
+  ///
+  /// In en, this message translates to:
+  /// **'Lottery / prize scam'**
+  String get scamFakeLottery;
+
+  /// No description provided for @scamFakeInvestment.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment scam'**
+  String get scamFakeInvestment;
+
+  /// No description provided for @scamFakeSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake customer support'**
+  String get scamFakeSupport;
+
+  /// No description provided for @scamNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No scam indicators'**
+  String get scamNone;
+
+  /// No description provided for @scamReasonCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'{category}: \"{matched}\"'**
+  String scamReasonCategory(String category, String matched);
+
+  /// No description provided for @scamReasonBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand referenced: {brand}'**
+  String scamReasonBrand(String brand);
+
+  /// No description provided for @scamReasonUrgency.
+  ///
+  /// In en, this message translates to:
+  /// **'Urgency / pressure wording: \"{word}\"'**
+  String scamReasonUrgency(String word);
+
+  /// No description provided for @scamReasonNoIndicators.
+  ///
+  /// In en, this message translates to:
+  /// **'No scam indicators detected in the text'**
+  String get scamReasonNoIndicators;
+
+  /// No description provided for @scamReasonNoText.
+  ///
+  /// In en, this message translates to:
+  /// **'No readable text found in the image'**
+  String get scamReasonNoText;
 }
 
 class _AppLocalizationsDelegate

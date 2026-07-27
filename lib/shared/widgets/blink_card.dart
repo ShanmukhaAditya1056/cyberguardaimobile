@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../core/utils/automation_ids.dart';
 
 /// Blinkit-style bright pastel tile with dark text. Light-on-dark accent.
 class BlinkCard extends StatefulWidget {
@@ -190,6 +191,9 @@ class BlinkButton extends StatefulWidget {
   final double radius;
   final bool fullWidth;
 
+  /// Stable resource-id for E2E automation. See [AutoId].
+  final String? autoIdent;
+
   const BlinkButton({
     super.key,
     required this.label,
@@ -201,6 +205,7 @@ class BlinkButton extends StatefulWidget {
     this.height = 48,
     this.radius = 14,
     this.fullWidth = true,
+    this.autoIdent,
   });
 
   @override
@@ -233,6 +238,17 @@ class _BlinkButtonState extends State<BlinkButton>
     final enabled = widget.onTap != null && !widget.isLoading;
     final bg = enabled ? widget.color : widget.color.withValues(alpha: 0.5);
 
+    return Semantics(
+      identifier: widget.autoIdent ?? '',
+      button: true,
+      enabled: enabled,
+      label: widget.label,
+      container: true,
+      child: _buildButton(enabled, bg),
+    );
+  }
+
+  Widget _buildButton(bool enabled, Color bg) {
     return GestureDetector(
       onTapDown: enabled
           ? (_) {
@@ -323,6 +339,9 @@ class BlinkInput extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
 
+  /// Stable resource-id for E2E automation. See [AutoId].
+  final String? autoIdent;
+
   const BlinkInput({
     super.key,
     required this.controller,
@@ -334,10 +353,20 @@ class BlinkInput extends StatelessWidget {
     this.obscureText = false,
     this.onChanged,
     this.onSubmitted,
+    this.autoIdent,
   });
 
   @override
   Widget build(BuildContext context) {
+    return Semantics(
+      identifier: autoIdent ?? '',
+      textField: true,
+      container: true,
+      child: _buildField(context),
+    );
+  }
+
+  Widget _buildField(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(

@@ -1,0 +1,28 @@
+{
+  "accuracy": 0.9916666666666667,
+  "auc": 0.9996937779017858,
+  "cv_mean": 0.9930833333333332,
+  "cv_std": 0.0011055415967851287,
+  "confusion_matrix": [
+    [
+      1113,
+      7
+    ],
+    [
+      13,
+      1267
+    ]
+  ],
+  "top_features": [
+    "target_sdk",
+    "is_sideloaded",
+    "bind_accessibility_service",
+    "receive_sms",
+    "request_install_packages",
+    "total_permissions",
+    "read_sms",
+    "receive_boot_completed",
+    "bind_device_admin",
+    "send_sms"
+  ]
+}

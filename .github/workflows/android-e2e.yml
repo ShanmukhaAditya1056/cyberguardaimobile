@@ -1,0 +1,318 @@
+name: Android E2E (Appium)
+
+# Builds the APK, boots an emulator, runs the Appium suite, and publishes
+# reports — including when tests fail, because that is exactly the run whose
+# report matters most.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Suite to run (blank = all)'
+        required: false
+        default: ''
+      api_level:
+        description: 'Android API level'
+        required: false
+        default: '34'
+  schedule:
+    # 02:30 UTC nightly — catches drift from dependency updates.
+    - cron: '30 2 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.41.8'
+  JAVA_VERSION: '17'
+  API_LEVEL: ${{ github.event.inputs.api_level || '34' }}
+
+jobs:
+  # ── Stage 1-5: static checks + APK build ────────────────────────────────
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      apk-path: build/app/outputs/flutter-apk/app-debug.apk
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore API key placeholder
+        # api_keys.dart is gitignored (it holds a real key locally), so CI has
+        # to create it. An empty key disables the Safe Browsing source, which
+        # is exactly what we want: CI must never call a third-party API.
+        run: |
+          if [ ! -f lib/core/config/api_keys.dart ]; then
+            cp lib/core/config/api_keys.example.dart lib/core/config/api_keys.dart
+            echo "Created api_keys.dart from the example (empty keys — cloud intel stays disabled)."
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Static analysis
+        run: flutter analyze --no-fatal-infos
+
+      - name: Dart unit tests
+        # Includes automation_corpus_test.dart, which guards the E2E URL
+        # expectations. If it fails, the Appium suite would fail confusingly —
+        # better to stop here with a clear reason.
+        run: flutter test --reporter expanded
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 30
+
+  # ── Stage 6-18: emulator, Appium, tests, reports ───────────────────────
+  e2e:
+    name: E2E on API ${{ github.event.inputs.api_level || '34' }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: app-debug-apk
+          path: build/app/outputs/flutter-apk/
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: automation/package-lock.json
+
+      - name: Install automation dependencies
+        working-directory: automation
+        run: npm ci
+
+      - name: Install Appium and the UiAutomator2 driver
+        working-directory: automation
+        run: |
+          npx appium driver install uiautomator2 || npx appium driver update uiautomator2
+          npx appium driver list --installed
+
+      - name: Enable KVM
+        # Without KVM the emulator falls back to software rendering and the
+        # suite times out rather than failing honestly.
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Cache AVD
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ env.API_LEVEL }}
+
+      - name: Create AVD snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "AVD snapshot created."
+
+      - name: Run Appium E2E suite
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          CG_APP_PATH: ${{ github.workspace }}/build/app/outputs/flutter-apk/app-debug.apk
+          CG_BUILD_NUMBER: ${{ github.run_number }}
+          CG_COMMIT: ${{ github.sha }}
+          CG_BRANCH: ${{ github.ref_name }}
+          CG_RETRIES: '1'
+          CG_PASS_THRESHOLD: '95'
+          # Hard guarantee: no test may reach a third-party service from CI.
+          CG_ALLOW_NETWORK_TESTS: 'false'
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            set +e
+            adb wait-for-device
+            adb shell input keyevent 82 || true
+
+            echo "::group::Device information"
+            adb shell getprop ro.build.version.release
+            adb shell getprop ro.build.version.sdk
+            adb devices -l
+            echo "::endgroup::"
+
+            echo "::group::Install APK"
+            adb install -r -g "$CG_APP_PATH"
+            adb shell pm list packages | grep cyberguard
+            echo "::endgroup::"
+
+            echo "::group::Start Appium"
+            cd automation
+            npx appium --allow-cors --relaxed-security --log-timestamp \
+              --log ../appium-server.log &
+            APPIUM_PID=$!
+            echo "APPIUM_PID=$APPIUM_PID" >> "$GITHUB_ENV"
+
+            for i in $(seq 1 30); do
+              if curl -sf http://127.0.0.1:4723/status > /dev/null; then
+                echo "Appium is up after ${i}s"
+                break
+              fi
+              sleep 1
+            done
+            curl -sf http://127.0.0.1:4723/status || { echo "Appium never became healthy"; exit 1; }
+            echo "::endgroup::"
+
+            echo "::group::Run suite"
+            npm test
+            SUITE_EXIT=$?
+            echo "::endgroup::"
+
+            kill $APPIUM_PID 2>/dev/null || true
+            echo "SUITE_EXIT=$SUITE_EXIT" >> "$GITHUB_ENV"
+            # Do not fail the emulator step — artifacts are uploaded first and
+            # the gate is applied at the end of the job.
+            exit 0
+
+      - name: Publish job summary
+        if: always()
+        run: |
+          if [ -f automation/reports/Summary/summary.md ]; then
+            cat automation/reports/Summary/summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Android Appium E2E" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "No summary was produced — the suite failed before reporting." >> "$GITHUB_STEP_SUMMARY"
+            echo "See the \`appium-server.log\` and \`e2e-logs\` artifacts." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # ── Artifacts are uploaded unconditionally ──────────────────────────
+      - name: Upload Excel reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: excel-reports
+          path: automation/reports/Excel/
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload HTML reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-reports
+          path: automation/reports/HTML/
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload JSON results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: json-results
+          path: automation/reports/JSON/
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: automation/screenshots/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-logs
+          path: |
+            automation/logs/
+            appium-server.log
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Bundle site for Pages
+        if: always()
+        run: |
+          mkdir -p site/reports/latest
+          cp -r automation/reports/HTML/. site/reports/latest/ 2>/dev/null || true
+          cp -r automation/reports/Summary/. site/reports/latest/ 2>/dev/null || true
+          mkdir -p site/reports/latest/screenshots
+          cp -r automation/screenshots/. site/reports/latest/screenshots/ 2>/dev/null || true
+          mkdir -p site/reports/latest/excel
+          cp -r automation/reports/Excel/. site/reports/latest/excel/ 2>/dev/null || true
+          cp automation/reports/JSON/execution-results.json site/reports/latest/ 2>/dev/null || true
+          ls -R site | head -50
+
+      - name: Upload Pages bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-bundle
+          path: site/
+          retention-days: 30
+          if-no-files-found: warn
+
+      # ── The gate, applied last so nothing is lost ───────────────────────
+      - name: Apply pass-rate gate
+        if: always()
+        run: |
+          if [ "${SUITE_EXIT:-1}" != "0" ]; then
+            echo "::error::E2E suite failed the pass-rate gate (exit ${SUITE_EXIT:-1})."
+            echo "All reports and screenshots were uploaded as artifacts."
+            exit 1
+          fi
+          echo "E2E suite passed."

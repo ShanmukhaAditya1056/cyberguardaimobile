@@ -982,4 +982,413 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get wifiNA => 'பொருந்தாது';
+
+  @override
+  String get cyberDefense => 'சைபர் பாதுகாப்பு';
+
+  @override
+  String get defenseThreatFusion => 'அச்சுறுத்தல் இணைப்பு';
+
+  @override
+  String get defenseScreenshotScan => 'ஸ்கிரீன்ஷாட் ஸ்கேன்';
+
+  @override
+  String get defensePredictiveRisk => 'முன்னறிவிப்பு ஆபத்து';
+
+  @override
+  String get defenseArbitrationLog => 'தீர்ப்பு பதிவு';
+
+  @override
+  String get linkProtection => 'இணைப்பு பாதுகாப்பு';
+
+  @override
+  String get linkInterceptorTitle => 'ஸ்மார்ட் இணைப்பு இடைமறிப்பான்';
+
+  @override
+  String get linkInterceptorSub =>
+      'மற்ற செயலிகளில் திறக்கும் இணைப்புகளை ஏற்றுவதற்கு முன் ஸ்கேன் செய்யவும்';
+
+  @override
+  String get cloudIntelTitle => 'கிளவுட் அச்சுறுத்தல் நுண்ணறிவு';
+
+  @override
+  String get cloudIntelSub =>
+      'இணைப்புகளை Google Safe Browsing உடன் சரிபார்க்கவும் (தட்டிய இணைப்பு Google-க்கு அனுப்பப்படும்). இயல்பாக அணைக்கப்பட்டுள்ளது.';
+
+  @override
+  String get saveLinkHistoryTitle => 'இணைப்பு வரலாற்றைச் சேமி';
+
+  @override
+  String get saveLinkHistorySub =>
+      'ஸ்கேன் செய்த இணைப்புகளை இந்த சாதனத்தில் சேமிக்கவும். அணைப்பு = எதுவும் வைக்கப்படாது.';
+
+  @override
+  String get defaultBrowserTitle =>
+      'CyberGuard ஐ இயல்புநிலை உலாவியாக அமைக்கவும்';
+
+  @override
+  String get defaultBrowserSub =>
+      'இணைப்புகள் திறப்பதற்கு முன் சரிபார்க்க தேவை. CyberGuard ஒவ்வொரு இணைப்பையும் ஸ்கேன் செய்து, பாதுகாப்பானவற்றை உங்கள் உலாவிக்கு அனுப்புகிறது.';
+
+  @override
+  String get defaultBrowserActive =>
+      'CyberGuard உங்கள் இயல்புநிலை உலாவி — தட்டிய இணைப்புகள் பாதுகாக்கப்படுகின்றன.';
+
+  @override
+  String get defaultBrowserSetCta => 'இயல்புநிலை உலாவியாக அமைக்கவும்';
+
+  @override
+  String get cloudIntelDialogTitle => 'கிளவுட் அச்சுறுத்தல் நுண்ணறிவை இயக்கவா?';
+
+  @override
+  String get cloudIntelDialogBody =>
+      'இயக்கப்பட்டால், இடைமறித்த இணைப்புகள் Google Safe Browsing உடன் சரிபார்க்கப்படும். நீங்கள் தட்டிய இணைப்பு இந்தச் சரிபார்ப்புக்காக Google-க்கு அனுப்பப்படும். வேறு எதுவும் உங்கள் சாதனத்தை விட்டு வெளியேறாது. இதை எப்போது வேண்டுமானாலும் அணைக்கலாம்.';
+
+  @override
+  String get commonEnable => 'இயக்கு';
+
+  @override
+  String get commonCancel => 'ரத்து';
+
+  @override
+  String get threatBandSafe => 'பாதுகாப்பானது (0-30)';
+
+  @override
+  String get threatBandSuspicious => 'சந்தேகத்திற்குரியது (31-60)';
+
+  @override
+  String get threatBandDangerous => 'ஆபத்தானது (61-80)';
+
+  @override
+  String get threatBandCritical => 'முக்கியமானது (81-100)';
+
+  @override
+  String get threatLevelSafe => 'பாதுகாப்பானது';
+
+  @override
+  String get threatLevelSuspicious => 'சந்தேகத்திற்குரியது';
+
+  @override
+  String get threatLevelDangerous => 'ஆபத்தானது';
+
+  @override
+  String get threatLevelCritical => 'முக்கியமானது';
+
+  @override
+  String confidencePct(int pct) {
+    return 'நம்பகத்தன்மை $pct%';
+  }
+
+  @override
+  String get warnDangerousTitle => 'ஆபத்தான இணையதளம் கண்டறியப்பட்டது';
+
+  @override
+  String get warnSuspiciousTitle => 'சந்தேகத்திற்குரிய இணையதளம்';
+
+  @override
+  String get warnRiskScore => 'ஆபத்து மதிப்பெண்';
+
+  @override
+  String get warnOverrideDefault =>
+      'நம்பகமான அச்சுறுத்தல் நுண்ணறிவு மேலெழுதலால் தடுக்கப்பட்டது.';
+
+  @override
+  String get warnConflict =>
+      'கண்டறிதல் ஆதாரங்கள் வேறுபட்டன — தீர்ப்பால் முடிவு சரிசெய்யப்பட்டது.';
+
+  @override
+  String get warnDestination => 'இலக்கு';
+
+  @override
+  String warnVia(String app) {
+    return '$app வழியாக';
+  }
+
+  @override
+  String get warnWhyFlagged => 'ஏன் குறிக்கப்பட்டது';
+
+  @override
+  String get warnSources => 'நுண்ணறிவு ஆதாரங்கள்';
+
+  @override
+  String get warnGoBack => 'பின் செல் (பரிந்துரைக்கப்படுகிறது)';
+
+  @override
+  String get warnContinue => 'எப்படியும் தொடரவும்';
+
+  @override
+  String get warnReport => 'இந்த இணைப்பைப் புகாரளி';
+
+  @override
+  String get warnReported => 'புகாரளிக்கப்பட்டது. நன்றி.';
+
+  @override
+  String get warnOpenDangerousTitle => 'ஆபத்தான தளத்தைத் திறக்கவா?';
+
+  @override
+  String get warnOpenDangerousBody =>
+      'CyberGuard இந்த இணைப்பை அதிக ஆபத்துடையதாக மதிப்பிட்டுள்ளது. இதைத் திறப்பது உங்கள் சான்றுகள் அல்லது சாதனத்தை வெளிப்படுத்தலாம். உங்கள் சொந்த ஆபத்தில் தொடரவா?';
+
+  @override
+  String get warnOpenAnyway => 'எப்படியும் திற';
+
+  @override
+  String get warnPrivacyNote =>
+      'அமைப்புகளில் இணைப்பு வரலாற்றை இயக்காத வரை எந்த URL-உம் சேமிக்கப்படாது.';
+
+  @override
+  String get fusionTitle => 'அச்சுறுத்தல் இணைப்பு ஸ்கேன்';
+
+  @override
+  String get fusionPrompt =>
+      'அனைத்து நுண்ணறிவு ஆதாரங்களிலும் ஒரு இணைப்பைச் சரிபார்க்கவும்';
+
+  @override
+  String get fusionRunScan => 'இணைப்பு ஸ்கேனை இயக்கு';
+
+  @override
+  String get fusionUnified => 'ஒருங்கிணைந்த';
+
+  @override
+  String get fusionSourceAttribution => 'ஆதார வரவு';
+
+  @override
+  String get fusionExplanation => 'விளக்கம்';
+
+  @override
+  String get fusionConflict =>
+      'ஆதாரங்கள் வேறுபட்டன — தீர்ப்பால் சரிசெய்யப்பட்டது.';
+
+  @override
+  String fusionTrust(int weight) {
+    return 'நம்பிக்கை $weight';
+  }
+
+  @override
+  String get arbitrationTitle => 'தீர்ப்பு பதிவு';
+
+  @override
+  String get arbitrationClear => 'பதிவை அழி';
+
+  @override
+  String get arbitrationEmptyTitle => 'இதுவரை முரண்பாடுகள் இல்லை';
+
+  @override
+  String get arbitrationEmptyBody =>
+      'கண்டறிதல் ஆதாரங்கள் வேறுபடும்போது அல்லது நம்பகமான ஆதாரம் CyberGuard-ஐ மேலெழுதும்போது, முடிவு இங்கே பதிவாகும்.';
+
+  @override
+  String arbitrationOverride(String level) {
+    return 'நம்பகமான மேலெழுதல் → $level';
+  }
+
+  @override
+  String arbitrationConflictTitle(String level) {
+    return 'ஆதார முரண்பாடு → $level';
+  }
+
+  @override
+  String get riskTitle => 'முன்னறிவிப்பு ஆபத்து';
+
+  @override
+  String get riskNoData => 'தரவு இல்லை';
+
+  @override
+  String get riskBandLow => 'குறைவு';
+
+  @override
+  String get riskBandMedium => 'நடுத்தரம்';
+
+  @override
+  String get riskBandHigh => 'அதிகம்';
+
+  @override
+  String riskSuffix(String band) {
+    return '$band ஆபத்து';
+  }
+
+  @override
+  String get riskForecastTitle => 'அச்சுறுத்தல் முன்னறிவிப்பு';
+
+  @override
+  String get riskTimelineTitle => '7-நாள் ஆபத்து காலவரிசை';
+
+  @override
+  String riskWhyTitle(String band) {
+    return 'உங்கள் ஆபத்து ஏன் $band';
+  }
+
+  @override
+  String get riskRecommendations => 'பரிந்துரைகள்';
+
+  @override
+  String get forecastPhishing => 'ஃபிஷிங் தாக்குதல்';
+
+  @override
+  String get forecastCredentialTheft => 'சான்று திருட்டு';
+
+  @override
+  String get forecastMalware => 'தீம்பொருள் தொற்று';
+
+  @override
+  String get rfPhishingTitle => 'ஃபிஷிங் இணைப்புகள் கண்டறியப்பட்டன';
+
+  @override
+  String rfPhishingDetail(int count) {
+    return 'கடந்த 7 நாட்களில் $count குறிக்கப்பட்டது';
+  }
+
+  @override
+  String get rfSmsTitle => 'சந்தேகத்திற்குரிய SMS பெறப்பட்டது';
+
+  @override
+  String rfSmsDetail(int count) {
+    return '$count ஃபிஷிங் SMS கண்டறியப்பட்டது';
+  }
+
+  @override
+  String get rfWifiTitle => 'தெரியாத Wi-Fi நெட்வொர்க்குகள் பயன்படுத்தப்பட்டன';
+
+  @override
+  String rfWifiDetail(int count) {
+    return '$count குறைந்த நம்பிக்கை நெட்வொர்க்குகள் இணைக்கப்பட்டன';
+  }
+
+  @override
+  String get rfMalwareTitle => 'ஆபத்தான செயலிகள் நிறுவப்பட்டன';
+
+  @override
+  String rfMalwareDetail(int count) {
+    return '$count அதிக ஆபத்துள்ள செயலிகள் கண்டறியப்பட்டன';
+  }
+
+  @override
+  String get rfInterceptTitle => 'சமீபத்தில் தடுக்கப்பட்ட இணைப்புகள்';
+
+  @override
+  String rfInterceptDetail(int count) {
+    return '$count ஆபத்தான இணைப்புகள் இடைமறிக்கப்பட்டன';
+  }
+
+  @override
+  String get rfBreachTitle => 'அறியப்பட்ட மீறலில் சான்றுகள்';
+
+  @override
+  String get rfBreachDetail => 'உங்கள் கணக்கு மீறப்பட்ட தரவில் தோன்றுகிறது';
+
+  @override
+  String get rfTrendTitle => 'பாதுகாப்பு மதிப்பெண் குறைகிறது';
+
+  @override
+  String rfTrendDetail(int pts) {
+    return 'பாதுகாப்பு சமீபத்தில் $pts புள்ளிகள் குறைந்தது';
+  }
+
+  @override
+  String get recBreach =>
+      'மீறப்பட்ட கணக்குகளின் கடவுச்சொற்களை மாற்றி 2FA-ஐ இயக்கவும்.';
+
+  @override
+  String get recPhishing =>
+      'எதிர்பாராத செய்திகளில் இணைப்புகளைத் தட்டுவதைத் தவிர்க்கவும்; அனுப்புநரைச் சரிபார்க்கவும்.';
+
+  @override
+  String get recWifi =>
+      'பொது Wi-Fi-யில் முக்கியமான உள்நுழைவைத் தவிர்க்கவும்; நம்பகமான நெட்வொர்க்கைப் பயன்படுத்தவும்.';
+
+  @override
+  String get recMalware =>
+      'அதிக ஆபத்துள்ள செயலிகளை மதிப்பாய்வு செய்து அகற்றவும்; Play Store-இல் இருந்து மட்டுமே நிறுவவும்.';
+
+  @override
+  String get recInterceptor =>
+      'தொடர்ந்த பாதுகாப்புக்காக ஸ்மார்ட் இணைப்பு இடைமறிப்பானை இயக்கி வைக்கவும்.';
+
+  @override
+  String get recHealthy =>
+      'நீங்கள் நல்ல நிலையில் உள்ளீர்கள் — CyberGuard பாதுகாப்புகளை இயக்கி வைக்கவும்.';
+
+  @override
+  String get screenshotTitle => 'ஸ்கிரீன்ஷாட் ஸ்கேனர்';
+
+  @override
+  String get screenshotPrompt =>
+      'சந்தேகத்திற்குரிய பக்கத்தின் ஸ்கிரீன்ஷாட்டை ஸ்கேன் செய்யவும்';
+
+  @override
+  String get screenshotDesc =>
+      'போலி வங்கி, UPI, OTP, உள்நுழைவு, KYC, லாட்டரி மற்றும் ஆதரவு மோசடிகளைக் கண்டறிகிறது. படங்கள் சாதனத்திலேயே பகுப்பாய்வு செய்யப்படுகின்றன.';
+
+  @override
+  String get screenshotGallery => 'கேலரி';
+
+  @override
+  String get screenshotCamera => 'கேமரா';
+
+  @override
+  String get screenshotScam => 'மோசடி';
+
+  @override
+  String get screenshotLooksClean => 'சுத்தமாகத் தெரிகிறது';
+
+  @override
+  String screenshotBrand(String brand) {
+    return 'குறிப்பிடப்பட்ட பிராண்ட்: $brand';
+  }
+
+  @override
+  String get screenshotIndicators => 'குறிகாட்டிகள்';
+
+  @override
+  String get screenshotExtractedText => 'பிரித்தெடுக்கப்பட்ட உரை';
+
+  @override
+  String get scamFakeBank => 'போலி வங்கி பக்கம்';
+
+  @override
+  String get scamFakeUpi => 'போலி UPI / கட்டண பக்கம்';
+
+  @override
+  String get scamFakeOtp => 'போலி OTP கோரிக்கை';
+
+  @override
+  String get scamFakeLogin => 'போலி உள்நுழைவு பக்கம்';
+
+  @override
+  String get scamFakeKyc => 'போலி KYC படிவம்';
+
+  @override
+  String get scamFakeLottery => 'லாட்டரி / பரிசு மோசடி';
+
+  @override
+  String get scamFakeInvestment => 'முதலீட்டு மோசடி';
+
+  @override
+  String get scamFakeSupport => 'போலி வாடிக்கையாளர் ஆதரவு';
+
+  @override
+  String get scamNone => 'மோசடி குறிகாட்டிகள் இல்லை';
+
+  @override
+  String scamReasonCategory(String category, String matched) {
+    return '$category: \"$matched\"';
+  }
+
+  @override
+  String scamReasonBrand(String brand) {
+    return 'குறிப்பிடப்பட்ட பிராண்ட்: $brand';
+  }
+
+  @override
+  String scamReasonUrgency(String word) {
+    return 'அவசர / அழுத்த வார்த்தைகள்: \"$word\"';
+  }
+
+  @override
+  String get scamReasonNoIndicators =>
+      'உரையில் மோசடி குறிகாட்டிகள் எதுவும் கண்டறியப்படவில்லை';
+
+  @override
+  String get scamReasonNoText =>
+      'படத்தில் படிக்கக்கூடிய உரை எதுவும் கிடைக்கவில்லை';
 }

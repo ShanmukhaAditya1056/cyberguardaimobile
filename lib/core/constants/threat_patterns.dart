@@ -128,9 +128,14 @@ class ThreatPatterns {
     ['READ_SMS', 'SEND_SMS', 'CALL_PHONE'],
   ];
 
-  // URL regex pattern
+  // URL regex pattern.
+  // The bare-domain branch matches the FULL multi-label host
+  // ((?:label\.)+tld) so domains like `myaadhaar.uidai.gov.in` or
+  // `irctc.co.in` aren't truncated to `myaadhaar.uidai` / `irctc.co` — a
+  // truncation that previously broke the safe-domain whitelist and caused
+  // false "phishing" verdicts on official .gov.in / .co.in links.
   static const String urlPattern =
-      r'https?://[^\s<>"{}|\\^`\[\]]+|www\.[^\s<>"{}|\\^`\[\]]+|[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:/[^\s]*)?';
+      r'https?://[^\s<>"{}|\\^`\[\]]+|www\.[^\s<>"{}|\\^`\[\]]+|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?';
 
   // Suspicious URL patterns
   static const List<String> suspiciousUrlPatterns = [

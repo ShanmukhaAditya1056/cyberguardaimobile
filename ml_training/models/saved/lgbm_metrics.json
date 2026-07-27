@@ -1,0 +1,41 @@
+{
+  "accuracy": 0.9945833333333334,
+  "auc": 0.9998465401785714,
+  "confusion_matrix": [
+    [
+      1113,
+      7
+    ],
+    [
+      6,
+      1274
+    ]
+  ],
+  "feature_importance": {
+    "read_sms": 315.0108957029879,
+    "send_sms": 271.9137491164729,
+    "receive_sms": 658.9230962935835,
+    "record_audio": 83.54425951838493,
+    "camera": 187.66266893129796,
+    "read_contacts": 16.71412292154855,
+    "write_contacts": 9.206476978957653,
+    "read_call_log": 608.0384858228499,
+    "process_outgoing_calls": 276.98117237351835,
+    "bind_accessibility_service": 1631.3652608459815,
+    "bind_device_admin": 553.3469111698796,
+    "request_install_packages": 736.0092383464798,
+    "receive_boot_completed": 391.7432133636903,
+    "foreground_service": 26.341113924980164,
+    "read_external_storage": 260.1811367496848,
+    "write_external_storage": 242.13836346846074,
+    "access_fine_location": 82.8300324305892,
+    "access_coarse_location": 114.5956154530868,
+    "use_biometric": 327.26739872084,
+    "use_fingerprint": 58.63422260293737,
+    "total_permissions": 1518.4176036499266,
+    "target_sdk": 94833.28168052435,
+    "min_sdk": 167.2079496360966,
+    "apk_size_mb": 541.0420068295207,
+    "is_sideloaded": 12202.376058748923
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "accuracy": 0.94625,
+  "best_accuracy": 0.94625,
+  "confusion_matrix": [
+    [
+      1079,
+      41
+    ],
+    [
+      88,
+      1192
+    ]
+  ]
+}

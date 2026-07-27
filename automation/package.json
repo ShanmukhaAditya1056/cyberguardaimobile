@@ -1,0 +1,31 @@
+{
+  "name": "cyberguard-appium-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Appium end-to-end automation suite for the CyberGuard AI Flutter Android app",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node runners/run-suite.js",
+    "test:smoke": "node runners/run-suite.js --suite=smoke",
+    "test:navigation": "node runners/run-suite.js --suite=navigation",
+    "test:phishing": "node runners/run-suite.js --suite=phishing",
+    "test:settings": "node runners/run-suite.js --suite=settings",
+    "test:regression": "node runners/run-suite.js --suite=regression",
+    "report": "node reporting/generate-all.js",
+    "appium": "appium --allow-cors --relaxed-security",
+    "appium:install-driver": "appium driver install uiautomator2",
+    "doctor": "node runners/doctor.js"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "mocha": "^10.7.3",
+    "webdriverio": "^9.2.8"
+  },
+  "devDependencies": {
+    "appium": "^2.12.1",
+    "appium-uiautomator2-driver": "^3.7.6"
+  }
+}

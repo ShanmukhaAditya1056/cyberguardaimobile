@@ -1,0 +1,11 @@
+# Test run output — regenerated on every execution, published as CI artifacts.
+reports/
+screenshots/
+logs/
+
+node_modules/
+npm-debug.log*
+
+# Keep the generated identifier mirror committed: it must be reviewable in a
+# diff when someone renames an automation id in the Dart source.
+!config/auto-ids.generated.js

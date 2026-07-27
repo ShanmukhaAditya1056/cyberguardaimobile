@@ -969,4 +969,408 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get wifiNA => 'लागू नहीं';
+
+  @override
+  String get cyberDefense => 'साइबर रक्षा';
+
+  @override
+  String get defenseThreatFusion => 'थ्रेट फ्यूज़न';
+
+  @override
+  String get defenseScreenshotScan => 'स्क्रीनशॉट स्कैन';
+
+  @override
+  String get defensePredictiveRisk => 'पूर्वानुमानित जोखिम';
+
+  @override
+  String get defenseArbitrationLog => 'मध्यस्थता लॉग';
+
+  @override
+  String get linkProtection => 'लिंक सुरक्षा';
+
+  @override
+  String get linkInterceptorTitle => 'स्मार्ट लिंक इंटरसेप्टर';
+
+  @override
+  String get linkInterceptorSub =>
+      'अन्य ऐप्स से खोले गए लिंक को लोड होने से पहले स्कैन करें';
+
+  @override
+  String get cloudIntelTitle => 'क्लाउड थ्रेट इंटेलिजेंस';
+
+  @override
+  String get cloudIntelSub =>
+      'लिंक को Google Safe Browsing से जाँचें (टैप किया गया लिंक Google को भेजा जाता है)। डिफ़ॉल्ट रूप से बंद।';
+
+  @override
+  String get saveLinkHistoryTitle => 'लिंक इतिहास सहेजें';
+
+  @override
+  String get saveLinkHistorySub =>
+      'स्कैन किए गए लिंक इस डिवाइस पर संग्रहीत करें। बंद = कुछ भी नहीं रखा जाता।';
+
+  @override
+  String get defaultBrowserTitle => 'CyberGuard को डिफ़ॉल्ट ब्राउज़र बनाएं';
+
+  @override
+  String get defaultBrowserSub =>
+      'लिंक खुलने से पहले जाँचने के लिए आवश्यक। CyberGuard हर लिंक स्कैन करता है, फिर सुरक्षित लिंक आपके ब्राउज़र को सौंपता है।';
+
+  @override
+  String get defaultBrowserActive =>
+      'CyberGuard आपका डिफ़ॉल्ट ब्राउज़र है — टैप किए गए लिंक सुरक्षित हैं।';
+
+  @override
+  String get defaultBrowserSetCta => 'डिफ़ॉल्ट ब्राउज़र बनाएं';
+
+  @override
+  String get cloudIntelDialogTitle => 'क्लाउड थ्रेट इंटेलिजेंस सक्षम करें?';
+
+  @override
+  String get cloudIntelDialogBody =>
+      'चालू होने पर, इंटरसेप्ट किए गए लिंक Google Safe Browsing से जाँचे जाते हैं। आपके द्वारा टैप किया गया लिंक इस जाँच के लिए Google को भेजा जाता है। आपके डिवाइस से और कुछ नहीं जाता। आप इसे कभी भी बंद कर सकते हैं।';
+
+  @override
+  String get commonEnable => 'सक्षम करें';
+
+  @override
+  String get commonCancel => 'रद्द करें';
+
+  @override
+  String get threatBandSafe => 'सुरक्षित (0-30)';
+
+  @override
+  String get threatBandSuspicious => 'संदिग्ध (31-60)';
+
+  @override
+  String get threatBandDangerous => 'खतरनाक (61-80)';
+
+  @override
+  String get threatBandCritical => 'गंभीर (81-100)';
+
+  @override
+  String get threatLevelSafe => 'सुरक्षित';
+
+  @override
+  String get threatLevelSuspicious => 'संदिग्ध';
+
+  @override
+  String get threatLevelDangerous => 'खतरनाक';
+
+  @override
+  String get threatLevelCritical => 'गंभीर';
+
+  @override
+  String confidencePct(int pct) {
+    return 'विश्वास $pct%';
+  }
+
+  @override
+  String get warnDangerousTitle => 'खतरनाक वेबसाइट पहचानी गई';
+
+  @override
+  String get warnSuspiciousTitle => 'संदिग्ध वेबसाइट';
+
+  @override
+  String get warnRiskScore => 'जोखिम स्कोर';
+
+  @override
+  String get warnOverrideDefault =>
+      'विश्वसनीय थ्रेट इंटेलिजेंस ओवरराइड द्वारा अवरुद्ध।';
+
+  @override
+  String get warnConflict =>
+      'पहचान स्रोत असहमत — मध्यस्थता द्वारा निर्णय का मिलान किया गया।';
+
+  @override
+  String get warnDestination => 'गंतव्य';
+
+  @override
+  String warnVia(String app) {
+    return '$app के माध्यम से';
+  }
+
+  @override
+  String get warnWhyFlagged => 'इसे क्यों चिह्नित किया गया';
+
+  @override
+  String get warnSources => 'इंटेलिजेंस स्रोत';
+
+  @override
+  String get warnGoBack => 'वापस जाएँ (अनुशंसित)';
+
+  @override
+  String get warnContinue => 'फिर भी जारी रखें';
+
+  @override
+  String get warnReport => 'इस लिंक की रिपोर्ट करें';
+
+  @override
+  String get warnReported => 'रिपोर्ट किया गया। धन्यवाद।';
+
+  @override
+  String get warnOpenDangerousTitle => 'खतरनाक साइट खोलें?';
+
+  @override
+  String get warnOpenDangerousBody =>
+      'CyberGuard ने इस लिंक को उच्च जोखिम वाला बताया है। इसे खोलने से आपके क्रेडेंशियल या डिवाइस उजागर हो सकते हैं। अपने जोखिम पर जारी रखें?';
+
+  @override
+  String get warnOpenAnyway => 'फिर भी खोलें';
+
+  @override
+  String get warnPrivacyNote =>
+      'जब तक आप सेटिंग्स में लिंक इतिहास सक्षम नहीं करते, कोई URL संग्रहीत नहीं होता।';
+
+  @override
+  String get fusionTitle => 'थ्रेट फ्यूज़न स्कैन';
+
+  @override
+  String get fusionPrompt => 'सभी इंटेलिजेंस स्रोतों में एक लिंक जाँचें';
+
+  @override
+  String get fusionRunScan => 'फ्यूज़न स्कैन चलाएँ';
+
+  @override
+  String get fusionUnified => 'एकीकृत';
+
+  @override
+  String get fusionSourceAttribution => 'स्रोत श्रेय';
+
+  @override
+  String get fusionExplanation => 'व्याख्या';
+
+  @override
+  String get fusionConflict => 'स्रोत असहमत — मध्यस्थता द्वारा मिलान।';
+
+  @override
+  String fusionTrust(int weight) {
+    return 'विश्वास $weight';
+  }
+
+  @override
+  String get arbitrationTitle => 'मध्यस्थता लॉग';
+
+  @override
+  String get arbitrationClear => 'लॉग साफ़ करें';
+
+  @override
+  String get arbitrationEmptyTitle => 'अभी तक कोई विरोध नहीं';
+
+  @override
+  String get arbitrationEmptyBody =>
+      'जब पहचान स्रोत असहमत होते हैं या कोई विश्वसनीय स्रोत CyberGuard को ओवरराइड करता है, तो निर्णय यहाँ दर्ज होता है।';
+
+  @override
+  String arbitrationOverride(String level) {
+    return 'विश्वसनीय ओवरराइड → $level';
+  }
+
+  @override
+  String arbitrationConflictTitle(String level) {
+    return 'स्रोत विरोध → $level';
+  }
+
+  @override
+  String get riskTitle => 'पूर्वानुमानित जोखिम';
+
+  @override
+  String get riskNoData => 'कोई डेटा नहीं';
+
+  @override
+  String get riskBandLow => 'कम';
+
+  @override
+  String get riskBandMedium => 'मध्यम';
+
+  @override
+  String get riskBandHigh => 'उच्च';
+
+  @override
+  String riskSuffix(String band) {
+    return '$band जोखिम';
+  }
+
+  @override
+  String get riskForecastTitle => 'खतरे का पूर्वानुमान';
+
+  @override
+  String get riskTimelineTitle => '7-दिन जोखिम समयरेखा';
+
+  @override
+  String riskWhyTitle(String band) {
+    return 'आपका जोखिम $band क्यों है';
+  }
+
+  @override
+  String get riskRecommendations => 'अनुशंसाएँ';
+
+  @override
+  String get forecastPhishing => 'फ़िशिंग हमला';
+
+  @override
+  String get forecastCredentialTheft => 'क्रेडेंशियल चोरी';
+
+  @override
+  String get forecastMalware => 'मैलवेयर संक्रमण';
+
+  @override
+  String get rfPhishingTitle => 'फ़िशिंग लिंक मिले';
+
+  @override
+  String rfPhishingDetail(int count) {
+    return 'पिछले 7 दिनों में $count चिह्नित';
+  }
+
+  @override
+  String get rfSmsTitle => 'संदिग्ध SMS प्राप्त';
+
+  @override
+  String rfSmsDetail(int count) {
+    return '$count फ़िशिंग SMS पहचाने गए';
+  }
+
+  @override
+  String get rfWifiTitle => 'अज्ञात Wi-Fi नेटवर्क उपयोग किए गए';
+
+  @override
+  String rfWifiDetail(int count) {
+    return '$count कम-विश्वास नेटवर्क से जुड़े';
+  }
+
+  @override
+  String get rfMalwareTitle => 'जोखिम भरे ऐप्स इंस्टॉल';
+
+  @override
+  String rfMalwareDetail(int count) {
+    return '$count उच्च-जोखिम ऐप्स पहचाने गए';
+  }
+
+  @override
+  String get rfInterceptTitle => 'हाल ही में अवरुद्ध लिंक';
+
+  @override
+  String rfInterceptDetail(int count) {
+    return '$count खतरनाक लिंक इंटरसेप्ट किए गए';
+  }
+
+  @override
+  String get rfBreachTitle => 'ज्ञात उल्लंघन में क्रेडेंशियल';
+
+  @override
+  String get rfBreachDetail =>
+      'आपका खाता उल्लंघन किए गए डेटा में दिखाई देता है';
+
+  @override
+  String get rfTrendTitle => 'सुरक्षा स्कोर घट रहा है';
+
+  @override
+  String rfTrendDetail(int pts) {
+    return 'सुरक्षा हाल ही में $pts अंक गिरी';
+  }
+
+  @override
+  String get recBreach =>
+      'उल्लंघन किए गए खातों के पासवर्ड बदलें और 2FA सक्षम करें।';
+
+  @override
+  String get recPhishing =>
+      'अप्रत्याशित संदेशों में लिंक टैप करने से बचें; प्रेषक सत्यापित करें।';
+
+  @override
+  String get recWifi =>
+      'सार्वजनिक Wi-Fi पर संवेदनशील लॉगिन से बचें; विश्वसनीय नेटवर्क उपयोग करें।';
+
+  @override
+  String get recMalware =>
+      'उच्च-जोखिम ऐप्स की समीक्षा कर हटाएँ; केवल Play Store से इंस्टॉल करें।';
+
+  @override
+  String get recInterceptor =>
+      'निरंतर सुरक्षा के लिए स्मार्ट लिंक इंटरसेप्टर सक्षम रखें।';
+
+  @override
+  String get recHealthy =>
+      'आप अच्छी स्थिति में हैं — CyberGuard सुरक्षा सक्षम रखें।';
+
+  @override
+  String get screenshotTitle => 'स्क्रीनशॉट स्कैनर';
+
+  @override
+  String get screenshotPrompt => 'संदिग्ध पृष्ठ का स्क्रीनशॉट स्कैन करें';
+
+  @override
+  String get screenshotDesc =>
+      'नकली बैंक, UPI, OTP, लॉगिन, KYC, लॉटरी और सहायता घोटालों का पता लगाता है। छवियाँ डिवाइस पर ही विश्लेषित होती हैं।';
+
+  @override
+  String get screenshotGallery => 'गैलरी';
+
+  @override
+  String get screenshotCamera => 'कैमरा';
+
+  @override
+  String get screenshotScam => 'घोटाला';
+
+  @override
+  String get screenshotLooksClean => 'साफ़ दिखता है';
+
+  @override
+  String screenshotBrand(String brand) {
+    return 'ब्रांड उल्लेख: $brand';
+  }
+
+  @override
+  String get screenshotIndicators => 'संकेतक';
+
+  @override
+  String get screenshotExtractedText => 'निकाला गया पाठ';
+
+  @override
+  String get scamFakeBank => 'नकली बैंक पृष्ठ';
+
+  @override
+  String get scamFakeUpi => 'नकली UPI / भुगतान पृष्ठ';
+
+  @override
+  String get scamFakeOtp => 'नकली OTP अनुरोध';
+
+  @override
+  String get scamFakeLogin => 'नकली लॉगिन पृष्ठ';
+
+  @override
+  String get scamFakeKyc => 'नकली KYC फ़ॉर्म';
+
+  @override
+  String get scamFakeLottery => 'लॉटरी / पुरस्कार घोटाला';
+
+  @override
+  String get scamFakeInvestment => 'निवेश घोटाला';
+
+  @override
+  String get scamFakeSupport => 'नकली ग्राहक सहायता';
+
+  @override
+  String get scamNone => 'कोई घोटाला संकेतक नहीं';
+
+  @override
+  String scamReasonCategory(String category, String matched) {
+    return '$category: \"$matched\"';
+  }
+
+  @override
+  String scamReasonBrand(String brand) {
+    return 'ब्रांड उल्लेख: $brand';
+  }
+
+  @override
+  String scamReasonUrgency(String word) {
+    return 'तात्कालिकता / दबाव शब्द: \"$word\"';
+  }
+
+  @override
+  String get scamReasonNoIndicators => 'पाठ में कोई घोटाला संकेतक नहीं मिला';
+
+  @override
+  String get scamReasonNoText => 'छवि में कोई पठनीय पाठ नहीं मिला';
 }

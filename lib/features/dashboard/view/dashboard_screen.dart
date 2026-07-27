@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_gradients.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/automation_ids.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../data/repositories/wifi_repository.dart';
@@ -97,7 +98,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return GradientScaffold(
       score: neverScanned ? 70 : state.unifiedScore,
-      body: CustomScrollView(
+      body: Semantics(
+        identifier: AutoId.dashboardRoot,
+        child: CustomScrollView(
         slivers: [
           // Transparent AppBar
           SliverAppBar(
@@ -110,7 +113,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 Text(AppLocalizations.of(context)!.appName,
                     style: AppTextStyles.titleMedium),
                 const Spacer(),
-                GestureDetector(
+                Semantics(
+                  identifier: AutoId.dashboardAlertsBtn,
+                  button: true,
+                  container: true,
+                  label: 'Alerts',
+                  child: GestureDetector(
                   onTap: () => context.push('/alerts'),
                   child: Stack(
                     clipBehavior: Clip.none,
@@ -145,12 +153,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         ),
                     ],
                   ),
+                  ),
                 ),
                 const SizedBox(width: 16),
-                GestureDetector(
-                  onTap: () => context.push('/settings'),
-                  child: const Icon(Icons.settings_outlined,
-                      color: AppColors.textDark),
+                Semantics(
+                  identifier: AutoId.dashboardSettingsBtn,
+                  button: true,
+                  container: true,
+                  label: 'Settings',
+                  child: GestureDetector(
+                    onTap: () => context.push('/settings'),
+                    child: const Icon(Icons.settings_outlined,
+                        color: AppColors.textDark),
+                  ),
                 ),
                 const SizedBox(width: 4),
               ],
@@ -166,6 +181,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
           ),
         ],
+        ),
       ),
       floatingActionButton: _ScanFab(
         onTap: _runQuickScan,
@@ -217,6 +233,12 @@ class _DashboardContent extends StatelessWidget {
         SectionTitle(title: AppLocalizations.of(context)!.protectionModules),
         const SizedBox(height: 12),
         ModuleGrid(state: state),
+        const SizedBox(height: 24),
+
+        // Cyber Defense tools (Features 2-5)
+        SectionTitle(title: AppLocalizations.of(context)!.cyberDefense),
+        const SizedBox(height: 12),
+        const _DefenseGrid(),
         const SizedBox(height: 24),
 
         // Score chart
@@ -488,7 +510,9 @@ class _MiniScoreRingState extends State<_MiniScoreRing>
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
+                      Semantics(
+                        identifier: AutoId.dashboardScoreValue,
+                        child: Text(
                         widget.placeholder ? '—' : '${_counter.value}',
                         style: TextStyle(
                           fontFamily: 'Inter',
@@ -500,6 +524,7 @@ class _MiniScoreRingState extends State<_MiniScoreRing>
                           letterSpacing: -1,
                           height: 1,
                         ),
+                      ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -563,6 +588,71 @@ class _MiniRingPainter extends CustomPainter {
   @override
   bool shouldRepaint(_MiniRingPainter old) =>
       old.progress != progress || old.accent != accent;
+}
+
+/// Quick-access grid for the proactive cyber-defense tools (Features 2-5).
+class _DefenseGrid extends StatelessWidget {
+  const _DefenseGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final tiles = <(IconData, String, Color, String)>[
+      (Icons.travel_explore_rounded, l.defenseThreatFusion, AppColors.blue, '/fusion'),
+      (Icons.image_search_rounded, l.defenseScreenshotScan, AppColors.safe, '/screenshot'),
+      (Icons.online_prediction_rounded, l.defensePredictiveRisk, AppColors.warning, '/risk'),
+      (Icons.balance_rounded, l.defenseArbitrationLog, AppColors.critical, '/arbitration'),
+    ];
+    return Semantics(
+      identifier: AutoId.dashboardDefenseGrid,
+      child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: GridView.count(
+        crossAxisCount: 2,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 2.4,
+        children: tiles
+            .map((t) => Semantics(
+                  // Route slug doubles as the tile's automation id, so
+                  // `/fusion` is addressable as cg_dashboard_defense_fusion.
+                  identifier: AutoId.defenseTile(t.$4.replaceAll('/', '')),
+                  button: true,
+                  container: true,
+                  label: t.$2,
+                  child: GlassCard(
+                    padding: const EdgeInsets.all(12),
+                    onTap: () => context.push(t.$4),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: t.$3.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(t.$1, color: t.$3, size: 20),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(t.$2,
+                              style: AppTextStyles.bodyMedium
+                                  .copyWith(color: AppColors.textDark),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis),
+                        ),
+                      ],
+                    ),
+                  ),
+                ))
+            .toList(),
+      ),
+      ),
+    );
+  }
 }
 
 class _RecentAlertsList extends StatelessWidget {
@@ -716,6 +806,7 @@ class _ScanFab extends StatelessWidget {
         onTap: isLoading ? null : onTap,
         isLoading: isLoading,
         height: 52,
+        autoIdent: AutoId.dashboardScanFab,
       ),
     );
   }

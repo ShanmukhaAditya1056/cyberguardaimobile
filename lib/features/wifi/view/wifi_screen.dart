@@ -13,6 +13,7 @@ import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/risk_badge.dart';
 import '../../../shared/widgets/smart_back_button.dart';
 import '../provider/wifi_provider.dart';
+import '../../../core/utils/automation_ids.dart';
 
 class WifiScreen extends ConsumerStatefulWidget {
   const WifiScreen({super.key});
@@ -86,6 +87,7 @@ class _WifiScreenState extends ConsumerState<WifiScreen>
                         : AppLocalizations.of(context)!.wifiScanThis,
                     icon: Icons.wifi_find_rounded,
                     height: 52,
+                    autoIdent: AutoId.wifiScanBtn,
                     color: BlinkCard.mintAccent,
                     isLoading: state.isScanning,
                     onTap: state.isScanning

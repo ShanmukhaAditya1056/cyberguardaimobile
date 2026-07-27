@@ -1,8 +1,12 @@
 package com.cyberguard.ai
 
+import android.app.Activity
+import android.app.role.RoleManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.net.ConnectivityManager
@@ -23,9 +27,22 @@ class MainActivity : FlutterActivity() {
 
     private val CHANNEL = "com.cyberguard.ai/device"
     private val SMS_EVENT_CHANNEL = "com.cyberguard.ai/sms_stream"
+    private val LINK_CHANNEL = "com.cyberguard.ai/link"
+    private val LINK_EVENT_CHANNEL = "com.cyberguard.ai/link_stream"
 
     private val smsReceiver = SmsReceiver()
     private var smsReceiverRegistered = false
+
+    // ── Smart Link Interceptor plumbing ──────────────────────────────────
+    // Links delivered while Flutter is alive go straight to this sink; a
+    // cold-start link (no sink yet) is buffered for getInitialLink().
+    private var linkEventSink: EventChannel.EventSink? = null
+    private var pendingInitialLink: Map<String, Any?>? = null
+
+    // Pending result for the ROLE_BROWSER request dialog (resolved in
+    // onActivityResult once the user accepts/declines the system prompt).
+    private val ROLE_BROWSER_REQUEST = 4711
+    private var pendingBrowserRoleResult: MethodChannel.Result? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -138,6 +155,191 @@ class MainActivity : FlutterActivity() {
                     SmsBus.detach()
                 }
             })
+
+        // ── Smart Link Interceptor channels ──────────────────────────────
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, LINK_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getInitialLink" -> {
+                        result.success(pendingInitialLink)
+                        pendingInitialLink = null // consume once
+                    }
+                    "openInBrowser" -> {
+                        try {
+                            val url = call.argument<String>("url")!!
+                            result.success(openInBrowser(url))
+                        } catch (e: Exception) {
+                            result.error("UNAVAILABLE", e.message, null)
+                        }
+                    }
+                    "isDefaultBrowser" -> {
+                        try {
+                            result.success(isDefaultBrowser())
+                        } catch (e: Exception) {
+                            result.error("UNAVAILABLE", e.message, null)
+                        }
+                    }
+                    "requestDefaultBrowser" -> {
+                        try {
+                            requestDefaultBrowser(result)
+                        } catch (e: Exception) {
+                            result.error("UNAVAILABLE", e.message, null)
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, LINK_EVENT_CHANNEL)
+            .setStreamHandler(object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink) {
+                    linkEventSink = events
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    linkEventSink = null
+                }
+            })
+
+        // Capture the intent that launched us (cold start). The sink isn't
+        // attached yet, so this buffers into pendingInitialLink.
+        handleLinkIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleLinkIntent(intent)
+    }
+
+    /// Pull a URL out of a VIEW (tapped link) or SEND (shared text) intent and
+    /// route it to Flutter — live via the event sink, or buffered for cold start.
+    private fun handleLinkIntent(intent: Intent?) {
+        val url = extractUrl(intent) ?: return
+        val payload: Map<String, Any?> = mapOf(
+            "url" to url,
+            "sourceApp" to referrerLabel(),
+        )
+        val sink = linkEventSink
+        if (sink != null) {
+            sink.success(payload)
+        } else {
+            pendingInitialLink = payload
+        }
+    }
+
+    private fun extractUrl(intent: Intent?): String? {
+        if (intent == null) return null
+        return when (intent.action) {
+            Intent.ACTION_VIEW -> {
+                val data = intent.dataString
+                if (data != null && (data.startsWith("http://") || data.startsWith("https://"))) data
+                else null
+            }
+            Intent.ACTION_SEND -> {
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return null
+                // Shared text may be "Check this out https://… 🔗" — grab the URL.
+                Regex("""https?://\S+""").find(text)?.value
+            }
+            else -> null
+        }
+    }
+
+    /// Friendly label for the app that handed us the link (best effort).
+    private fun referrerLabel(): String? {
+        val ref = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) referrer else null
+        val pkg = ref?.host ?: return null
+        return try {
+            val ai = packageManager.getApplicationInfo(pkg, 0)
+            packageManager.getApplicationLabel(ai).toString()
+        } catch (_: Exception) {
+            pkg
+        }
+    }
+
+    /// Open [url] in a real browser, excluding CyberGuard from the chooser so
+    /// "Continue Anyway" can never loop back into the interceptor.
+    private fun openInBrowser(url: String): Boolean {
+        return try {
+            val view = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+            val chooser = Intent.createChooser(view, "Open with")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                chooser.putExtra(
+                    Intent.EXTRA_EXCLUDE_COMPONENTS,
+                    arrayOf(ComponentName(this, MainActivity::class.java)),
+                )
+            }
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(chooser)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /// True when CyberGuard is the system default browser. On Android 12+ this
+    /// is the ONLY way a tapped http/https link is delivered to us before the
+    /// browser opens it (a passive intent filter is bypassed for unverified
+    /// domains). Uses RoleManager on Q+, falling back to intent resolution.
+    private fun isDefaultBrowser(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val rm = getSystemService(Context.ROLE_SERVICE) as? RoleManager
+            if (rm != null && rm.isRoleAvailable(RoleManager.ROLE_BROWSER)) {
+                return rm.isRoleHeld(RoleManager.ROLE_BROWSER)
+            }
+        }
+        return try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.example.com"))
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+            val resolved = packageManager.resolveActivity(
+                intent, PackageManager.MATCH_DEFAULT_ONLY
+            )
+            resolved?.activityInfo?.packageName == packageName
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /// Ask the OS to make CyberGuard the default browser. On Q+ this pops the
+    /// system ROLE_BROWSER dialog and the result is delivered via
+    /// onActivityResult. On older devices we open the default-apps settings
+    /// (no in-place dialog API), so we resolve immediately with the current
+    /// state and rely on a re-check when the user returns.
+    private fun requestDefaultBrowser(result: MethodChannel.Result) {
+        if (isDefaultBrowser()) {
+            result.success(true)
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val rm = getSystemService(Context.ROLE_SERVICE) as? RoleManager
+            if (rm != null && rm.isRoleAvailable(RoleManager.ROLE_BROWSER)) {
+                pendingBrowserRoleResult = result
+                startActivityForResult(
+                    rm.createRequestRoleIntent(RoleManager.ROLE_BROWSER),
+                    ROLE_BROWSER_REQUEST,
+                )
+                return
+            }
+        }
+        // Pre-Q fallback: send the user to the default-apps settings screen.
+        try {
+            startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+        } catch (e: Exception) {
+            try { startActivity(Intent(Settings.ACTION_SETTINGS)) } catch (_: Exception) {}
+        }
+        result.success(false)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == ROLE_BROWSER_REQUEST) {
+            // RESULT_OK means the role was granted to us; double-check by
+            // querying current state to stay correct across OEM quirks.
+            val granted = resultCode == Activity.RESULT_OK || isDefaultBrowser()
+            pendingBrowserRoleResult?.success(granted)
+            pendingBrowserRoleResult = null
+        }
     }
 
     private fun registerSmsReceiver() {

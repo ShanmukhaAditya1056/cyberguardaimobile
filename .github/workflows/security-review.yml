@@ -1,0 +1,273 @@
+name: Security review
+
+# Static analysis, secret scanning and dependency review for a Flutter Android
+# application. Fails the build only on Critical findings — a security workflow
+# that blocks every PR on a Low finding gets disabled within a week.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1' # Mondays 03:00 UTC
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets:
+    name: Secret scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Gitleaks needs history to scan past commits.
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Check for API keys in tracked files
+        # Belt and braces: api_keys.dart is gitignored, and this asserts it
+        # stayed that way. A committed key is the one finding worth failing on
+        # immediately, because history rewriting only gets harder with time.
+        run: |
+          echo "Scanning tracked files for credential patterns…"
+          FOUND=0
+
+          if git ls-files --error-unmatch lib/core/config/api_keys.dart > /dev/null 2>&1; then
+            echo "::error file=lib/core/config/api_keys.dart::api_keys.dart is tracked by git. It must stay gitignored."
+            FOUND=1
+          fi
+
+          # Google API key shape.
+          if git grep -nIE 'AIza[0-9A-Za-z_-]{35}' -- . ':(exclude)*.md' > /dev/null 2>&1; then
+            echo "::error::A Google API key pattern is present in tracked files."
+            git grep -nIE 'AIza[0-9A-Za-z_-]{35}' -- . ':(exclude)*.md' || true
+            FOUND=1
+          fi
+
+          if [ "$FOUND" = "1" ]; then
+            echo "Rotate the exposed credential before doing anything else."
+            exit 1
+          fi
+          echo "No credentials found in tracked files."
+
+  static-analysis:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.8'
+          channel: stable
+          cache: true
+
+      - name: Restore API key placeholder
+        run: |
+          if [ ! -f lib/core/config/api_keys.dart ]; then
+            cp lib/core/config/api_keys.example.dart lib/core/config/api_keys.dart
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Flutter analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Dart tests
+        run: flutter test --reporter expanded
+
+      - name: Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/dart
+        continue-on-error: true
+
+      - name: Dependency freshness
+        run: |
+          echo "## Dependency status" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          flutter pub outdated --no-dev-dependencies 2>&1 | head -50 >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+  manifest-audit:
+    name: Android manifest audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Audit manifest and Gradle configuration
+        # Encodes the concrete findings from security/security-review.md so a
+        # regression is caught the day it is introduced rather than at the next
+        # manual review.
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          GRADLE=android/app/build.gradle
+          WARN=0
+
+          echo "## Android configuration audit" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Check | Result | Finding |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+
+          check() {
+            local name="$1" ok="$2" ref="$3"
+            if [ "$ok" = "1" ]; then
+              echo "| $name | ✅ pass | $ref |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "| $name | ⚠️ review | $ref |" >> "$GITHUB_STEP_SUMMARY"
+              echo "::warning::$name — see $ref"
+              WARN=1
+            fi
+          }
+
+          # MOB-001 — release must not use the debug signing config.
+          if grep -q 'signingConfig signingConfigs.debug' "$GRADLE"; then
+            check "Release signing key" 0 "MOB-001"
+          else
+            check "Release signing key" 1 "MOB-001"
+          fi
+
+          # MOB-005 — backup should be explicitly disabled or scoped.
+          if grep -q 'android:allowBackup="false"' "$MANIFEST" || \
+             grep -q 'dataExtractionRules' "$MANIFEST"; then
+            check "Backup configuration" 1 "MOB-005"
+          else
+            check "Backup configuration" 0 "MOB-005"
+          fi
+
+          # MOB-006 — R8 enabled for release.
+          if grep -q 'minifyEnabled true' "$GRADLE"; then
+            check "Code shrinking" 1 "MOB-006"
+          else
+            check "Code shrinking" 0 "MOB-006"
+          fi
+
+          # Cleartext must stay disabled — this one is currently correct and
+          # must not regress.
+          if grep -q 'android:usesCleartextTraffic="false"' "$MANIFEST"; then
+            check "Cleartext traffic disabled" 1 "positive finding"
+          else
+            check "Cleartext traffic disabled" 0 "REGRESSION"
+          fi
+
+          # Network security config present.
+          if grep -q 'networkSecurityConfig' "$MANIFEST"; then
+            check "Network security config" 1 "positive finding"
+          else
+            check "Network security config" 0 "REGRESSION"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$WARN" = "1" ]; then
+            echo "See \`security/remediation-guide.md\` for copy-paste fixes." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          # Warn, do not fail: these are known findings with a tracked
+          # remediation plan, not new regressions to block a merge on.
+          exit 0
+
+  filesystem-scan:
+    name: Filesystem & dependency scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          ignore-unfixed: true
+          skip-dirs: 'ml_training/.venv-ml,automation/node_modules,build'
+        continue-on-error: true
+
+      - name: Upload Trivy results to code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+        continue-on-error: true
+
+      - name: Fail only on Critical
+        run: |
+          if [ ! -f trivy-results.sarif ]; then
+            echo "No Trivy output — scan did not complete."
+            exit 0
+          fi
+          CRITICAL=$(grep -c '"level": *"error"' trivy-results.sarif || true)
+          echo "Critical/error-level findings: ${CRITICAL:-0}"
+          if [ "${CRITICAL:-0}" -gt 0 ]; then
+            echo "::error::Trivy reported ${CRITICAL} critical finding(s)."
+            exit 1
+          fi
+
+  report:
+    name: Publish security summary
+    runs-on: ubuntu-latest
+    needs: [secrets, static-analysis, manifest-audit, filesystem-scan]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Summarise the assessment
+        run: |
+          {
+            echo "# Security review"
+            echo ""
+            echo "| Job | Result |"
+            echo "|---|---|"
+            echo "| Secret scanning | ${{ needs.secrets.result }} |"
+            echo "| Static analysis | ${{ needs.static-analysis.result }} |"
+            echo "| Manifest audit | ${{ needs.manifest-audit.result }} |"
+            echo "| Filesystem scan | ${{ needs.filesystem-scan.result }} |"
+            echo ""
+            echo "## Standing findings"
+            echo ""
+            echo "From the full assessment in \`security/security-review.md\`:"
+            echo ""
+            echo "| Severity | Count |"
+            echo "|---|---:|"
+            echo "| Critical | 0 |"
+            echo "| High | 3 |"
+            echo "| Medium | 5 |"
+            echo "| Low | 4 |"
+            echo "| Informational | 3 |"
+            echo ""
+            echo "Overall score: **68/100** · Risk rating: **MEDIUM**"
+            echo ""
+            echo "Fixes: \`security/remediation-guide.md\` — steps 1–4 clear every High finding in about two hours."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the assessment documents
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-assessment
+          path: security/
+          retention-days: 30

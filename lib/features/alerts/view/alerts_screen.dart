@@ -13,6 +13,7 @@ import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/loading_shimmer.dart';
 import '../../../shared/widgets/smart_back_button.dart';
 import '../provider/alerts_provider.dart';
+import '../../../core/utils/automation_ids.dart';
 
 class AlertsScreen extends ConsumerWidget {
   const AlertsScreen({super.key});
@@ -58,10 +59,16 @@ class AlertsScreen extends ConsumerWidget {
                     style: AppTextStyles.captionMedium
                         .copyWith(color: AppColors.blue)),
               ),
-            IconButton(
-              icon: const Icon(Icons.delete_sweep_outlined,
-                  color: AppColors.white50),
-              onPressed: () => _confirmClear(context, ref),
+            Semantics(
+              identifier: AutoId.alertsClearBtn,
+              button: true,
+              container: true,
+              label: 'Clear all alerts',
+              child: IconButton(
+                icon: const Icon(Icons.delete_sweep_outlined,
+                    color: AppColors.white50),
+                onPressed: () => _confirmClear(context, ref),
+              ),
             ),
           ],
         ],

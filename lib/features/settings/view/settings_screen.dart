@@ -4,12 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_gradients.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/automation_ids.dart';
 import '../../../shared/widgets/animated_gradient_bg.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/smart_back_button.dart';
 import '../../../core/i18n/locale_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../data/services/interceptor_prefs.dart';
+import '../../../data/services/link_interceptor_channel.dart';
 import '../../../data/services/report_export_service.dart';
 import '../../../data/services/sms_stream_service.dart';
 import '../provider/settings_provider.dart';
@@ -21,17 +24,49 @@ class SettingsScreen extends ConsumerStatefulWidget {
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen>
+    with WidgetsBindingObserver {
   final _apiKeyCtrl = TextEditingController();
   bool _apiKeyVisible = false;
   bool _apiKeyEditing = false;
   bool _smsLive = SmsStreamService.isRunning;
 
+  // Smart Link Interceptor flags (stored in prefsBox via InterceptorPrefs).
+  bool _interceptorEnabled = InterceptorPrefs.interceptorEnabled;
+  bool _cloudIntel = InterceptorPrefs.cloudIntelEnabled;
+  bool _linkHistory = InterceptorPrefs.linkHistoryEnabled;
+
+  // Whether CyberGuard is the system default browser. On Android 12+ this must
+  // be true for tapped links to reach the interceptor at all.
+  static const _linkChannel = LinkInterceptorChannel();
+  bool _isDefaultBrowser = false;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final settings = ref.read(settingsProvider);
     _apiKeyCtrl.text = settings.hibpApiKey;
+    _refreshDefaultBrowser();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // The user may have changed the default browser in system settings while
+    // we were backgrounded — re-check on resume so the tile stays accurate.
+    if (state == AppLifecycleState.resumed) _refreshDefaultBrowser();
+  }
+
+  Future<void> _refreshDefaultBrowser() async {
+    final isDefault = await _linkChannel.isDefaultBrowser();
+    if (!mounted) return;
+    setState(() => _isDefaultBrowser = isDefault);
+  }
+
+  Future<void> _requestDefaultBrowser() async {
+    final granted = await _linkChannel.requestDefaultBrowser();
+    if (!mounted) return;
+    setState(() => _isDefaultBrowser = granted);
   }
 
   Future<void> _toggleSmsLive(bool value) async {
@@ -51,8 +86,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _setCloudIntel(bool value) async {
+    final l = AppLocalizations.of(context)!;
+    if (value) {
+      // Cloud intel sends URLs to external services — require explicit consent.
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(l.cloudIntelDialogTitle),
+          content: Text(l.cloudIntelDialogBody),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l.commonCancel)),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l.commonEnable)),
+          ],
+        ),
+      );
+      if (ok != true) return;
+    }
+    await InterceptorPrefs.setCloudIntelEnabled(value);
+    if (!mounted) return;
+    setState(() => _cloudIntel = value);
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _apiKeyCtrl.dispose();
     super.dispose();
   }
@@ -70,7 +135,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         leading: const SmartBackButton(),
         title: Text(l.settings, style: AppTextStyles.title),
       ),
-      body: ListView(
+      body: Semantics(
+        identifier: AutoId.settingsRoot,
+        child: ListView(
         padding: const EdgeInsets.fromLTRB(20, kToolbarHeight + 16, 20, 100),
         children: [
           // ── Notifications ──────────────────────────────────────────────
@@ -83,6 +150,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 _ToggleTile(
                   title: l.settingRealTimeAlerts,
+                  autoIdent: AutoId.settingsRealTimeAlerts,
                   subtitle: l.settingRealTimeAlertsSub,
                   value: settings.realTimeAlerts,
                   onChanged: (v) =>
@@ -91,6 +159,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _Divider(),
                 _ToggleTile(
                   title: l.settingClipboardScan,
+                  autoIdent: AutoId.settingsClipboardScan,
                   subtitle: l.settingClipboardScanSub,
                   value: settings.clipboardScan,
                   onChanged: (v) =>
@@ -99,6 +168,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _Divider(),
                 _ToggleTile(
                   title: l.settingWifiAutoScan,
+                  autoIdent: AutoId.settingsWifiAutoScan,
                   subtitle: l.settingWifiAutoScanSub,
                   value: settings.wifiAutoScan,
                   onChanged: (v) =>
@@ -107,9 +177,58 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _Divider(),
                 _ToggleTile(
                   title: l.liveSmsGuard,
+                  autoIdent: AutoId.settingsLiveSmsGuard,
                   subtitle: l.liveSmsGuardSubtitle,
                   value: _smsLive,
                   onChanged: _toggleSmsLive,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── Link Protection (Smart Link Interceptor) ───────────────────
+          _SectionHeader(
+              icon: Icons.shield_outlined, title: l.linkProtection),
+          const SizedBox(height: 8),
+          GlassCard(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Column(
+              children: [
+                _DefaultBrowserTile(
+                  isDefault: _isDefaultBrowser,
+                  onSetDefault: _requestDefaultBrowser,
+                ),
+                _Divider(),
+                _ToggleTile(
+                  title: l.linkInterceptorTitle,
+                  autoIdent: AutoId.settingsLinkInterceptor,
+                  subtitle: l.linkInterceptorSub,
+                  value: _interceptorEnabled,
+                  onChanged: (v) async {
+                    await InterceptorPrefs.setInterceptorEnabled(v);
+                    if (mounted) setState(() => _interceptorEnabled = v);
+                  },
+                ),
+                _Divider(),
+                _ToggleTile(
+                  title: l.cloudIntelTitle,
+                  autoIdent: AutoId.settingsCloudIntel,
+                  subtitle: l.cloudIntelSub,
+                  value: _cloudIntel,
+                  onChanged: _setCloudIntel,
+                ),
+                _Divider(),
+                _ToggleTile(
+                  title: l.saveLinkHistoryTitle,
+                  autoIdent: AutoId.settingsLinkHistory,
+                  subtitle: l.saveLinkHistorySub,
+                  value: _linkHistory,
+                  onChanged: (v) async {
+                    await InterceptorPrefs.setLinkHistoryEnabled(v);
+                    if (mounted) setState(() => _linkHistory = v);
+                  },
                 ),
               ],
             ),
@@ -225,7 +344,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
+                Semantics(
+                  identifier: AutoId.settingsHibpInput,
+                  textField: true,
+                  container: true,
+                  child: TextField(
                   controller: _apiKeyCtrl,
                   obscureText: !_apiKeyVisible,
                   style: AppTextStyles.mono
@@ -246,6 +369,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                 ),
+                ),
                 if (_apiKeyEditing) ...[
                   const SizedBox(height: 12),
                   Row(
@@ -256,6 +380,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           gradient: AppGradients.blue,
                           icon: Icons.save_outlined,
                           height: 40,
+                          autoIdent: AutoId.settingsHibpSave,
                           onTap: () {
                             ref
                                 .read(settingsProvider.notifier)
@@ -281,6 +406,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: Icons.clear,
                         gradient: AppGradients.danger,
                         size: 40,
+                        autoIdent: AutoId.settingsHibpClear,
+                        semanticLabel: 'Clear HIBP API key',
                         onTap: () {
                           _apiKeyCtrl.clear();
                           ref.read(settingsProvider.notifier).clearHibpApiKey();
@@ -366,6 +493,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _ExportTile(
                   icon: Icons.picture_as_pdf_outlined,
                   title: l.exportPdf,
+                  autoIdent: AutoId.settingsExportPdf,
                   subtitle: l.exportPdfSubtitle,
                   iconColor: AppColors.danger,
                   onTap: () => _exportPdf(context),
@@ -374,6 +502,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _ExportTile(
                   icon: Icons.table_view_outlined,
                   title: l.exportCsv,
+                  autoIdent: AutoId.settingsExportCsv,
                   subtitle: l.exportCsvSubtitle,
                   iconColor: AppColors.safe,
                   onTap: () => _exportCsv(context),
@@ -425,6 +554,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     gradient: AppGradients.danger,
                     icon: Icons.restore,
                     height: 44,
+                    autoIdent: AutoId.settingsReset,
                     onTap: () => _confirmReset(context),
                   ),
                 ),
@@ -432,6 +562,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -556,15 +687,30 @@ class _ToggleTile extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
+  /// Stable resource-id for E2E automation. See [AutoId].
+  final String? autoIdent;
+
   const _ToggleTile({
     required this.title,
     required this.subtitle,
     required this.value,
     required this.onChanged,
+    this.autoIdent,
   });
 
   @override
   Widget build(BuildContext context) {
+    // `toggled` publishes the switch state to the semantics tree, so a test
+    // can assert on/off directly instead of screenshot-diffing the thumb.
+    return Semantics(
+      identifier: autoIdent ?? '',
+      toggled: value,
+      container: true,
+      child: _buildTile(context),
+    );
+  }
+
+  Widget _buildTile(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final titleColor = isDark ? Colors.white : const Color(0xFF111111);
     return Padding(
@@ -596,6 +742,84 @@ class _ToggleTile extends StatelessWidget {
                 : const Color(0xFFCCCCCC),
             trackOutlineColor:
                 WidgetStateProperty.all(Colors.transparent),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Status + call-to-action for making CyberGuard the default browser. When
+/// already default, shows a confirmation row; otherwise nudges the user with a
+/// "why" subtitle and a button that pops the system role dialog.
+class _DefaultBrowserTile extends StatelessWidget {
+  final bool isDefault;
+  final Future<void> Function() onSetDefault;
+
+  const _DefaultBrowserTile({
+    required this.isDefault,
+    required this.onSetDefault,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : const Color(0xFF111111);
+
+    if (isDefault) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            const Icon(Icons.verified_user_rounded,
+                color: AppColors.safe, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                l.defaultBrowserActive,
+                style: AppTextStyles.bodySmall
+                    .copyWith(color: AppColors.safe, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.shield_outlined,
+                  color: AppColors.warning, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l.defaultBrowserTitle,
+                        style: AppTextStyles.bodyMedium
+                            .copyWith(color: titleColor, fontSize: 15)),
+                    const SizedBox(height: 2),
+                    Text(l.defaultBrowserSub, style: AppTextStyles.caption),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: GradientButton(
+              label: l.defaultBrowserSetCta,
+              icon: Icons.open_in_browser_rounded,
+              gradient: AppGradients.blue,
+              onTap: onSetDefault,
+            ),
           ),
         ],
       ),
@@ -656,16 +880,30 @@ class _ExportTile extends StatelessWidget {
   final Color iconColor;
   final VoidCallback onTap;
 
+  /// Stable resource-id for E2E automation. See [AutoId].
+  final String? autoIdent;
+
   const _ExportTile({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.iconColor,
     required this.onTap,
+    this.autoIdent,
   });
 
   @override
   Widget build(BuildContext context) {
+    return Semantics(
+      identifier: autoIdent ?? '',
+      button: true,
+      container: true,
+      label: title,
+      child: _buildTile(),
+    );
+  }
+
+  Widget _buildTile() {
     return InkWell(
       onTap: onTap,
       child: Padding(

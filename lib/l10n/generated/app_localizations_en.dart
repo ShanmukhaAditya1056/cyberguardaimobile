@@ -968,4 +968,408 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wifiNA => 'N/A';
+
+  @override
+  String get cyberDefense => 'Cyber Defense';
+
+  @override
+  String get defenseThreatFusion => 'Threat Fusion';
+
+  @override
+  String get defenseScreenshotScan => 'Screenshot Scan';
+
+  @override
+  String get defensePredictiveRisk => 'Predictive Risk';
+
+  @override
+  String get defenseArbitrationLog => 'Arbitration Log';
+
+  @override
+  String get linkProtection => 'Link Protection';
+
+  @override
+  String get linkInterceptorTitle => 'Smart Link Interceptor';
+
+  @override
+  String get linkInterceptorSub =>
+      'Scan links you open from other apps before they load';
+
+  @override
+  String get cloudIntelTitle => 'Cloud threat intelligence';
+
+  @override
+  String get cloudIntelSub =>
+      'Check links against Google Safe Browsing (sends the tapped link to Google). Off by default.';
+
+  @override
+  String get saveLinkHistoryTitle => 'Save link history';
+
+  @override
+  String get saveLinkHistorySub =>
+      'Store scanned links on this device. Off = nothing is kept.';
+
+  @override
+  String get defaultBrowserTitle => 'Set CyberGuard as default browser';
+
+  @override
+  String get defaultBrowserSub =>
+      'Required to check links before they open. CyberGuard scans each link, then hands safe ones to your browser.';
+
+  @override
+  String get defaultBrowserActive =>
+      'CyberGuard is your default browser — tapped links are protected.';
+
+  @override
+  String get defaultBrowserSetCta => 'Set as Default Browser';
+
+  @override
+  String get cloudIntelDialogTitle => 'Enable cloud threat intelligence?';
+
+  @override
+  String get cloudIntelDialogBody =>
+      'When on, intercepted links are checked against Google Safe Browsing. The link you tapped is sent to Google for this check. Nothing else leaves your device. You can turn this off anytime.';
+
+  @override
+  String get commonEnable => 'Enable';
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get threatBandSafe => 'Safe (0-30)';
+
+  @override
+  String get threatBandSuspicious => 'Suspicious (31-60)';
+
+  @override
+  String get threatBandDangerous => 'Dangerous (61-80)';
+
+  @override
+  String get threatBandCritical => 'Critical (81-100)';
+
+  @override
+  String get threatLevelSafe => 'Safe';
+
+  @override
+  String get threatLevelSuspicious => 'Suspicious';
+
+  @override
+  String get threatLevelDangerous => 'Dangerous';
+
+  @override
+  String get threatLevelCritical => 'Critical';
+
+  @override
+  String confidencePct(int pct) {
+    return 'confidence $pct%';
+  }
+
+  @override
+  String get warnDangerousTitle => 'Dangerous Website Detected';
+
+  @override
+  String get warnSuspiciousTitle => 'Suspicious Website';
+
+  @override
+  String get warnRiskScore => 'RISK SCORE';
+
+  @override
+  String get warnOverrideDefault =>
+      'Blocked by trusted threat intelligence override.';
+
+  @override
+  String get warnConflict =>
+      'Detection sources disagreed — verdict reconciled by arbitration.';
+
+  @override
+  String get warnDestination => 'DESTINATION';
+
+  @override
+  String warnVia(String app) {
+    return 'via $app';
+  }
+
+  @override
+  String get warnWhyFlagged => 'WHY THIS IS FLAGGED';
+
+  @override
+  String get warnSources => 'INTELLIGENCE SOURCES';
+
+  @override
+  String get warnGoBack => 'Go Back (Recommended)';
+
+  @override
+  String get warnContinue => 'Continue Anyway';
+
+  @override
+  String get warnReport => 'Report this link';
+
+  @override
+  String get warnReported => 'Reported. Thank you.';
+
+  @override
+  String get warnOpenDangerousTitle => 'Open a dangerous site?';
+
+  @override
+  String get warnOpenDangerousBody =>
+      'CyberGuard rated this link as high-risk. Opening it could expose your credentials or device. Continue at your own risk?';
+
+  @override
+  String get warnOpenAnyway => 'Open anyway';
+
+  @override
+  String get warnPrivacyNote =>
+      'No URLs are stored unless you enable link history in Settings.';
+
+  @override
+  String get fusionTitle => 'Threat Fusion Scan';
+
+  @override
+  String get fusionPrompt => 'Check a link across all intelligence sources';
+
+  @override
+  String get fusionRunScan => 'Run Fusion Scan';
+
+  @override
+  String get fusionUnified => 'UNIFIED';
+
+  @override
+  String get fusionSourceAttribution => 'SOURCE ATTRIBUTION';
+
+  @override
+  String get fusionExplanation => 'EXPLANATION';
+
+  @override
+  String get fusionConflict => 'Sources disagreed — reconciled by arbitration.';
+
+  @override
+  String fusionTrust(int weight) {
+    return 'trust $weight';
+  }
+
+  @override
+  String get arbitrationTitle => 'Arbitration Log';
+
+  @override
+  String get arbitrationClear => 'Clear log';
+
+  @override
+  String get arbitrationEmptyTitle => 'No conflicts yet';
+
+  @override
+  String get arbitrationEmptyBody =>
+      'When detection sources disagree or a trusted source overrides CyberGuard, the decision is recorded here.';
+
+  @override
+  String arbitrationOverride(String level) {
+    return 'Trusted override → $level';
+  }
+
+  @override
+  String arbitrationConflictTitle(String level) {
+    return 'Source conflict → $level';
+  }
+
+  @override
+  String get riskTitle => 'Predictive Risk';
+
+  @override
+  String get riskNoData => 'No data';
+
+  @override
+  String get riskBandLow => 'Low';
+
+  @override
+  String get riskBandMedium => 'Medium';
+
+  @override
+  String get riskBandHigh => 'High';
+
+  @override
+  String riskSuffix(String band) {
+    return '$band RISK';
+  }
+
+  @override
+  String get riskForecastTitle => 'Threat Forecast';
+
+  @override
+  String get riskTimelineTitle => '7-Day Risk Timeline';
+
+  @override
+  String riskWhyTitle(String band) {
+    return 'Why your risk is $band';
+  }
+
+  @override
+  String get riskRecommendations => 'Recommendations';
+
+  @override
+  String get forecastPhishing => 'Phishing Attack';
+
+  @override
+  String get forecastCredentialTheft => 'Credential Theft';
+
+  @override
+  String get forecastMalware => 'Malware Infection';
+
+  @override
+  String get rfPhishingTitle => 'Phishing links encountered';
+
+  @override
+  String rfPhishingDetail(int count) {
+    return '$count flagged in the last 7 days';
+  }
+
+  @override
+  String get rfSmsTitle => 'Suspicious SMS received';
+
+  @override
+  String rfSmsDetail(int count) {
+    return '$count phishing SMS detected';
+  }
+
+  @override
+  String get rfWifiTitle => 'Unknown Wi-Fi networks used';
+
+  @override
+  String rfWifiDetail(int count) {
+    return '$count low-trust networks connected';
+  }
+
+  @override
+  String get rfMalwareTitle => 'Risky apps installed';
+
+  @override
+  String rfMalwareDetail(int count) {
+    return '$count high-risk apps detected';
+  }
+
+  @override
+  String get rfInterceptTitle => 'Links blocked recently';
+
+  @override
+  String rfInterceptDetail(int count) {
+    return '$count dangerous links intercepted';
+  }
+
+  @override
+  String get rfBreachTitle => 'Credentials in a known breach';
+
+  @override
+  String get rfBreachDetail => 'Your account appears in breached data';
+
+  @override
+  String get rfTrendTitle => 'Security score declining';
+
+  @override
+  String rfTrendDetail(int pts) {
+    return 'Protection dropped $pts pts recently';
+  }
+
+  @override
+  String get recBreach =>
+      'Change passwords for breached accounts and enable 2FA.';
+
+  @override
+  String get recPhishing =>
+      'Avoid tapping links in unexpected messages; verify the sender.';
+
+  @override
+  String get recWifi =>
+      'Avoid sensitive logins on public Wi-Fi; use a trusted network.';
+
+  @override
+  String get recMalware =>
+      'Review and uninstall high-risk apps; install only from Play Store.';
+
+  @override
+  String get recInterceptor =>
+      'Keep the Smart Link Interceptor enabled for ongoing protection.';
+
+  @override
+  String get recHealthy =>
+      'You\'re in good shape — keep CyberGuard protections enabled.';
+
+  @override
+  String get screenshotTitle => 'Screenshot Scanner';
+
+  @override
+  String get screenshotPrompt => 'Scan a suspicious page screenshot';
+
+  @override
+  String get screenshotDesc =>
+      'Detects fake bank, UPI, OTP, login, KYC, lottery and support scams. Images are analysed on-device.';
+
+  @override
+  String get screenshotGallery => 'Gallery';
+
+  @override
+  String get screenshotCamera => 'Camera';
+
+  @override
+  String get screenshotScam => 'SCAM';
+
+  @override
+  String get screenshotLooksClean => 'Looks clean';
+
+  @override
+  String screenshotBrand(String brand) {
+    return 'Brand referenced: $brand';
+  }
+
+  @override
+  String get screenshotIndicators => 'INDICATORS';
+
+  @override
+  String get screenshotExtractedText => 'EXTRACTED TEXT';
+
+  @override
+  String get scamFakeBank => 'Fake bank page';
+
+  @override
+  String get scamFakeUpi => 'Fake UPI / payment page';
+
+  @override
+  String get scamFakeOtp => 'Fake OTP request';
+
+  @override
+  String get scamFakeLogin => 'Fake login page';
+
+  @override
+  String get scamFakeKyc => 'Fake KYC form';
+
+  @override
+  String get scamFakeLottery => 'Lottery / prize scam';
+
+  @override
+  String get scamFakeInvestment => 'Investment scam';
+
+  @override
+  String get scamFakeSupport => 'Fake customer support';
+
+  @override
+  String get scamNone => 'No scam indicators';
+
+  @override
+  String scamReasonCategory(String category, String matched) {
+    return '$category: \"$matched\"';
+  }
+
+  @override
+  String scamReasonBrand(String brand) {
+    return 'Brand referenced: $brand';
+  }
+
+  @override
+  String scamReasonUrgency(String word) {
+    return 'Urgency / pressure wording: \"$word\"';
+  }
+
+  @override
+  String get scamReasonNoIndicators =>
+      'No scam indicators detected in the text';
+
+  @override
+  String get scamReasonNoText => 'No readable text found in the image';
 }

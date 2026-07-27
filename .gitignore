@@ -1,0 +1,59 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# Android
+android/.gradle/
+android/local.properties
+android/key.properties
+android/app/debug.keystore
+
+# IDEs
+.idea/
+.vscode/
+.claude/
+*.iml
+
+# Misc
+coverage/
+*.log
+*.bak
+
+# Leftover scratch from a previous history-cleanup run — not project source.
+.git-temp-backup/
+
+# Python virtualenv for ML training. Machine-specific and reinstallable from
+# ml_training/requirements.txt — it must never be committed. The scripts,
+# notebooks and data under ml_training/ ARE tracked; only the venv is not.
+ml_training/.venv-ml/
+
+# Trained DistilBERT weights and optimiser checkpoints. Individually 516 MB to
+# 1 GB, which is far past GitHub's 100 MB per-file hard limit, and the app does
+# not use them — it ships a 1.5 KB logistic regression at
+# assets/models/phishing_weights.json. Regenerate with ml_training/scripts/
+# 03_train_distilbert.py. The metrics JSON and training plots beside them ARE
+# tracked, so the training evidence is preserved.
+ml_training/models/saved/**/*.safetensors
+ml_training/models/saved/**/*.onnx
+ml_training/models/saved/**/*.pt
+ml_training/models/saved/**/*.pth
+ml_training/models/saved/**/*.bin
+ml_training/models/saved/**/*.h5
+ml_training/models/saved/distilbert_checkpoints/
+
+# Node — E2E automation dependencies
+automation/node_modules/
+
+# E2E run output (reports, screenshots, logs) — regenerated every run and
+# published as CI artifacts.
+automation/reports/
+automation/screenshots/
+automation/logs/
+
+# Secrets — real API keys live here (copy api_keys.example.dart → api_keys.dart)
+lib/core/config/api_keys.dart

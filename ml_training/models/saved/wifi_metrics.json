@@ -1,0 +1,38 @@
+{
+  "contamination": 0.05,
+  "n_estimators": 200,
+  "training_samples": 300,
+  "anomalies_tested": 3,
+  "anomalies_detected": 2,
+  "detection_rate": 0.6666666666666666,
+  "feature_means": [
+    -51.26,
+    2.46,
+    0.2633333333333333,
+    43.35666666666667,
+    100.0,
+    0.21666666666666667,
+    2.285433333333333,
+    3.7866666666666666
+  ],
+  "feature_scales": [
+    14.91103841677925,
+    0.4983974317750845,
+    0.44044169749115364,
+    22.41910172647919,
+    1.0,
+    0.41197356981027583,
+    1.0080086700464876,
+    1.2971078940816332
+  ],
+  "feature_names": [
+    "rssi",
+    "encryption_code",
+    "is_public",
+    "dns_response_ms",
+    "beacon_interval",
+    "bssid_changes",
+    "rssi_variance",
+    "frequency_ghz"
+  ]
+}

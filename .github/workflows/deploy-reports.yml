@@ -1,0 +1,193 @@
+name: Publish reports to GitHub Pages
+
+# Runs after the E2E workflow and publishes its reports.
+#
+# Kept separate from android-e2e.yml on purpose: publishing needs
+# `pages: write` and `id-token: write`, and granting those to the job that
+# executes test code would let any change to a test file write to the
+# published site.
+
+on:
+  workflow_run:
+    workflows: ['Android E2E (Appium)']
+    types: [completed]
+    branches: [main, master, testing]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    # `always()`-style behaviour on purpose: a failed test run still has a
+    # report worth reading, and hiding it is how failures get ignored.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success' ||
+      github.event.workflow_run.conclusion == 'failure'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download the Pages bundle from the E2E run
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-bundle
+          path: incoming/
+          run-id: ${{ github.event.workflow_run.id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Restore existing site so history survives
+        # Pages deployments replace the whole site. Without pulling the current
+        # gh-pages content forward, every publish would wipe the archive.
+        run: |
+          mkdir -p site
+          if git ls-remote --exit-code --heads origin gh-pages > /dev/null 2>&1; then
+            git fetch origin gh-pages --depth=1
+            git --work-tree=site checkout origin/gh-pages -- . 2>/dev/null || true
+            echo "Restored the existing published site."
+          else
+            echo "No gh-pages branch yet — starting a fresh site."
+          fi
+
+      - name: Merge the new run into the site
+        run: |
+          BUILD="${{ github.event.workflow_run.run_number || github.run_number }}"
+          BUILD_DIR="site/reports/history/build-$(printf '%03d' "$BUILD")"
+
+          mkdir -p site/reports/latest "$BUILD_DIR"
+
+          if [ -d incoming/reports/latest ]; then
+            # Archive the previous "latest" before overwriting it.
+            cp -r incoming/reports/latest/. "$BUILD_DIR"/
+            rm -rf site/reports/latest
+            mkdir -p site/reports/latest
+            cp -r incoming/reports/latest/. site/reports/latest/
+            echo "Published build $BUILD."
+          else
+            echo "::warning::No report bundle was found — publishing the existing site unchanged."
+          fi
+
+          # Keep the archive bounded; 50 builds is plenty for a trend view.
+          if [ -d site/reports/history ]; then
+            ls -1d site/reports/history/build-* 2>/dev/null \
+              | sort -r | tail -n +51 | xargs -r rm -rf
+          fi
+
+      - name: Build the landing page
+        run: |
+          BUILD="${{ github.event.workflow_run.run_number || github.run_number }}"
+          CONCLUSION="${{ github.event.workflow_run.conclusion || 'manual' }}"
+          COMMIT="${{ github.event.workflow_run.head_sha || github.sha }}"
+          REPO="${{ github.repository }}"
+
+          HISTORY_LINKS=""
+          if [ -d site/reports/history ]; then
+            for d in $(ls -1d site/reports/history/build-* 2>/dev/null | sort -r | head -20); do
+              name=$(basename "$d")
+              HISTORY_LINKS="$HISTORY_LINKS<li><a href=\"reports/history/$name/execution-report.html\">$name</a></li>"
+            done
+          fi
+
+          cat > site/index.html <<HTML
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>CyberGuard AI — QA Reports</title>
+          <style>
+            :root{--bg:#f6f7f9;--surface:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--accent:#1a73e8}
+            @media (prefers-color-scheme:dark){
+              :root{--bg:#0b1120;--surface:#131c31;--text:#e2e8f0;--muted:#94a3b8;--border:#1e293b}
+            }
+            *{box-sizing:border-box}
+            body{margin:0;background:var(--bg);color:var(--text);
+              font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+            .wrap{max-width:820px;margin:0 auto;padding:48px 20px 80px}
+            h1{font-size:30px;font-weight:800;letter-spacing:-.5px;margin:0 0 8px}
+            .sub{color:var(--muted);margin-bottom:28px}
+            .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+              padding:22px 24px;margin-bottom:16px}
+            .card h2{font-size:18px;margin:0 0 10px}
+            a{color:var(--accent);text-decoration:none;font-weight:600}
+            a:hover{text-decoration:underline}
+            ul{margin:8px 0 0;padding-left:20px}
+            li{margin:4px 0}
+            .chip{display:inline-block;background:var(--bg);border:1px solid var(--border);
+              border-radius:99px;padding:4px 12px;font-size:13px;color:var(--muted);margin-right:6px}
+            code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+          </style>
+          </head>
+          <body><div class="wrap">
+            <h1>CyberGuard AI — QA Reports</h1>
+            <div class="sub">Automated Appium end-to-end results for <code>$REPO</code></div>
+
+            <div>
+              <span class="chip">Build <b>$BUILD</b></span>
+              <span class="chip">Result <b>$CONCLUSION</b></span>
+              <span class="chip">Commit <b>$(echo "$COMMIT" | cut -c1-8)</b></span>
+            </div>
+
+            <div class="card" style="margin-top:22px">
+              <h2>Latest run</h2>
+              <ul>
+                <li><a href="reports/latest/execution-report.html">Execution report</a> — every test case, failures with screenshots</li>
+                <li><a href="reports/latest/dashboard.html">Dashboard</a> — summary and historical trend</li>
+                <li><a href="reports/latest/summary.md">Markdown summary</a></li>
+                <li><a href="reports/latest/execution-results.json">Raw JSON results</a></li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h2>Excel reports</h2>
+              <ul>
+                <li><a href="reports/latest/excel/Automation_Test_Report.xlsx">Automation_Test_Report.xlsx</a> — 8 sheets</li>
+                <li><a href="reports/latest/excel/Passed_Test_Cases.xlsx">Passed_Test_Cases.xlsx</a></li>
+                <li><a href="reports/latest/excel/Failed_Test_Cases.xlsx">Failed_Test_Cases.xlsx</a></li>
+                <li><a href="reports/latest/excel/Execution_Summary.xlsx">Execution_Summary.xlsx</a></li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h2>Execution history</h2>
+              <ul>$HISTORY_LINKS</ul>
+            </div>
+          </div></body>
+          </html>
+          HTML
+
+          # Stop Jekyll from swallowing files that begin with an underscore.
+          touch site/.nojekyll
+          ls -R site | head -40
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Report the published URL
+        run: |
+          echo "## Reports published" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [Execution report](${{ steps.deployment.outputs.page_url }}reports/latest/execution-report.html)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [Dashboard](${{ steps.deployment.outputs.page_url }}reports/latest/dashboard.html)" >> "$GITHUB_STEP_SUMMARY"
