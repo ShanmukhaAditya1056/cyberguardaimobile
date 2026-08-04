@@ -41,22 +41,29 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download the Pages bundle from the E2E run
+        if: github.event_name == 'workflow_run'
         uses: actions/download-artifact@v4
         with:
           name: pages-bundle
           path: incoming/
-          run-id: ${{ github.event.workflow_run.id || github.run_id }}
+          run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
       - name: Download the load-test report from the same run
+        if: github.event_name == 'workflow_run'
         uses: actions/download-artifact@v4
         with:
           name: load-test-report
           path: incoming-load/
-          run-id: ${{ github.event.workflow_run.id || github.run_id }}
+          run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
+
+      - name: (No-op) Skip artifact download when manually dispatched
+        if: github.event_name != 'workflow_run'
+        run: |
+          echo "This run was started manually (workflow_dispatch) — there is no triggering E2E run to download artifacts from."
 
       - name: Restore existing site so history survives
         # Pages deployments replace the whole site. Without pulling the current
@@ -64,7 +71,7 @@ jobs:
         run: |
           mkdir -p site
           if git ls-remote --exit-code --heads origin gh-pages > /dev/null 2>&1; then
-            git fetch origin gh-pages --depth=1
+            git fetch origin/gh-pages --depth=1
             git --work-tree=site checkout origin/gh-pages -- . 2>/dev/null || true
             echo "Restored the existing published site."
           else
