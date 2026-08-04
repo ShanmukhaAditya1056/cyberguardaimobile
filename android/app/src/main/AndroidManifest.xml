@@ -77,6 +77,15 @@
             android:name="flutterEmbedding"
             android:value="2"/>
 
+        <!-- flutter_local_notifications does NOT declare this in its own
+             manifest, and action buttons whose showsUserInterface is false
+             (our "Dismiss") are delivered here via PendingIntent.getBroadcast.
+             Without this declaration the broadcast targets a component that
+             doesn't exist, so tapping the button does nothing at all. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
+            android:exported="false"/>
+
         <!-- Background SMS phishing guard. Runs as a foreground service so
              incoming SMS keep getting scanned even after the user kills the
              app. Scanning is done entirely in native Kotlin — no Dart runtime
