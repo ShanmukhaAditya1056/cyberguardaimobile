@@ -49,6 +49,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
+      - name: Download the load-test report from the same run
+        uses: actions/download-artifact@v4
+        with:
+          name: load-test-report
+          path: incoming-load/
+          run-id: ${{ github.event.workflow_run.id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
       - name: Restore existing site so history survives
         # Pages deployments replace the whole site. Without pulling the current
         # gh-pages content forward, every publish would wipe the archive.
@@ -78,6 +87,17 @@ jobs:
             echo "Published build $BUILD."
           else
             echo "::warning::No report bundle was found — publishing the existing site unchanged."
+          fi
+
+          # The load test runs in a job of its own, so its output arrives as a
+          # second artifact. Merge it after `latest` has been rebuilt above,
+          # otherwise the rm -rf would discard it.
+          if [ -d incoming-load/site/reports/latest ]; then
+            cp -r incoming-load/site/reports/latest/. site/reports/latest/
+            cp -r incoming-load/site/reports/latest/. "$BUILD_DIR"/ 2>/dev/null || true
+            echo "Merged the load-test report."
+          else
+            echo "No load-test report in this run."
           fi
 
           # Keep the archive bounded; 50 builds is plenty for a trend view.
@@ -148,6 +168,14 @@ jobs:
                 <li><a href="reports/latest/dashboard.html">Dashboard</a> — summary and historical trend</li>
                 <li><a href="reports/latest/summary.md">Markdown summary</a></li>
                 <li><a href="reports/latest/execution-results.json">Raw JSON results</a></li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h2>Load test</h2>
+              <ul>
+                <li><a href="reports/latest/load-test-results.json">k6 results (JSON)</a> — throughput, error rate, p95/p99</li>
+                <li><a href="reports/latest/load-test-output.txt">k6 console output</a></li>
               </ul>
             </div>
 

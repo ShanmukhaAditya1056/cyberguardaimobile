@@ -18,6 +18,10 @@ on:
         description: 'Android API level'
         required: false
         default: '34'
+      load_scenario:
+        description: 'k6 profile: baseline | stress | spike | endurance'
+        required: false
+        default: 'baseline'
   schedule:
     # 02:30 UTC nightly — catches drift from dependency updates.
     - cron: '30 2 * * *'
@@ -90,6 +94,166 @@ jobs:
           name: app-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 30
+
+  # ── Release APK ─────────────────────────────────────────────────────────
+  # The E2E suite deliberately runs against the debug APK (it needs a
+  # debuggable build). This job proves the release variant also compiles and
+  # publishes a shippable artifact. `release` signs with signingConfigs.debug
+  # (android/app/build.gradle:33), so no keystore secret is required.
+  build-release:
+    name: Build release APK
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore API key placeholder
+        run: |
+          if [ ! -f lib/core/config/api_keys.dart ]; then
+            cp lib/core/config/api_keys.example.dart lib/core/config/api_keys.dart
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build release APK
+        run: flutter build apk --release
+        env:
+          GRADLE_OPTS: '-Xmx4g -Dorg.gradle.daemon=false'
+
+      - name: Report APK size
+        run: |
+          APK=build/app/outputs/flutter-apk/app-release.apk
+          SIZE=$(du -h "$APK" | cut -f1)
+          echo "## Release APK" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Size: **$SIZE**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: \`$(echo "${{ github.sha }}" | cut -c1-8)\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+  # ── Load test ───────────────────────────────────────────────────────────
+  # Runs the existing k6 profile in automation/performance. The target is the
+  # bundled mock of the threat-intel contract, never Google Safe Browsing or
+  # HIBP — the script's setup() refuses any non-local BASE_URL. Independent of
+  # the emulator, so it runs in parallel with the E2E job.
+  load-test:
+    name: k6 load test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SCENARIO: ${{ github.event.inputs.load_scenario || 'baseline' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Start the mock threat-intel server
+        working-directory: automation
+        run: |
+          node performance/mock-threat-intel-server.js > ../mock-server.log 2>&1 &
+          echo "MOCK_PID=$!" >> "$GITHUB_ENV"
+
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8787/health > /dev/null; then
+              echo "Mock server is up after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:8787/health || {
+            echo "::error::Mock server never became healthy."
+            cat ../mock-server.log
+            exit 1
+          }
+
+      - name: Run k6
+        id: k6
+        working-directory: automation
+        run: |
+          # handleSummary writes to reports/JSON/ relative to cwd.
+          mkdir -p reports/JSON
+          set +e
+          k6 run -e SCENARIO="$SCENARIO" -e BASE_URL=http://127.0.0.1:8787 \
+            performance/k6-load-test.js | tee ../k6-output.txt
+          echo "K6_EXIT=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+          exit 0
+
+      - name: Stop the mock server
+        if: always()
+        run: kill "$MOCK_PID" 2>/dev/null || true
+
+      - name: Publish job summary
+        if: always()
+        run: |
+          {
+            echo "## k6 load test — \`$SCENARIO\`"
+            echo ""
+            if [ -f k6-output.txt ]; then
+              echo '```'
+              # The script's own text summary, not k6's raw metric dump.
+              sed -n '/═══/,$p' k6-output.txt | head -40
+              echo '```'
+            else
+              echo "k6 produced no output — see the \`load-test-report\` artifact."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Bundle for Pages
+        if: always()
+        run: |
+          mkdir -p site/reports/latest
+          cp automation/reports/JSON/load-test-results.json site/reports/latest/ 2>/dev/null || true
+          cp k6-output.txt site/reports/latest/load-test-output.txt 2>/dev/null || true
+
+      - name: Upload load-test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-report
+          path: |
+            site/
+            mock-server.log
+          retention-days: 30
+          if-no-files-found: warn
+
+      # k6 exits non-zero when a threshold is breached. Gate last so the
+      # report is always uploaded first.
+      - name: Apply threshold gate
+        if: always()
+        run: |
+          if [ "${K6_EXIT:-1}" != "0" ]; then
+            echo "::error::k6 thresholds were breached (exit ${K6_EXIT:-1})."
+            exit 1
+          fi
+          echo "All k6 thresholds passed."
 
   # ── Stage 6-18: emulator, Appium, tests, reports ───────────────────────
   e2e:
