@@ -46,7 +46,6 @@
   "enterPassword": "சோதிக்க கடவுச்சொல்லை உள்ளிடவும்",
   "noBreachFound": "ப்ரீச் எதுவும் இல்லை",
   "breachesFound": "{count, plural, =1{1 ப்ரீச் கண்டறியப்பட்டது} other{{count} ப்ரீச்கள் கண்டறியப்பட்டன}}",
-
   "onboardAiSecurityTitle": "AI-இயக்கப்படும் பாதுகாப்பு 🛡️",
   "onboardAiSecurityDesc": "ஆன்-டிவைஸ் இயந்திர கற்றல் நிகழ்நேரத்தில் ஃபிஷிங், மால்வேர் மற்றும் ப்ரீச்களைக் கண்டறியும் — உங்கள் தரவு போனை விட்டு வெளியேறாது.",
   "onboardPhishingTitle": "ஃபிஷிங் கண்டறிதல் 🔗",
@@ -60,7 +59,6 @@
   "onboardContinue": "தொடரவும்",
   "onboardGrantStart": "அனுமதிகளை அளித்து தொடங்கு",
   "onboardSkip": "தவிர்க்கவும்",
-
   "scoreGreetingProtected": "நீங்கள் பாதுகாப்பாக இருக்கிறீர்கள்",
   "scoreGreetingAtRisk": "சில விஷயங்களைச் சரிபார்க்கவும் ⚠️",
   "scoreGreetingCritical": "உடனடியாக நடவடிக்கை எடுக்கவும் 🚨",
@@ -69,7 +67,6 @@
   "scoreHeadlineAtRisk": "ஒரு விரைவான பார்வை எடுக்கவும்",
   "scoreHeadlineCritical": "முக்கியமான பிரச்சினைகள் கண்டறியப்பட்டன",
   "scoreHeadlineFirstScan": "உங்கள் போனைப் பாதுகாக்கவும்",
-
   "permSmsTitle": "SMS அணுகல் தேவை",
   "permSmsRationale": "ஃபிஷிங் இணைப்புகளைக் கண்டறிய சைபர்கார்டு AI உங்கள் SMS செய்திகளைப் படிக்க வேண்டும். உங்கள் செய்திகள் எந்த சர்வருக்கும் அனுப்பப்படாது.",
   "permLocationTitle": "இட அணுகல் தேவை",
@@ -78,14 +75,12 @@
   "permNotifRationale": "அச்சுறுத்தல்களைக் கண்டறிந்தவுடன் நீங்கள் உடனடி நடவடிக்கை எடுக்க சைபர்கார்டு AI அறிவிப்புகளை அனுப்புகிறது.",
   "permAllowButton": "அனுமதி அளி",
   "permNotNow": "இப்போது வேண்டாம்",
-
   "dialogCancel": "ரத்துசெய்",
   "dialogConfirm": "உறுதிசெய்",
   "dialogClearAll": "அனைத்தையும் அழி",
   "dialogReset": "மீட்டமை",
   "dialogDelete": "நீக்கு",
   "dialogClose": "மூடு",
-
   "breachInputTitle": "உங்கள் தரவு கசிந்துள்ளதா எனப் பாருங்கள்",
   "breachInputSubtitle": "12+ பில்லியன் கசிந்த பதிவுகளில் தேடுகிறோம்",
   "breachTabEmail": "மின்னஞ்சல்",
@@ -120,7 +115,6 @@
   "breachPrivacyStep2": "ஹாஷின் முதல் 5 எழுத்துகள் மட்டுமே HIBP-க்கு அனுப்பப்படுகின்றன.",
   "breachPrivacyStep3": "ஆயிரக்கணக்கான பொருந்தும் ஹாஷ்கள் திரும்ப வருகின்றன.",
   "breachPrivacyStep4": "100% பொருத்த சோதனை உங்கள் சாதனத்திலேயே நடக்கிறது.",
-
   "qrScanTitle": "QR ஸ்கேன்",
   "qrUploadFromGallery": "கேலரியில் இருந்து பதிவேற்று",
   "qrPointAtCode": "எந்த QR-ஐயும் காண்பிக்கவும் · ஸ்கேன் URL-கள் சாதனத்திலேயே சரிபார்க்கப்படும்",
@@ -134,13 +128,11 @@
   "qrCameraUnavailable": "கேமரா கிடைக்கவில்லை. கேமரா அனுமதி வழங்கி மீண்டும் முயற்சிக்கவும்.",
   "qrOpenSettings": "அமைப்புகளைத் திற",
   "qrNoCodeInImage": "இந்தப் படத்தில் QR கோட் இல்லை.",
-
   "scoreSuffix": "/100",
   "scoreLabel": "மதிப்பெண்",
   "scannedAgo": "{time} ஸ்கேன் செய்யப்பட்டது",
   "dashboardRefreshed": "டாஷ்போர்டு புதுப்பிக்கப்பட்டது",
   "dashboardRefreshedWithWifi": "டாஷ்போர்டு புதுப்பிக்கப்பட்டது · வைஃபை நம்பிக்கை {score}/100",
-
   "moduleTitlePhishing": "ஃபிஷிங்",
   "moduleSubtitlePhishing": "URL & SMS ஸ்கேனர்",
   "moduleTitleMalware": "மால்வேர்",
@@ -149,12 +141,10 @@
   "moduleSubtitleBreach": "தரவு கசிவு கண்காணிப்பு",
   "moduleTitleWifi": "வைஃபை",
   "moduleSubtitleWifi": "வலையமைப்பு பகுப்பாய்வு",
-
   "statTotalScans": "மொத்த ஸ்கேன்கள்",
   "statThreats": "அச்சுறுத்தல்கள்",
   "statLastScan": "கடைசி ஸ்கேன்",
   "statNever": "ஒருபோதும் இல்லை",
-
   "settingRealTimeAlerts": "நிகழ்நேர எச்சரிக்கைகள்",
   "settingRealTimeAlertsSub": "அச்சுறுத்தல்கள் கண்டறியப்படும்போது அறிவிப்பு பெறுங்கள்",
   "settingClipboardScan": "கிளிப்போர்டு ஸ்கேன்",
@@ -187,7 +177,6 @@
   "settingsResetBody": "அனைத்து அமைப்புகளும் இயல்புநிலைக்கு மீட்டமைக்கப்படும். தொடரவா?",
   "exportGenerating": "PDF அறிக்கை உருவாக்கப்படுகிறது…",
   "exportFailed": "ஏற்றுமதி தோல்வி: {error}",
-
   "alertsMarkAllRead": "அனைத்தும் படித்ததாக குறி",
   "alertsNoFilter": "{filter} எச்சரிக்கைகள் இல்லை",
   "alertsTryDifferent": "வேறு வடிகட்டியை முயற்சிக்கவும்",
@@ -198,7 +187,6 @@
   "alertsFilterMalware": "மால்வேர்",
   "alertsFilterBreach": "மீறல்",
   "alertsFilterWifi": "வைஃபை",
-
   "malwareIssuesFound": "சிக்கல்கள் கண்டறியப்பட்டன ⚠️",
   "malwareAppSecurity": "ஆப் பாதுகாப்பு 🛡️",
   "malwareTapToScan": "உங்கள் ஆப்களை பகுப்பாய்வு செய்ய ஸ்கேனை அழுத்தவும்",
@@ -219,7 +207,6 @@
   "malwareNoMatchSub": "வேறு வடிகட்டி அல்லது தேடல் சொல்லை முயற்சிக்கவும்",
   "malwarePermsVerified": "{count} அனுமதிகள் • சரிபார்க்கப்பட்டது",
   "malwarePermsSideloaded": "{count} அனுமதிகள் • பக்கமாக நிறுவப்பட்டது",
-
   "phishingUrlTab": "🔗  URL ஸ்கேனர்",
   "phishingSmsTab": "💬  SMS ஸ்கேனர்",
   "phishingCheckLink": "இணைப்பை சரிபார் 🔍",
@@ -251,7 +238,6 @@
   "phishingSmsLinksSuspicious": "சந்தேகத்திற்குரிய இணைப்புகள் கண்டறியப்பட்டன!",
   "phishingSmsScanLinks": "{count} {count, plural, =1{இணைப்பை} other{இணைப்புகளை}} ஸ்கேன் செய்",
   "phishingSmsNoUrls": "இந்த செய்தியில் URL-கள் இல்லை",
-
   "wifiClearHistoryTooltip": "வரலாற்றை அழி",
   "wifiClearTitle": "வரலாற்றை அழி",
   "wifiClearBody": "அனைத்து வைஃபை ஸ்கேன் வரலாற்றையும் அகற்றவா?",
@@ -300,13 +286,11 @@
   "wifiDetailScanned": "ஸ்கேன் செய்யப்பட்டது",
   "wifiUnknown": "தெரியாதது",
   "wifiNA": "பொருந்தாது",
-
   "cyberDefense": "சைபர் பாதுகாப்பு",
   "defenseThreatFusion": "அச்சுறுத்தல் இணைப்பு",
   "defenseScreenshotScan": "ஸ்கிரீன்ஷாட் ஸ்கேன்",
   "defensePredictiveRisk": "முன்னறிவிப்பு ஆபத்து",
   "defenseArbitrationLog": "தீர்ப்பு பதிவு",
-
   "linkProtection": "இணைப்பு பாதுகாப்பு",
   "linkInterceptorTitle": "ஸ்மார்ட் இணைப்பு இடைமறிப்பான்",
   "linkInterceptorSub": "மற்ற செயலிகளில் திறக்கும் இணைப்புகளை ஏற்றுவதற்கு முன் ஸ்கேன் செய்யவும்",
@@ -322,7 +306,6 @@
   "cloudIntelDialogBody": "இயக்கப்பட்டால், இடைமறித்த இணைப்புகள் Google Safe Browsing உடன் சரிபார்க்கப்படும். நீங்கள் தட்டிய இணைப்பு இந்தச் சரிபார்ப்புக்காக Google-க்கு அனுப்பப்படும். வேறு எதுவும் உங்கள் சாதனத்தை விட்டு வெளியேறாது. இதை எப்போது வேண்டுமானாலும் அணைக்கலாம்.",
   "commonEnable": "இயக்கு",
   "commonCancel": "ரத்து",
-
   "threatBandSafe": "பாதுகாப்பானது (0-30)",
   "threatBandSuspicious": "சந்தேகத்திற்குரியது (31-60)",
   "threatBandDangerous": "ஆபத்தானது (61-80)",
@@ -332,7 +315,6 @@
   "threatLevelDangerous": "ஆபத்தானது",
   "threatLevelCritical": "முக்கியமானது",
   "confidencePct": "நம்பகத்தன்மை {pct}%",
-
   "warnDangerousTitle": "ஆபத்தான இணையதளம் கண்டறியப்பட்டது",
   "warnSuspiciousTitle": "சந்தேகத்திற்குரிய இணையதளம்",
   "warnRiskScore": "ஆபத்து மதிப்பெண்",
@@ -350,7 +332,6 @@
   "warnOpenDangerousBody": "CyberGuard இந்த இணைப்பை அதிக ஆபத்துடையதாக மதிப்பிட்டுள்ளது. இதைத் திறப்பது உங்கள் சான்றுகள் அல்லது சாதனத்தை வெளிப்படுத்தலாம். உங்கள் சொந்த ஆபத்தில் தொடரவா?",
   "warnOpenAnyway": "எப்படியும் திற",
   "warnPrivacyNote": "அமைப்புகளில் இணைப்பு வரலாற்றை இயக்காத வரை எந்த URL-உம் சேமிக்கப்படாது.",
-
   "fusionTitle": "அச்சுறுத்தல் இணைப்பு ஸ்கேன்",
   "fusionPrompt": "அனைத்து நுண்ணறிவு ஆதாரங்களிலும் ஒரு இணைப்பைச் சரிபார்க்கவும்",
   "fusionRunScan": "இணைப்பு ஸ்கேனை இயக்கு",
@@ -359,14 +340,12 @@
   "fusionExplanation": "விளக்கம்",
   "fusionConflict": "ஆதாரங்கள் வேறுபட்டன — தீர்ப்பால் சரிசெய்யப்பட்டது.",
   "fusionTrust": "நம்பிக்கை {weight}",
-
   "arbitrationTitle": "தீர்ப்பு பதிவு",
   "arbitrationClear": "பதிவை அழி",
   "arbitrationEmptyTitle": "இதுவரை முரண்பாடுகள் இல்லை",
   "arbitrationEmptyBody": "கண்டறிதல் ஆதாரங்கள் வேறுபடும்போது அல்லது நம்பகமான ஆதாரம் CyberGuard-ஐ மேலெழுதும்போது, முடிவு இங்கே பதிவாகும்.",
   "arbitrationOverride": "நம்பகமான மேலெழுதல் → {level}",
   "arbitrationConflictTitle": "ஆதார முரண்பாடு → {level}",
-
   "riskTitle": "முன்னறிவிப்பு ஆபத்து",
   "riskNoData": "தரவு இல்லை",
   "riskBandLow": "குறைவு",
@@ -380,7 +359,6 @@
   "forecastPhishing": "ஃபிஷிங் தாக்குதல்",
   "forecastCredentialTheft": "சான்று திருட்டு",
   "forecastMalware": "தீம்பொருள் தொற்று",
-
   "rfPhishingTitle": "ஃபிஷிங் இணைப்புகள் கண்டறியப்பட்டன",
   "rfPhishingDetail": "கடந்த 7 நாட்களில் {count} குறிக்கப்பட்டது",
   "rfSmsTitle": "சந்தேகத்திற்குரிய SMS பெறப்பட்டது",
@@ -395,14 +373,12 @@
   "rfBreachDetail": "உங்கள் கணக்கு மீறப்பட்ட தரவில் தோன்றுகிறது",
   "rfTrendTitle": "பாதுகாப்பு மதிப்பெண் குறைகிறது",
   "rfTrendDetail": "பாதுகாப்பு சமீபத்தில் {pts} புள்ளிகள் குறைந்தது",
-
   "recBreach": "மீறப்பட்ட கணக்குகளின் கடவுச்சொற்களை மாற்றி 2FA-ஐ இயக்கவும்.",
   "recPhishing": "எதிர்பாராத செய்திகளில் இணைப்புகளைத் தட்டுவதைத் தவிர்க்கவும்; அனுப்புநரைச் சரிபார்க்கவும்.",
   "recWifi": "பொது Wi-Fi-யில் முக்கியமான உள்நுழைவைத் தவிர்க்கவும்; நம்பகமான நெட்வொர்க்கைப் பயன்படுத்தவும்.",
   "recMalware": "அதிக ஆபத்துள்ள செயலிகளை மதிப்பாய்வு செய்து அகற்றவும்; Play Store-இல் இருந்து மட்டுமே நிறுவவும்.",
   "recInterceptor": "தொடர்ந்த பாதுகாப்புக்காக ஸ்மார்ட் இணைப்பு இடைமறிப்பானை இயக்கி வைக்கவும்.",
   "recHealthy": "நீங்கள் நல்ல நிலையில் உள்ளீர்கள் — CyberGuard பாதுகாப்புகளை இயக்கி வைக்கவும்.",
-
   "screenshotTitle": "ஸ்கிரீன்ஷாட் ஸ்கேனர்",
   "screenshotPrompt": "சந்தேகத்திற்குரிய பக்கத்தின் ஸ்கிரீன்ஷாட்டை ஸ்கேன் செய்யவும்",
   "screenshotDesc": "போலி வங்கி, UPI, OTP, உள்நுழைவு, KYC, லாட்டரி மற்றும் ஆதரவு மோசடிகளைக் கண்டறிகிறது. படங்கள் சாதனத்திலேயே பகுப்பாய்வு செய்யப்படுகின்றன.",
@@ -413,7 +389,6 @@
   "screenshotBrand": "குறிப்பிடப்பட்ட பிராண்ட்: {brand}",
   "screenshotIndicators": "குறிகாட்டிகள்",
   "screenshotExtractedText": "பிரித்தெடுக்கப்பட்ட உரை",
-
   "scamFakeBank": "போலி வங்கி பக்கம்",
   "scamFakeUpi": "போலி UPI / கட்டண பக்கம்",
   "scamFakeOtp": "போலி OTP கோரிக்கை",
@@ -427,5 +402,35 @@
   "scamReasonBrand": "குறிப்பிடப்பட்ட பிராண்ட்: {brand}",
   "scamReasonUrgency": "அவசர / அழுத்த வார்த்தைகள்: \"{word}\"",
   "scamReasonNoIndicators": "உரையில் மோசடி குறிகாட்டிகள் எதுவும் கண்டறியப்படவில்லை",
-  "scamReasonNoText": "படத்தில் படிக்கக்கூடிய உரை எதுவும் கிடைக்கவில்லை"
+  "scamReasonNoText": "படத்தில் படிக்கக்கூடிய உரை எதுவும் கிடைக்கவில்லை",
+  "authTitle": "CyberGuard AI இல் உள்நுழையவும்",
+  "authSubtitle": "உங்கள் பாதுகாப்பு அமைப்புகளை எல்லா சாதனங்களிலும் ஒத்திசைக்கவும்",
+  "authSignIn": "உள்நுழை",
+  "authSignUp": "கணக்கை உருவாக்கு",
+  "authPassword": "கடவுச்சொல்",
+  "authContinueGoogle": "Google மூலம் தொடரவும்",
+  "authForgotPassword": "கடவுச்சொல் மறந்துவிட்டதா?",
+  "authNoAccount": "புதியவரா? கணக்கை உருவாக்குங்கள்",
+  "authHaveAccount": "ஏற்கனவே கணக்கு உள்ளதா? உள்நுழையவும்",
+  "authOr": "அல்லது",
+  "authContinueOffline": "கணக்கு இல்லாமல் தொடரவும்",
+  "authResetSent": "அந்த முகவரி பதிவு செய்யப்பட்டிருந்தால், மீட்டமைப்பு இணைப்பு அனுப்பப்படும்.",
+  "authUnavailableTitle": "இந்த பதிப்பில் உள்நுழைவு அமைக்கப்படவில்லை",
+  "authUnavailableBody": "இந்த ஆப் Firebase சான்றுகள் இல்லாமல் உருவாக்கப்பட்டது, எனவே கணக்குகள் கிடைக்கவில்லை. மற்ற அனைத்தும் வழக்கம் போல் ஆஃப்லைனில் இயங்கும்.",
+  "authErrInvalidEmail": "அந்த மின்னஞ்சல் முகவரி சரியாகத் தெரியவில்லை",
+  "authErrWrongPassword": "மின்னஞ்சல் அல்லது கடவுச்சொல் தவறு",
+  "authErrUserNotFound": "அந்த மின்னஞ்சலுக்கு கணக்கு எதுவும் இல்லை",
+  "authErrEmailInUse": "அந்த மின்னஞ்சலுக்கு ஏற்கனவே கணக்கு உள்ளது",
+  "authErrWeakPassword": "குறைந்தது 6 எழுத்துகளைப் பயன்படுத்தவும்",
+  "authErrNetwork": "இணைப்பு இல்லை. உங்கள் நெட்வொர்க்கைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
+  "authErrUnknown": "ஏதோ தவறு நடந்தது. மீண்டும் முயற்சிக்கவும்.",
+  "authSignOut": "வெளியேறு",
+  "authSignedInAs": "{email} ஆக உள்நுழைந்துள்ளீர்கள்",
+  "@authSignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  }
 }

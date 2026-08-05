@@ -7,6 +7,9 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.9.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // Only ever applied by app/build.gradle when google-services.json is
+        // present. Declaring the classpath here is inert on its own.
+        classpath 'com.google.gms:google-services:4.4.2'
     }
 }
 

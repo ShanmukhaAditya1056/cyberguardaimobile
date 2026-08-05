@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/repositories/malware_repository.dart';
 import '../../data/services/hive_service.dart';
 import '../../features/alerts/view/alerts_screen.dart';
+import '../../features/auth/view/login_screen.dart';
 import '../../features/breach/view/breach_screen.dart';
 import '../../features/dashboard/view/dashboard_screen.dart';
 import '../../features/fusion/view/arbitration_log_screen.dart';
@@ -33,6 +34,14 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/onboarding',
       builder: (_, __) => const OnboardingScreen(),
+    ),
+
+    // Sign in. Not a gate: every scanner works on-device without an account,
+    // so nothing redirects here. Onboarding offers it, Settings links to it,
+    // and the screen itself always offers a way straight to the dashboard.
+    GoRoute(
+      path: '/login',
+      builder: (_, __) => const LoginScreen(),
     ),
 
     // Dashboard — main shell

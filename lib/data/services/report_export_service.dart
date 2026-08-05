@@ -66,9 +66,11 @@ class ReportExportService {
         .replaceAll(':', '-');
     final file = File('${dir.path}/cyberguard_report_$stamp.pdf');
     await file.writeAsBytes(bytes);
-    await Share.shareXFiles(
-      [XFile(file.path, mimeType: 'application/pdf')],
-      subject: 'CyberGuard AI Security Report',
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path, mimeType: 'application/pdf')],
+        subject: 'CyberGuard AI Security Report',
+      ),
     );
     return file;
   }
@@ -108,9 +110,11 @@ class ReportExportService {
         .replaceAll(':', '-');
     final file = File('${dir.path}/cyberguard_report_$stamp.csv');
     await file.writeAsString(csv);
-    await Share.shareXFiles(
-      [XFile(file.path, mimeType: 'text/csv')],
-      subject: 'CyberGuard AI Security Data',
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path, mimeType: 'text/csv')],
+        subject: 'CyberGuard AI Security Data',
+      ),
     );
     return file;
   }

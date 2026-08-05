@@ -46,7 +46,6 @@
   "enterPassword": "जाँचने के लिए पासवर्ड दर्ज करें",
   "noBreachFound": "कोई ब्रीच नहीं मिला",
   "breachesFound": "{count, plural, =1{1 ब्रीच मिला} other{{count} ब्रीच मिले}}",
-
   "onboardAiSecurityTitle": "AI-संचालित सुरक्षा 🛡️",
   "onboardAiSecurityDesc": "ऑन-डिवाइस मशीन लर्निंग वास्तविक समय में फ़िशिंग, मैलवेयर और ब्रीच का पता लगाती है — आपका डेटा कभी फ़ोन से बाहर नहीं जाता।",
   "onboardPhishingTitle": "फ़िशिंग का पता 🔗",
@@ -60,7 +59,6 @@
   "onboardContinue": "जारी रखें",
   "onboardGrantStart": "अनुमतियाँ दें और शुरू करें",
   "onboardSkip": "छोड़ें",
-
   "scoreGreetingProtected": "आप सुरक्षित हैं",
   "scoreGreetingAtRisk": "कुछ चीज़ें जाँचनी हैं ⚠️",
   "scoreGreetingCritical": "तुरंत कार्रवाई करें 🚨",
@@ -69,7 +67,6 @@
   "scoreHeadlineAtRisk": "एक नज़र डालें",
   "scoreHeadlineCritical": "गंभीर समस्याएँ मिलीं",
   "scoreHeadlineFirstScan": "अपना फ़ोन सुरक्षित करें",
-
   "permSmsTitle": "SMS एक्सेस चाहिए",
   "permSmsRationale": "साइबरगार्ड AI को फ़िशिंग लिंक का पता लगाने के लिए आपके SMS पढ़ने की ज़रूरत है। आपके मैसेज कभी किसी सर्वर पर नहीं भेजे जाते — सारा विश्लेषण आपके डिवाइस पर ही होता है।",
   "permLocationTitle": "स्थान एक्सेस चाहिए",
@@ -78,14 +75,12 @@
   "permNotifRationale": "जब साइबरगार्ड AI ख़तरों का पता लगाता है तो वह सूचनाएँ भेजता है ताकि आप तुरंत कार्रवाई कर सकें।",
   "permAllowButton": "अनुमति दें",
   "permNotNow": "अभी नहीं",
-
   "dialogCancel": "रद्द करें",
   "dialogConfirm": "पुष्टि करें",
   "dialogClearAll": "सब हटाएँ",
   "dialogReset": "रीसेट",
   "dialogDelete": "मिटाएँ",
   "dialogClose": "बंद करें",
-
   "breachInputTitle": "जांचें कि आपका डेटा लीक हुआ है या नहीं",
   "breachInputSubtitle": "हम 12+ अरब लीक रिकॉर्ड में जाँच करते हैं",
   "breachTabEmail": "ईमेल",
@@ -120,7 +115,6 @@
   "breachPrivacyStep2": "हैश के केवल पहले 5 अक्षर HIBP को भेजे जाते हैं।",
   "breachPrivacyStep3": "हज़ारों मिलते-जुलते हैश वापस आते हैं।",
   "breachPrivacyStep4": "100% मिलान-जाँच आपके डिवाइस पर ही होती है।",
-
   "qrScanTitle": "QR स्कैन करें",
   "qrUploadFromGallery": "गैलरी से अपलोड करें",
   "qrPointAtCode": "किसी भी QR पर तानें · स्कैन URL डिवाइस पर ही जाँचे जाते हैं",
@@ -134,13 +128,11 @@
   "qrCameraUnavailable": "कैमरा उपलब्ध नहीं। कैमरा अनुमति दें और फिर कोशिश करें।",
   "qrOpenSettings": "सेटिंग्स खोलें",
   "qrNoCodeInImage": "इस छवि में कोई QR कोड नहीं मिला।",
-
   "scoreSuffix": "/100",
   "scoreLabel": "स्कोर",
   "scannedAgo": "{time} स्कैन हुआ",
   "dashboardRefreshed": "डैशबोर्ड ताज़ा हुआ",
   "dashboardRefreshedWithWifi": "डैशबोर्ड ताज़ा हुआ · वाई-फ़ाई ट्रस्ट {score}/100",
-
   "moduleTitlePhishing": "फ़िशिंग",
   "moduleSubtitlePhishing": "URL और SMS स्कैनर",
   "moduleTitleMalware": "मैलवेयर",
@@ -149,12 +141,10 @@
   "moduleSubtitleBreach": "डेटा लीक मॉनिटर",
   "moduleTitleWifi": "वाई-फ़ाई",
   "moduleSubtitleWifi": "नेटवर्क विश्लेषक",
-
   "statTotalScans": "कुल स्कैन",
   "statThreats": "ख़तरे",
   "statLastScan": "अंतिम स्कैन",
   "statNever": "कभी नहीं",
-
   "settingRealTimeAlerts": "रीयल-टाइम अलर्ट",
   "settingRealTimeAlertsSub": "ख़तरे पाए जाने पर सूचना पाएँ",
   "settingClipboardScan": "क्लिपबोर्ड स्कैन",
@@ -187,7 +177,6 @@
   "settingsResetBody": "सभी सेटिंग्स डिफ़ॉल्ट पर वापस आ जाएँगी। जारी रखें?",
   "exportGenerating": "PDF रिपोर्ट बना रहे हैं…",
   "exportFailed": "निर्यात विफल: {error}",
-
   "alertsMarkAllRead": "सभी पढ़े हुए के रूप में चिह्नित करें",
   "alertsNoFilter": "कोई {filter} अलर्ट नहीं",
   "alertsTryDifferent": "अलग फ़िल्टर आज़माएँ",
@@ -198,7 +187,6 @@
   "alertsFilterMalware": "मैलवेयर",
   "alertsFilterBreach": "ब्रीच",
   "alertsFilterWifi": "वाई-फ़ाई",
-
   "malwareIssuesFound": "समस्याएँ मिलीं ⚠️",
   "malwareAppSecurity": "ऐप सुरक्षा 🛡️",
   "malwareTapToScan": "अपने ऐप्स का विश्लेषण करने के लिए स्कैन दबाएँ",
@@ -219,7 +207,6 @@
   "malwareNoMatchSub": "अलग फ़िल्टर या खोज शब्द आज़माएँ",
   "malwarePermsVerified": "{count} अनुमतियाँ • सत्यापित",
   "malwarePermsSideloaded": "{count} अनुमतियाँ • साइडलोडेड",
-
   "phishingUrlTab": "🔗  URL स्कैनर",
   "phishingSmsTab": "💬  SMS स्कैनर",
   "phishingCheckLink": "लिंक जाँचें 🔍",
@@ -251,7 +238,6 @@
   "phishingSmsLinksSuspicious": "संदिग्ध लिंक मिले!",
   "phishingSmsScanLinks": "{count} {count, plural, =1{लिंक} other{लिंक}} स्कैन करें",
   "phishingSmsNoUrls": "इस मैसेज में कोई URL नहीं मिला",
-
   "wifiClearHistoryTooltip": "इतिहास साफ़ करें",
   "wifiClearTitle": "इतिहास साफ़ करें",
   "wifiClearBody": "सभी वाई-फ़ाई स्कैन इतिहास हटाएँ?",
@@ -300,13 +286,11 @@
   "wifiDetailScanned": "स्कैन किया गया",
   "wifiUnknown": "अज्ञात",
   "wifiNA": "लागू नहीं",
-
   "cyberDefense": "साइबर रक्षा",
   "defenseThreatFusion": "थ्रेट फ्यूज़न",
   "defenseScreenshotScan": "स्क्रीनशॉट स्कैन",
   "defensePredictiveRisk": "पूर्वानुमानित जोखिम",
   "defenseArbitrationLog": "मध्यस्थता लॉग",
-
   "linkProtection": "लिंक सुरक्षा",
   "linkInterceptorTitle": "स्मार्ट लिंक इंटरसेप्टर",
   "linkInterceptorSub": "अन्य ऐप्स से खोले गए लिंक को लोड होने से पहले स्कैन करें",
@@ -322,7 +306,6 @@
   "cloudIntelDialogBody": "चालू होने पर, इंटरसेप्ट किए गए लिंक Google Safe Browsing से जाँचे जाते हैं। आपके द्वारा टैप किया गया लिंक इस जाँच के लिए Google को भेजा जाता है। आपके डिवाइस से और कुछ नहीं जाता। आप इसे कभी भी बंद कर सकते हैं।",
   "commonEnable": "सक्षम करें",
   "commonCancel": "रद्द करें",
-
   "threatBandSafe": "सुरक्षित (0-30)",
   "threatBandSuspicious": "संदिग्ध (31-60)",
   "threatBandDangerous": "खतरनाक (61-80)",
@@ -332,7 +315,6 @@
   "threatLevelDangerous": "खतरनाक",
   "threatLevelCritical": "गंभीर",
   "confidencePct": "विश्वास {pct}%",
-
   "warnDangerousTitle": "खतरनाक वेबसाइट पहचानी गई",
   "warnSuspiciousTitle": "संदिग्ध वेबसाइट",
   "warnRiskScore": "जोखिम स्कोर",
@@ -350,7 +332,6 @@
   "warnOpenDangerousBody": "CyberGuard ने इस लिंक को उच्च जोखिम वाला बताया है। इसे खोलने से आपके क्रेडेंशियल या डिवाइस उजागर हो सकते हैं। अपने जोखिम पर जारी रखें?",
   "warnOpenAnyway": "फिर भी खोलें",
   "warnPrivacyNote": "जब तक आप सेटिंग्स में लिंक इतिहास सक्षम नहीं करते, कोई URL संग्रहीत नहीं होता।",
-
   "fusionTitle": "थ्रेट फ्यूज़न स्कैन",
   "fusionPrompt": "सभी इंटेलिजेंस स्रोतों में एक लिंक जाँचें",
   "fusionRunScan": "फ्यूज़न स्कैन चलाएँ",
@@ -359,14 +340,12 @@
   "fusionExplanation": "व्याख्या",
   "fusionConflict": "स्रोत असहमत — मध्यस्थता द्वारा मिलान।",
   "fusionTrust": "विश्वास {weight}",
-
   "arbitrationTitle": "मध्यस्थता लॉग",
   "arbitrationClear": "लॉग साफ़ करें",
   "arbitrationEmptyTitle": "अभी तक कोई विरोध नहीं",
   "arbitrationEmptyBody": "जब पहचान स्रोत असहमत होते हैं या कोई विश्वसनीय स्रोत CyberGuard को ओवरराइड करता है, तो निर्णय यहाँ दर्ज होता है।",
   "arbitrationOverride": "विश्वसनीय ओवरराइड → {level}",
   "arbitrationConflictTitle": "स्रोत विरोध → {level}",
-
   "riskTitle": "पूर्वानुमानित जोखिम",
   "riskNoData": "कोई डेटा नहीं",
   "riskBandLow": "कम",
@@ -380,7 +359,6 @@
   "forecastPhishing": "फ़िशिंग हमला",
   "forecastCredentialTheft": "क्रेडेंशियल चोरी",
   "forecastMalware": "मैलवेयर संक्रमण",
-
   "rfPhishingTitle": "फ़िशिंग लिंक मिले",
   "rfPhishingDetail": "पिछले 7 दिनों में {count} चिह्नित",
   "rfSmsTitle": "संदिग्ध SMS प्राप्त",
@@ -395,14 +373,12 @@
   "rfBreachDetail": "आपका खाता उल्लंघन किए गए डेटा में दिखाई देता है",
   "rfTrendTitle": "सुरक्षा स्कोर घट रहा है",
   "rfTrendDetail": "सुरक्षा हाल ही में {pts} अंक गिरी",
-
   "recBreach": "उल्लंघन किए गए खातों के पासवर्ड बदलें और 2FA सक्षम करें।",
   "recPhishing": "अप्रत्याशित संदेशों में लिंक टैप करने से बचें; प्रेषक सत्यापित करें।",
   "recWifi": "सार्वजनिक Wi-Fi पर संवेदनशील लॉगिन से बचें; विश्वसनीय नेटवर्क उपयोग करें।",
   "recMalware": "उच्च-जोखिम ऐप्स की समीक्षा कर हटाएँ; केवल Play Store से इंस्टॉल करें।",
   "recInterceptor": "निरंतर सुरक्षा के लिए स्मार्ट लिंक इंटरसेप्टर सक्षम रखें।",
   "recHealthy": "आप अच्छी स्थिति में हैं — CyberGuard सुरक्षा सक्षम रखें।",
-
   "screenshotTitle": "स्क्रीनशॉट स्कैनर",
   "screenshotPrompt": "संदिग्ध पृष्ठ का स्क्रीनशॉट स्कैन करें",
   "screenshotDesc": "नकली बैंक, UPI, OTP, लॉगिन, KYC, लॉटरी और सहायता घोटालों का पता लगाता है। छवियाँ डिवाइस पर ही विश्लेषित होती हैं।",
@@ -413,7 +389,6 @@
   "screenshotBrand": "ब्रांड उल्लेख: {brand}",
   "screenshotIndicators": "संकेतक",
   "screenshotExtractedText": "निकाला गया पाठ",
-
   "scamFakeBank": "नकली बैंक पृष्ठ",
   "scamFakeUpi": "नकली UPI / भुगतान पृष्ठ",
   "scamFakeOtp": "नकली OTP अनुरोध",
@@ -427,5 +402,35 @@
   "scamReasonBrand": "ब्रांड उल्लेख: {brand}",
   "scamReasonUrgency": "तात्कालिकता / दबाव शब्द: \"{word}\"",
   "scamReasonNoIndicators": "पाठ में कोई घोटाला संकेतक नहीं मिला",
-  "scamReasonNoText": "छवि में कोई पठनीय पाठ नहीं मिला"
+  "scamReasonNoText": "छवि में कोई पठनीय पाठ नहीं मिला",
+  "authTitle": "CyberGuard AI में साइन इन करें",
+  "authSubtitle": "अपनी सुरक्षा सेटिंग्स सभी डिवाइस पर सिंक करें",
+  "authSignIn": "साइन इन",
+  "authSignUp": "खाता बनाएँ",
+  "authPassword": "पासवर्ड",
+  "authContinueGoogle": "Google से जारी रखें",
+  "authForgotPassword": "पासवर्ड भूल गए?",
+  "authNoAccount": "नए हैं? खाता बनाएँ",
+  "authHaveAccount": "पहले से खाता है? साइन इन करें",
+  "authOr": "या",
+  "authContinueOffline": "बिना खाते के जारी रखें",
+  "authResetSent": "यदि वह पता पंजीकृत है, तो रीसेट लिंक भेजा जा रहा है।",
+  "authUnavailableTitle": "इस बिल्ड में साइन-इन सेट नहीं है",
+  "authUnavailableBody": "यह ऐप Firebase क्रेडेंशियल के बिना बनाया गया था, इसलिए खाते उपलब्ध नहीं हैं। बाकी सब कुछ हमेशा की तरह ऑफ़लाइन काम करता है।",
+  "authErrInvalidEmail": "यह ईमेल पता सही नहीं लगता",
+  "authErrWrongPassword": "ईमेल या पासवर्ड ग़लत है",
+  "authErrUserNotFound": "इस ईमेल के लिए कोई खाता नहीं मिला",
+  "authErrEmailInUse": "इस ईमेल के लिए खाता पहले से मौजूद है",
+  "authErrWeakPassword": "कम से कम 6 अक्षर इस्तेमाल करें",
+  "authErrNetwork": "कोई कनेक्शन नहीं। अपना नेटवर्क जाँचें और फिर कोशिश करें।",
+  "authErrUnknown": "कुछ ग़लत हो गया। कृपया फिर कोशिश करें।",
+  "authSignOut": "साइन आउट",
+  "authSignedInAs": "{email} के रूप में साइन इन",
+  "@authSignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  }
 }

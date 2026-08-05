@@ -17,7 +17,11 @@
   "critical": "Critical",
   "lastScanned": "Last scanned {time}",
   "@lastScanned": {
-    "placeholders": {"time": {"type": "String"}}
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "neverScanned": "Never scanned",
   "protectionModules": "Protection Modules",
@@ -50,9 +54,12 @@
   "noBreachFound": "No breaches found",
   "breachesFound": "{count, plural, =1{1 breach found} other{{count} breaches found}}",
   "@breachesFound": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "onboardAiSecurityTitle": "AI-powered security 🛡️",
   "onboardAiSecurityDesc": "On-device machine learning detects phishing, malware, and breaches — all in real time, none of your data leaves your phone.",
   "onboardPhishingTitle": "Phishing detection 🔗",
@@ -66,7 +73,6 @@
   "onboardContinue": "Continue",
   "onboardGrantStart": "Grant permissions & start",
   "onboardSkip": "Skip",
-
   "scoreGreetingProtected": "You're protected",
   "scoreGreetingAtRisk": "A few things to check ⚠️",
   "scoreGreetingCritical": "Action needed 🚨",
@@ -75,7 +81,6 @@
   "scoreHeadlineAtRisk": "Take a quick look",
   "scoreHeadlineCritical": "Critical issues found",
   "scoreHeadlineFirstScan": "Let's secure your phone",
-
   "permSmsTitle": "SMS Access Needed",
   "permSmsRationale": "CyberGuard AI needs to read your SMS messages to detect phishing links. Your messages are never sent to any server — all analysis happens locally on your device.",
   "permLocationTitle": "Location Access Needed",
@@ -84,14 +89,12 @@
   "permNotifRationale": "CyberGuard AI sends notifications when it detects threats so you can act immediately. You can customise notification types in Settings.",
   "permAllowButton": "Allow Permission",
   "permNotNow": "Not Now",
-
   "dialogCancel": "Cancel",
   "dialogConfirm": "Confirm",
   "dialogClearAll": "Clear All",
   "dialogReset": "Reset",
   "dialogDelete": "Delete",
   "dialogClose": "Close",
-
   "breachInputTitle": "Check if your data was leaked",
   "breachInputSubtitle": "We check across 12+ billion leaked records",
   "breachTabEmail": "Email",
@@ -113,7 +116,11 @@
   "breachFoundPhone": "This number was exposed in the following breaches:",
   "breachAccountsAffected": "{count} accounts affected",
   "@breachAccountsAffected": {
-    "placeholders": {"count": {"type": "String"}}
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   },
   "breachCompromisedData": "COMPROMISED DATA",
   "breachWhatToDo": "What should I do?",
@@ -129,7 +136,6 @@
   "breachPrivacyStep2": "Only the first 5 characters of the hash are sent to HIBP.",
   "breachPrivacyStep3": "Thousands of matching hashes come back.",
   "breachPrivacyStep4": "100% of the match check happens locally on your device.",
-
   "qrScanTitle": "Scan QR",
   "qrUploadFromGallery": "Upload from gallery",
   "qrPointAtCode": "Point at any QR · scanned URLs are checked locally",
@@ -141,20 +147,34 @@
   "qrViewDetails": "View details",
   "qrConfidence": "{count}% confidence",
   "@qrConfidence": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "qrCameraUnavailable": "Camera unavailable. Grant camera permission and try again.",
   "qrOpenSettings": "Open settings",
   "qrNoCodeInImage": "No QR code found in this image.",
-
   "scoreSuffix": "/100",
   "scoreLabel": "score",
   "scannedAgo": "Scanned {time}",
-  "@scannedAgo": {"placeholders": {"time": {"type": "String"}}},
+  "@scannedAgo": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "dashboardRefreshed": "Dashboard refreshed",
   "dashboardRefreshedWithWifi": "Dashboard refreshed · Wi-Fi trust {score}/100",
-  "@dashboardRefreshedWithWifi": {"placeholders": {"score": {"type": "int"}}},
-
+  "@dashboardRefreshedWithWifi": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "moduleTitlePhishing": "Phishing",
   "moduleSubtitlePhishing": "URL & SMS scanner",
   "moduleTitleMalware": "Malware",
@@ -163,12 +183,10 @@
   "moduleSubtitleBreach": "Data leak monitor",
   "moduleTitleWifi": "Wi-Fi",
   "moduleSubtitleWifi": "Network analyser",
-
   "statTotalScans": "Total Scans",
   "statThreats": "Threats",
   "statLastScan": "Last Scan",
   "statNever": "Never",
-
   "settingRealTimeAlerts": "Real-time Alerts",
   "settingRealTimeAlertsSub": "Get notified when threats are detected",
   "settingClipboardScan": "Clipboard Scan",
@@ -178,7 +196,13 @@
   "smsPermissionDenied": "SMS permission denied — cannot start live scan",
   "settingsAutoScanFrequency": "Auto Scan Frequency",
   "settingsBackgroundScanEvery": "Background scan every {hours}h",
-  "@settingsBackgroundScanEvery": {"placeholders": {"hours": {"type": "int"}}},
+  "@settingsBackgroundScanEvery": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "settingsHibpTitle": "Have I Been Pwned API Key",
   "settingsHibpDesc": "Required for email breach checks. Get your free key at haveibeenpwned.com/API/Key",
   "settingsHibpPasteHint": "Paste your API key here…",
@@ -202,11 +226,22 @@
   "settingsResetBody": "All settings will be restored to defaults. Continue?",
   "exportGenerating": "Generating PDF report…",
   "exportFailed": "Export failed: {error}",
-  "@exportFailed": {"placeholders": {"error": {"type": "String"}}},
-
+  "@exportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "alertsMarkAllRead": "Mark all read",
   "alertsNoFilter": "No {filter} alerts",
-  "@alertsNoFilter": {"placeholders": {"filter": {"type": "String"}}},
+  "@alertsNoFilter": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
   "alertsTryDifferent": "Try a different filter",
   "alertsClearTitle": "Clear All Alerts",
   "alertsClearBody": "This will permanently delete all alerts.",
@@ -215,21 +250,56 @@
   "alertsFilterMalware": "Malware",
   "alertsFilterBreach": "Breach",
   "alertsFilterWifi": "Wi-Fi",
-
   "malwareIssuesFound": "Issues found ⚠️",
   "malwareAppSecurity": "App security 🛡️",
   "malwareTapToScan": "Tap scan to analyse your apps",
   "malwareAppsThreats": "{apps} apps · {threats} {threats, plural, =1{threat} other{threats}}",
-  "@malwareAppsThreats": {"placeholders": {"apps": {"type": "int"}, "threats": {"type": "int"}}},
+  "@malwareAppsThreats": {
+    "placeholders": {
+      "apps": {
+        "type": "int"
+      },
+      "threats": {
+        "type": "int"
+      }
+    }
+  },
   "malwareLastScan": "Last scan {time}",
-  "@malwareLastScan": {"placeholders": {"time": {"type": "String"}}},
+  "@malwareLastScan": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "malwareScanNow": "Scan apps now",
   "malwareAnalysing": "Analysing {name}…",
-  "@malwareAnalysing": {"placeholders": {"name": {"type": "String"}}},
+  "@malwareAnalysing": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "malwareEtaSec": "~{sec}s",
-  "@malwareEtaSec": {"placeholders": {"sec": {"type": "String"}}},
+  "@malwareEtaSec": {
+    "placeholders": {
+      "sec": {
+        "type": "String"
+      }
+    }
+  },
   "malwareProgress": "{progress} / {total} apps",
-  "@malwareProgress": {"placeholders": {"progress": {"type": "int"}, "total": {"type": "int"}}},
+  "@malwareProgress": {
+    "placeholders": {
+      "progress": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "malwareRiskCritical": "Critical",
   "malwareRiskHigh": "High",
   "malwareRiskMedium": "Medium",
@@ -240,10 +310,21 @@
   "malwareNoMatchTitle": "No apps match filter",
   "malwareNoMatchSub": "Try a different filter or search term",
   "malwarePermsVerified": "{count} permissions • Verified",
-  "@malwarePermsVerified": {"placeholders": {"count": {"type": "int"}}},
+  "@malwarePermsVerified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "malwarePermsSideloaded": "{count} permissions • Sideloaded",
-  "@malwarePermsSideloaded": {"placeholders": {"count": {"type": "int"}}},
-
+  "@malwarePermsSideloaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "phishingUrlTab": "🔗  URL Scanner",
   "phishingSmsTab": "💬  SMS Scanner",
   "phishingCheckLink": "Check a link 🔍",
@@ -252,7 +333,13 @@
   "phishingScanNow": "Scan now",
   "phishingScanHistory": "Scan History",
   "phishingScans": "{count} scans",
-  "@phishingScans": {"placeholders": {"count": {"type": "int"}}},
+  "@phishingScans": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "phishingNoScansTitle": "No scans yet",
   "phishingNoScansSub": "URLs you scan will appear here",
   "phishingAnalysingTitle": "AI Analysing URL",
@@ -275,9 +362,14 @@
   "phishingSmsLinksScannedSafe": "Links Scanned — Safe",
   "phishingSmsLinksSuspicious": "Suspicious Links Found!",
   "phishingSmsScanLinks": "Scan {count} {count, plural, =1{link} other{links}}",
-  "@phishingSmsScanLinks": {"placeholders": {"count": {"type": "int"}}},
+  "@phishingSmsScanLinks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "phishingSmsNoUrls": "No URLs found in this message",
-
   "wifiClearHistoryTooltip": "Clear history",
   "wifiClearTitle": "Clear History",
   "wifiClearBody": "Remove all Wi-Fi scan history?",
@@ -289,7 +381,13 @@
   "wifiNoScanSub": "Tap Scan Network to analyse your Wi-Fi",
   "wifiUnknownSsid": "Unknown SSID",
   "wifiTrust": "Trust: {score}%",
-  "@wifiTrust": {"placeholders": {"score": {"type": "int"}}},
+  "@wifiTrust": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "wifiTrustScore": "Trust Score",
   "wifiSignal": "Signal",
   "wifiBand": "Band",
@@ -299,7 +397,16 @@
   "wifiNo": "No",
   "wifiSecurityChecks": "Security Checks",
   "wifiChecksPassed": "{passed}/{total} passed",
-  "@wifiChecksPassed": {"placeholders": {"passed": {"type": "int"}, "total": {"type": "int"}}},
+  "@wifiChecksPassed": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "wifiCheckEncryption": "Encryption",
   "wifiCheckSignalStrength": "Signal Strength",
   "wifiCheckDnsHealth": "DNS Health",
@@ -309,17 +416,44 @@
   "wifiEncDescYes": "Network uses WPA2/WPA3 encryption",
   "wifiEncDescNo": "Open network — traffic is unencrypted",
   "wifiDnsDescYes": "DNS resolved in {ms}ms",
-  "@wifiDnsDescYes": {"placeholders": {"ms": {"type": "int"}}},
+  "@wifiDnsDescYes": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
   "wifiDnsDescNo": "DNS resolution failed — possible interception",
   "wifiBssidDesc": "BSSID {bssid} matches stored record",
-  "@wifiBssidDesc": {"placeholders": {"bssid": {"type": "String"}}},
+  "@wifiBssidDesc": {
+    "placeholders": {
+      "bssid": {
+        "type": "String"
+      }
+    }
+  },
   "wifiLatencyDesc": "Latency: {ms}ms",
-  "@wifiLatencyDesc": {"placeholders": {"ms": {"type": "int"}}},
+  "@wifiLatencyDesc": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
   "wifiLatencyDescNone": "Latency not measured",
   "wifiBandDesc5": "Using 5GHz band — less interference",
   "wifiBandDesc24": "Using 2.4GHz band — more interference",
   "wifiSignalDesc": "Signal: {rssi} dBm ({label})",
-  "@wifiSignalDesc": {"placeholders": {"rssi": {"type": "int"}, "label": {"type": "String"}}},
+  "@wifiSignalDesc": {
+    "placeholders": {
+      "rssi": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "wifiNetworkDetails": "Network Details",
   "wifiDetailSsid": "SSID",
   "wifiDetailBssid": "BSSID",
@@ -332,13 +466,11 @@
   "wifiDetailScanned": "Scanned",
   "wifiUnknown": "Unknown",
   "wifiNA": "N/A",
-
   "cyberDefense": "Cyber Defense",
   "defenseThreatFusion": "Threat Fusion",
   "defenseScreenshotScan": "Screenshot Scan",
   "defensePredictiveRisk": "Predictive Risk",
   "defenseArbitrationLog": "Arbitration Log",
-
   "linkProtection": "Link Protection",
   "linkInterceptorTitle": "Smart Link Interceptor",
   "linkInterceptorSub": "Scan links you open from other apps before they load",
@@ -354,7 +486,6 @@
   "cloudIntelDialogBody": "When on, intercepted links are checked against Google Safe Browsing. The link you tapped is sent to Google for this check. Nothing else leaves your device. You can turn this off anytime.",
   "commonEnable": "Enable",
   "commonCancel": "Cancel",
-
   "threatBandSafe": "Safe (0-30)",
   "threatBandSuspicious": "Suspicious (31-60)",
   "threatBandDangerous": "Dangerous (61-80)",
@@ -364,8 +495,13 @@
   "threatLevelDangerous": "Dangerous",
   "threatLevelCritical": "Critical",
   "confidencePct": "confidence {pct}%",
-  "@confidencePct": {"placeholders": {"pct": {"type": "int"}}},
-
+  "@confidencePct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
   "warnDangerousTitle": "Dangerous Website Detected",
   "warnSuspiciousTitle": "Suspicious Website",
   "warnRiskScore": "RISK SCORE",
@@ -373,7 +509,13 @@
   "warnConflict": "Detection sources disagreed — verdict reconciled by arbitration.",
   "warnDestination": "DESTINATION",
   "warnVia": "via {app}",
-  "@warnVia": {"placeholders": {"app": {"type": "String"}}},
+  "@warnVia": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
   "warnWhyFlagged": "WHY THIS IS FLAGGED",
   "warnSources": "INTELLIGENCE SOURCES",
   "warnGoBack": "Go Back (Recommended)",
@@ -384,7 +526,6 @@
   "warnOpenDangerousBody": "CyberGuard rated this link as high-risk. Opening it could expose your credentials or device. Continue at your own risk?",
   "warnOpenAnyway": "Open anyway",
   "warnPrivacyNote": "No URLs are stored unless you enable link history in Settings.",
-
   "fusionTitle": "Threat Fusion Scan",
   "fusionPrompt": "Check a link across all intelligence sources",
   "fusionRunScan": "Run Fusion Scan",
@@ -393,61 +534,122 @@
   "fusionExplanation": "EXPLANATION",
   "fusionConflict": "Sources disagreed — reconciled by arbitration.",
   "fusionTrust": "trust {weight}",
-  "@fusionTrust": {"placeholders": {"weight": {"type": "int"}}},
-
+  "@fusionTrust": {
+    "placeholders": {
+      "weight": {
+        "type": "int"
+      }
+    }
+  },
   "arbitrationTitle": "Arbitration Log",
   "arbitrationClear": "Clear log",
   "arbitrationEmptyTitle": "No conflicts yet",
   "arbitrationEmptyBody": "When detection sources disagree or a trusted source overrides CyberGuard, the decision is recorded here.",
   "arbitrationOverride": "Trusted override → {level}",
-  "@arbitrationOverride": {"placeholders": {"level": {"type": "String"}}},
+  "@arbitrationOverride": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "arbitrationConflictTitle": "Source conflict → {level}",
-  "@arbitrationConflictTitle": {"placeholders": {"level": {"type": "String"}}},
-
+  "@arbitrationConflictTitle": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "riskTitle": "Predictive Risk",
   "riskNoData": "No data",
   "riskBandLow": "Low",
   "riskBandMedium": "Medium",
   "riskBandHigh": "High",
   "riskSuffix": "{band} RISK",
-  "@riskSuffix": {"placeholders": {"band": {"type": "String"}}},
+  "@riskSuffix": {
+    "placeholders": {
+      "band": {
+        "type": "String"
+      }
+    }
+  },
   "riskForecastTitle": "Threat Forecast",
   "riskTimelineTitle": "7-Day Risk Timeline",
   "riskWhyTitle": "Why your risk is {band}",
-  "@riskWhyTitle": {"placeholders": {"band": {"type": "String"}}},
+  "@riskWhyTitle": {
+    "placeholders": {
+      "band": {
+        "type": "String"
+      }
+    }
+  },
   "riskRecommendations": "Recommendations",
   "forecastPhishing": "Phishing Attack",
   "forecastCredentialTheft": "Credential Theft",
   "forecastMalware": "Malware Infection",
-
   "rfPhishingTitle": "Phishing links encountered",
   "rfPhishingDetail": "{count} flagged in the last 7 days",
-  "@rfPhishingDetail": {"placeholders": {"count": {"type": "int"}}},
+  "@rfPhishingDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "rfSmsTitle": "Suspicious SMS received",
   "rfSmsDetail": "{count} phishing SMS detected",
-  "@rfSmsDetail": {"placeholders": {"count": {"type": "int"}}},
+  "@rfSmsDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "rfWifiTitle": "Unknown Wi-Fi networks used",
   "rfWifiDetail": "{count} low-trust networks connected",
-  "@rfWifiDetail": {"placeholders": {"count": {"type": "int"}}},
+  "@rfWifiDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "rfMalwareTitle": "Risky apps installed",
   "rfMalwareDetail": "{count} high-risk apps detected",
-  "@rfMalwareDetail": {"placeholders": {"count": {"type": "int"}}},
+  "@rfMalwareDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "rfInterceptTitle": "Links blocked recently",
   "rfInterceptDetail": "{count} dangerous links intercepted",
-  "@rfInterceptDetail": {"placeholders": {"count": {"type": "int"}}},
+  "@rfInterceptDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "rfBreachTitle": "Credentials in a known breach",
   "rfBreachDetail": "Your account appears in breached data",
   "rfTrendTitle": "Security score declining",
   "rfTrendDetail": "Protection dropped {pts} pts recently",
-  "@rfTrendDetail": {"placeholders": {"pts": {"type": "int"}}},
-
+  "@rfTrendDetail": {
+    "placeholders": {
+      "pts": {
+        "type": "int"
+      }
+    }
+  },
   "recBreach": "Change passwords for breached accounts and enable 2FA.",
   "recPhishing": "Avoid tapping links in unexpected messages; verify the sender.",
   "recWifi": "Avoid sensitive logins on public Wi-Fi; use a trusted network.",
   "recMalware": "Review and uninstall high-risk apps; install only from Play Store.",
   "recInterceptor": "Keep the Smart Link Interceptor enabled for ongoing protection.",
   "recHealthy": "You're in good shape — keep CyberGuard protections enabled.",
-
   "screenshotTitle": "Screenshot Scanner",
   "screenshotPrompt": "Scan a suspicious page screenshot",
   "screenshotDesc": "Detects fake bank, UPI, OTP, login, KYC, lottery and support scams. Images are analysed on-device.",
@@ -456,10 +658,15 @@
   "screenshotScam": "SCAM",
   "screenshotLooksClean": "Looks clean",
   "screenshotBrand": "Brand referenced: {brand}",
-  "@screenshotBrand": {"placeholders": {"brand": {"type": "String"}}},
+  "@screenshotBrand": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
   "screenshotIndicators": "INDICATORS",
   "screenshotExtractedText": "EXTRACTED TEXT",
-
   "scamFakeBank": "Fake bank page",
   "scamFakeUpi": "Fake UPI / payment page",
   "scamFakeOtp": "Fake OTP request",
@@ -470,11 +677,62 @@
   "scamFakeSupport": "Fake customer support",
   "scamNone": "No scam indicators",
   "scamReasonCategory": "{category}: \"{matched}\"",
-  "@scamReasonCategory": {"placeholders": {"category": {"type": "String"}, "matched": {"type": "String"}}},
+  "@scamReasonCategory": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "matched": {
+        "type": "String"
+      }
+    }
+  },
   "scamReasonBrand": "Brand referenced: {brand}",
-  "@scamReasonBrand": {"placeholders": {"brand": {"type": "String"}}},
+  "@scamReasonBrand": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
   "scamReasonUrgency": "Urgency / pressure wording: \"{word}\"",
-  "@scamReasonUrgency": {"placeholders": {"word": {"type": "String"}}},
+  "@scamReasonUrgency": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
   "scamReasonNoIndicators": "No scam indicators detected in the text",
-  "scamReasonNoText": "No readable text found in the image"
+  "scamReasonNoText": "No readable text found in the image",
+  "authTitle": "Sign in to CyberGuard AI",
+  "authSubtitle": "Sync your security settings across devices",
+  "authSignIn": "Sign In",
+  "authSignUp": "Create Account",
+  "authPassword": "Password",
+  "authContinueGoogle": "Continue with Google",
+  "authForgotPassword": "Forgot password?",
+  "authNoAccount": "New here? Create an account",
+  "authHaveAccount": "Already have an account? Sign in",
+  "authOr": "or",
+  "authContinueOffline": "Continue without an account",
+  "authResetSent": "If that address is registered, a reset link is on its way.",
+  "authUnavailableTitle": "Sign-in isn't set up in this build",
+  "authUnavailableBody": "This copy of the app was built without Firebase credentials, so accounts are unavailable. Everything else works offline as usual.",
+  "authErrInvalidEmail": "That email address doesn't look right",
+  "authErrWrongPassword": "Incorrect email or password",
+  "authErrUserNotFound": "No account found for that email",
+  "authErrEmailInUse": "An account already exists for that email",
+  "authErrWeakPassword": "Use at least 6 characters",
+  "authErrNetwork": "No connection. Check your network and try again.",
+  "authErrUnknown": "Something went wrong. Please try again.",
+  "authSignOut": "Sign out",
+  "authSignedInAs": "Signed in as {email}",
+  "@authSignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  }
 }

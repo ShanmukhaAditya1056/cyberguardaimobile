@@ -1391,4 +1391,81 @@ class AppLocalizationsTa extends AppLocalizations {
   @override
   String get scamReasonNoText =>
       'படத்தில் படிக்கக்கூடிய உரை எதுவும் கிடைக்கவில்லை';
+
+  @override
+  String get authTitle => 'CyberGuard AI இல் உள்நுழையவும்';
+
+  @override
+  String get authSubtitle =>
+      'உங்கள் பாதுகாப்பு அமைப்புகளை எல்லா சாதனங்களிலும் ஒத்திசைக்கவும்';
+
+  @override
+  String get authSignIn => 'உள்நுழை';
+
+  @override
+  String get authSignUp => 'கணக்கை உருவாக்கு';
+
+  @override
+  String get authPassword => 'கடவுச்சொல்';
+
+  @override
+  String get authContinueGoogle => 'Google மூலம் தொடரவும்';
+
+  @override
+  String get authForgotPassword => 'கடவுச்சொல் மறந்துவிட்டதா?';
+
+  @override
+  String get authNoAccount => 'புதியவரா? கணக்கை உருவாக்குங்கள்';
+
+  @override
+  String get authHaveAccount => 'ஏற்கனவே கணக்கு உள்ளதா? உள்நுழையவும்';
+
+  @override
+  String get authOr => 'அல்லது';
+
+  @override
+  String get authContinueOffline => 'கணக்கு இல்லாமல் தொடரவும்';
+
+  @override
+  String get authResetSent =>
+      'அந்த முகவரி பதிவு செய்யப்பட்டிருந்தால், மீட்டமைப்பு இணைப்பு அனுப்பப்படும்.';
+
+  @override
+  String get authUnavailableTitle =>
+      'இந்த பதிப்பில் உள்நுழைவு அமைக்கப்படவில்லை';
+
+  @override
+  String get authUnavailableBody =>
+      'இந்த ஆப் Firebase சான்றுகள் இல்லாமல் உருவாக்கப்பட்டது, எனவே கணக்குகள் கிடைக்கவில்லை. மற்ற அனைத்தும் வழக்கம் போல் ஆஃப்லைனில் இயங்கும்.';
+
+  @override
+  String get authErrInvalidEmail =>
+      'அந்த மின்னஞ்சல் முகவரி சரியாகத் தெரியவில்லை';
+
+  @override
+  String get authErrWrongPassword => 'மின்னஞ்சல் அல்லது கடவுச்சொல் தவறு';
+
+  @override
+  String get authErrUserNotFound => 'அந்த மின்னஞ்சலுக்கு கணக்கு எதுவும் இல்லை';
+
+  @override
+  String get authErrEmailInUse => 'அந்த மின்னஞ்சலுக்கு ஏற்கனவே கணக்கு உள்ளது';
+
+  @override
+  String get authErrWeakPassword => 'குறைந்தது 6 எழுத்துகளைப் பயன்படுத்தவும்';
+
+  @override
+  String get authErrNetwork =>
+      'இணைப்பு இல்லை. உங்கள் நெட்வொர்க்கைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.';
+
+  @override
+  String get authErrUnknown => 'ஏதோ தவறு நடந்தது. மீண்டும் முயற்சிக்கவும்.';
+
+  @override
+  String get authSignOut => 'வெளியேறு';
+
+  @override
+  String authSignedInAs(String email) {
+    return '$email ஆக உள்நுழைந்துள்ளீர்கள்';
+  }
 }

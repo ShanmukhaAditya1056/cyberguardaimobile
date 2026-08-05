@@ -57,3 +57,11 @@ automation/logs/
 
 # Secrets — real API keys live here (copy api_keys.example.dart → api_keys.dart)
 lib/core/config/api_keys.dart
+# Firebase config — project-specific keys, and the Android app registration is
+# tied to a signing SHA-1, so it is per-developer. app/build.gradle only applies
+# the google-services plugin when this file is present, so the project still
+# builds without it (auth just reports itself unconfigured). See
+# lib/data/services/auth_service.dart.
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart

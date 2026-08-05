@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/repositories/malware_repository.dart';
 import 'data/repositories/phishing_repository.dart';
+import 'data/services/auth_service.dart';
 import 'data/services/hive_service.dart';
 import 'data/services/notification_service.dart';
 import 'data/services/wifi_auto_scan_service.dart';
@@ -58,6 +59,10 @@ Future<void> main() async {
 
   // Initialise Hive
   await HiveService.init();
+
+  // Optional: no-ops when the build has no google-services.json. Never throws,
+  // so a missing Firebase project cannot stop the app from starting.
+  await AuthService.init();
 
   // Initialise notifications
   await NotificationService.init();

@@ -1372,4 +1372,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scamReasonNoText => 'No readable text found in the image';
+
+  @override
+  String get authTitle => 'Sign in to CyberGuard AI';
+
+  @override
+  String get authSubtitle => 'Sync your security settings across devices';
+
+  @override
+  String get authSignIn => 'Sign In';
+
+  @override
+  String get authSignUp => 'Create Account';
+
+  @override
+  String get authPassword => 'Password';
+
+  @override
+  String get authContinueGoogle => 'Continue with Google';
+
+  @override
+  String get authForgotPassword => 'Forgot password?';
+
+  @override
+  String get authNoAccount => 'New here? Create an account';
+
+  @override
+  String get authHaveAccount => 'Already have an account? Sign in';
+
+  @override
+  String get authOr => 'or';
+
+  @override
+  String get authContinueOffline => 'Continue without an account';
+
+  @override
+  String get authResetSent =>
+      'If that address is registered, a reset link is on its way.';
+
+  @override
+  String get authUnavailableTitle => 'Sign-in isn\'t set up in this build';
+
+  @override
+  String get authUnavailableBody =>
+      'This copy of the app was built without Firebase credentials, so accounts are unavailable. Everything else works offline as usual.';
+
+  @override
+  String get authErrInvalidEmail => 'That email address doesn\'t look right';
+
+  @override
+  String get authErrWrongPassword => 'Incorrect email or password';
+
+  @override
+  String get authErrUserNotFound => 'No account found for that email';
+
+  @override
+  String get authErrEmailInUse => 'An account already exists for that email';
+
+  @override
+  String get authErrWeakPassword => 'Use at least 6 characters';
+
+  @override
+  String get authErrNetwork =>
+      'No connection. Check your network and try again.';
+
+  @override
+  String get authErrUnknown => 'Something went wrong. Please try again.';
+
+  @override
+  String get authSignOut => 'Sign out';
+
+  @override
+  String authSignedInAs(String email) {
+    return 'Signed in as $email';
+  }
 }

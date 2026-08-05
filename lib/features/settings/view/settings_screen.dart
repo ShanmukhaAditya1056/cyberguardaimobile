@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_gradients.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -11,6 +12,7 @@ import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/smart_back_button.dart';
 import '../../../core/i18n/locale_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../data/services/interceptor_prefs.dart';
 import '../../../data/services/link_interceptor_channel.dart';
 import '../../../data/services/report_export_service.dart';
@@ -140,6 +142,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         child: ListView(
         padding: const EdgeInsets.fromLTRB(20, kToolbarHeight + 16, 20, 100),
         children: [
+          // ── Account ────────────────────────────────────────────────────
+          _SectionHeader(
+              icon: Icons.person_outline_rounded, title: l.authSignIn),
+          const SizedBox(height: 8),
+          GlassCard(
+            child: AuthService.isSignedIn
+                ? ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    title: Text(
+                      l.authSignedInAs(
+                          AuthService.currentUser?.email ?? '—'),
+                      style: AppTextStyles.bodySmall,
+                    ),
+                    trailing: TextButton(
+                      onPressed: () async {
+                        await AuthService.signOut();
+                        if (context.mounted) setState(() {});
+                      },
+                      child: Text(l.authSignOut,
+                          style: AppTextStyles.captionMedium
+                              .copyWith(color: AppColors.danger)),
+                    ),
+                  )
+                : ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    title: Text(l.authSignIn, style: AppTextStyles.bodyMedium),
+                    subtitle: Text(
+                      AuthService.isConfigured
+                          ? l.authSubtitle
+                          : l.authUnavailableTitle,
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textMedium),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded,
+                        color: AppColors.textMedium),
+                    onTap: () async {
+                      await context.push('/login');
+                      if (context.mounted) setState(() {});
+                    },
+                  ),
+          ),
+          const SizedBox(height: 20),
+
           // ── Notifications ──────────────────────────────────────────────
           _SectionHeader(
               icon: Icons.notifications_outlined, title: l.notifications),

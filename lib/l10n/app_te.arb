@@ -46,7 +46,6 @@
   "enterPassword": "పరీక్షించడానికి పాస్‌వర్డ్ ఎంటర్ చేయి",
   "noBreachFound": "బ్రీచ్‌లు లేవు",
   "breachesFound": "{count, plural, =1{1 బ్రీచ్ కనుగొనబడింది} other{{count} బ్రీచ్‌లు కనుగొనబడ్డాయి}}",
-
   "onboardAiSecurityTitle": "AI-శక్తితో భద్రత 🛡️",
   "onboardAiSecurityDesc": "ఆన్-డివైస్ మెషీన్ లెర్నింగ్ నిజ సమయంలో ఫిషింగ్, మాల్‌వేర్, బ్రీచ్‌లను గుర్తిస్తుంది — మీ డేటా ఫోన్‌ను విడిచిపెట్టదు.",
   "onboardPhishingTitle": "ఫిషింగ్ గుర్తింపు 🔗",
@@ -60,7 +59,6 @@
   "onboardContinue": "కొనసాగించు",
   "onboardGrantStart": "అనుమతులు ఇచ్చి ప్రారంభించు",
   "onboardSkip": "దాటవేయి",
-
   "scoreGreetingProtected": "మీరు రక్షితంగా ఉన్నారు",
   "scoreGreetingAtRisk": "కొన్ని విషయాలు తనిఖీ చేయాలి ⚠️",
   "scoreGreetingCritical": "తక్షణ చర్య అవసరం 🚨",
@@ -69,7 +67,6 @@
   "scoreHeadlineAtRisk": "ఒక్కసారి చూడండి",
   "scoreHeadlineCritical": "క్లిష్టమైన సమస్యలు కనుగొనబడ్డాయి",
   "scoreHeadlineFirstScan": "మీ ఫోన్‌ను భద్రపరచండి",
-
   "permSmsTitle": "SMS యాక్సెస్ అవసరం",
   "permSmsRationale": "ఫిషింగ్ లింక్‌లను గుర్తించడానికి సైబర్‌గార్డ్ AI మీ SMS సందేశాలను చదవాలి. మీ సందేశాలు ఎప్పుడూ సర్వర్‌కు పంపబడవు.",
   "permLocationTitle": "లొకేషన్ యాక్సెస్ అవసరం",
@@ -78,14 +75,12 @@
   "permNotifRationale": "ముప్పులను గుర్తించినప్పుడు మీరు తక్షణం చర్య తీసుకోవడానికి సైబర్‌గార్డ్ AI నోటిఫికేషన్లను పంపుతుంది.",
   "permAllowButton": "అనుమతి ఇవ్వు",
   "permNotNow": "ఇప్పుడు కాదు",
-
   "dialogCancel": "రద్దు",
   "dialogConfirm": "నిర్ధారించు",
   "dialogClearAll": "అన్నీ తొలగించు",
   "dialogReset": "రీసెట్",
   "dialogDelete": "తొలగించు",
   "dialogClose": "మూసివేయి",
-
   "breachInputTitle": "మీ డేటా లీక్ అయిందో లేదో తనిఖీ చేయండి",
   "breachInputSubtitle": "12+ బిలియన్ లీక్ రికార్డులలో మేము తనిఖీ చేస్తాము",
   "breachTabEmail": "ఇమెయిల్",
@@ -120,7 +115,6 @@
   "breachPrivacyStep2": "హ్యాష్ యొక్క మొదటి 5 అక్షరాలు మాత్రమే HIBP-కు పంపబడతాయి.",
   "breachPrivacyStep3": "వేలాది సరిపోలిక హ్యాష్‌లు తిరిగి వస్తాయి.",
   "breachPrivacyStep4": "100% సరిపోలిక తనిఖీ మీ పరికరంలోనే జరుగుతుంది.",
-
   "qrScanTitle": "QR స్కాన్",
   "qrUploadFromGallery": "గ్యాలరీ నుండి అప్‌లోడ్ చేయండి",
   "qrPointAtCode": "ఏదైనా QR వద్దకు సూచించండి · స్కాన్ చేసిన URL-లు పరికరంలోనే తనిఖీ చేయబడతాయి",
@@ -134,13 +128,11 @@
   "qrCameraUnavailable": "కెమెరా అందుబాటులో లేదు. కెమెరా అనుమతి ఇచ్చి మళ్లీ ప్రయత్నించండి.",
   "qrOpenSettings": "సెట్టింగ్స్ తెరవండి",
   "qrNoCodeInImage": "ఈ చిత్రంలో QR కోడ్ కనుగొనబడలేదు.",
-
   "scoreSuffix": "/100",
   "scoreLabel": "స్కోర్",
   "scannedAgo": "{time} స్కాన్ చేయబడింది",
   "dashboardRefreshed": "డాష్‌బోర్డ్ రిఫ్రెష్ అయింది",
   "dashboardRefreshedWithWifi": "డాష్‌బోర్డ్ రిఫ్రెష్ అయింది · వైఫై ట్రస్ట్ {score}/100",
-
   "moduleTitlePhishing": "ఫిషింగ్",
   "moduleSubtitlePhishing": "URL & SMS స్కానర్",
   "moduleTitleMalware": "మాల్వేర్",
@@ -149,12 +141,10 @@
   "moduleSubtitleBreach": "డేటా లీక్ మానిటర్",
   "moduleTitleWifi": "వైఫై",
   "moduleSubtitleWifi": "నెట్‌వర్క్ విశ్లేషకుడు",
-
   "statTotalScans": "మొత్తం స్కాన్లు",
   "statThreats": "బెదిరింపులు",
   "statLastScan": "చివరి స్కాన్",
   "statNever": "ఎప్పుడూ లేదు",
-
   "settingRealTimeAlerts": "రియల్-టైమ్ హెచ్చరికలు",
   "settingRealTimeAlertsSub": "బెదిరింపులు గుర్తించబడినప్పుడు నోటిఫై చేయండి",
   "settingClipboardScan": "క్లిప్‌బోర్డ్ స్కాన్",
@@ -187,7 +177,6 @@
   "settingsResetBody": "అన్ని సెట్టింగ్‌లు డిఫాల్ట్‌లకు పునరుద్ధరించబడతాయి. కొనసాగించాలా?",
   "exportGenerating": "PDF నివేదిక సృష్టించబడుతోంది…",
   "exportFailed": "ఎగుమతి విఫలమైంది: {error}",
-
   "alertsMarkAllRead": "అన్నీ చదివినట్లు గుర్తు పెట్టండి",
   "alertsNoFilter": "{filter} హెచ్చరికలు లేవు",
   "alertsTryDifferent": "వేరే ఫిల్టర్‌ను ప్రయత్నించండి",
@@ -198,7 +187,6 @@
   "alertsFilterMalware": "మాల్వేర్",
   "alertsFilterBreach": "ఉల్లంఘన",
   "alertsFilterWifi": "వైఫై",
-
   "malwareIssuesFound": "సమస్యలు కనుగొనబడ్డాయి ⚠️",
   "malwareAppSecurity": "యాప్ భద్రత 🛡️",
   "malwareTapToScan": "మీ యాప్‌లను విశ్లేషించడానికి స్కాన్ నొక్కండి",
@@ -219,7 +207,6 @@
   "malwareNoMatchSub": "వేరే ఫిల్టర్ లేదా శోధన పదాన్ని ప్రయత్నించండి",
   "malwarePermsVerified": "{count} అనుమతులు • ధృవీకరించబడింది",
   "malwarePermsSideloaded": "{count} అనుమతులు • సైడ్‌లోడెడ్",
-
   "phishingUrlTab": "🔗  URL స్కానర్",
   "phishingSmsTab": "💬  SMS స్కానర్",
   "phishingCheckLink": "లింక్‌ను తనిఖీ చేయండి 🔍",
@@ -251,7 +238,6 @@
   "phishingSmsLinksSuspicious": "అనుమానాస్పద లింక్‌లు కనుగొనబడ్డాయి!",
   "phishingSmsScanLinks": "{count} {count, plural, =1{లింక్} other{లింక్‌లు}} స్కాన్ చేయండి",
   "phishingSmsNoUrls": "ఈ సందేశంలో URL-లు లేవు",
-
   "wifiClearHistoryTooltip": "చరిత్రను తొలగించండి",
   "wifiClearTitle": "చరిత్రను తొలగించండి",
   "wifiClearBody": "అన్ని వైఫై స్కాన్ చరిత్రను తీసివేయాలా?",
@@ -300,13 +286,11 @@
   "wifiDetailScanned": "స్కాన్ చేయబడింది",
   "wifiUnknown": "తెలియనిది",
   "wifiNA": "వర్తించదు",
-
   "cyberDefense": "సైబర్ రక్షణ",
   "defenseThreatFusion": "థ్రెట్ ఫ్యూజన్",
   "defenseScreenshotScan": "స్క్రీన్‌షాట్ స్కాన్",
   "defensePredictiveRisk": "ముందస్తు అంచనా ప్రమాదం",
   "defenseArbitrationLog": "మధ్యవర్తిత్వ లాగ్",
-
   "linkProtection": "లింక్ రక్షణ",
   "linkInterceptorTitle": "స్మార్ట్ లింక్ ఇంటర్‌సెప్టర్",
   "linkInterceptorSub": "ఇతర యాప్‌ల నుండి తెరిచే లింక్‌లను లోడ్ కాకముందే స్కాన్ చేయండి",
@@ -322,7 +306,6 @@
   "cloudIntelDialogBody": "ఆన్‌లో ఉన్నప్పుడు, ఇంటర్‌సెప్ట్ చేసిన లింక్‌లు Google Safe Browsing తో తనిఖీ చేయబడతాయి. మీరు నొక్కిన లింక్ ఈ తనిఖీ కోసం Googleకు పంపబడుతుంది. మరేదీ మీ పరికరం నుండి బయటకు వెళ్లదు. మీరు దీన్ని ఎప్పుడైనా ఆఫ్ చేయవచ్చు.",
   "commonEnable": "ప్రారంభించు",
   "commonCancel": "రద్దు",
-
   "threatBandSafe": "సురక్షితం (0-30)",
   "threatBandSuspicious": "అనుమానాస్పదం (31-60)",
   "threatBandDangerous": "ప్రమాదకరం (61-80)",
@@ -332,7 +315,6 @@
   "threatLevelDangerous": "ప్రమాదకరం",
   "threatLevelCritical": "క్లిష్టం",
   "confidencePct": "విశ్వాసం {pct}%",
-
   "warnDangerousTitle": "ప్రమాదకర వెబ్‌సైట్ గుర్తించబడింది",
   "warnSuspiciousTitle": "అనుమానాస్పద వెబ్‌సైట్",
   "warnRiskScore": "ప్రమాద స్కోర్",
@@ -350,7 +332,6 @@
   "warnOpenDangerousBody": "CyberGuard ఈ లింక్‌ను అధిక ప్రమాదకరంగా రేట్ చేసింది. దీన్ని తెరవడం మీ ఆధారాలు లేదా పరికరాన్ని బహిర్గతం చేయవచ్చు. మీ స్వంత ప్రమాదంలో కొనసాగించాలా?",
   "warnOpenAnyway": "అయినా తెరువు",
   "warnPrivacyNote": "మీరు సెట్టింగ్‌లలో లింక్ చరిత్రను ప్రారంభించనంత వరకు ఏ URL నిల్వ చేయబడదు.",
-
   "fusionTitle": "థ్రెట్ ఫ్యూజన్ స్కాన్",
   "fusionPrompt": "అన్ని ఇంటెలిజెన్స్ మూలాలలో ఒక లింక్‌ను తనిఖీ చేయండి",
   "fusionRunScan": "ఫ్యూజన్ స్కాన్ నడుపు",
@@ -359,14 +340,12 @@
   "fusionExplanation": "వివరణ",
   "fusionConflict": "మూలాలు విభేదించాయి — మధ్యవర్తిత్వం ద్వారా సరిచేయబడింది.",
   "fusionTrust": "విశ్వాసం {weight}",
-
   "arbitrationTitle": "మధ్యవర్తిత్వ లాగ్",
   "arbitrationClear": "లాగ్ క్లియర్ చేయి",
   "arbitrationEmptyTitle": "ఇంకా విభేదాలు లేవు",
   "arbitrationEmptyBody": "గుర్తింపు మూలాలు విభేదించినప్పుడు లేదా విశ్వసనీయ మూలం CyberGuardను ఓవర్‌రైడ్ చేసినప్పుడు, నిర్ణయం ఇక్కడ నమోదు అవుతుంది.",
   "arbitrationOverride": "విశ్వసనీయ ఓవర్‌రైడ్ → {level}",
   "arbitrationConflictTitle": "మూల విభేదం → {level}",
-
   "riskTitle": "ముందస్తు అంచనా ప్రమాదం",
   "riskNoData": "డేటా లేదు",
   "riskBandLow": "తక్కువ",
@@ -380,7 +359,6 @@
   "forecastPhishing": "ఫిషింగ్ దాడి",
   "forecastCredentialTheft": "ఆధార దొంగతనం",
   "forecastMalware": "మాల్‌వేర్ సంక్రమణ",
-
   "rfPhishingTitle": "ఫిషింగ్ లింక్‌లు ఎదురయ్యాయి",
   "rfPhishingDetail": "గత 7 రోజుల్లో {count} ఫ్లాగ్ చేయబడ్డాయి",
   "rfSmsTitle": "అనుమానాస్పద SMS అందింది",
@@ -395,14 +373,12 @@
   "rfBreachDetail": "మీ ఖాతా ఉల్లంఘించబడిన డేటాలో కనిపిస్తుంది",
   "rfTrendTitle": "భద్రతా స్కోర్ తగ్గుతోంది",
   "rfTrendDetail": "భద్రత ఇటీవల {pts} పాయింట్లు తగ్గింది",
-
   "recBreach": "ఉల్లంఘించబడిన ఖాతాల పాస్‌వర్డ్‌లను మార్చి 2FA ప్రారంభించండి.",
   "recPhishing": "ఊహించని సందేశాలలో లింక్‌లను నొక్కడం మానుకోండి; పంపినవారిని ధృవీకరించండి.",
   "recWifi": "పబ్లిక్ Wi-Fiలో సున్నితమైన లాగిన్‌లను మానుకోండి; విశ్వసనీయ నెట్‌వర్క్‌ను ఉపయోగించండి.",
   "recMalware": "అధిక-ప్రమాద యాప్‌లను సమీక్షించి తొలగించండి; Play Store నుండి మాత్రమే ఇన్‌స్టాల్ చేయండి.",
   "recInterceptor": "నిరంతర రక్షణ కోసం స్మార్ట్ లింక్ ఇంటర్‌సెప్టర్‌ను ప్రారంభించి ఉంచండి.",
   "recHealthy": "మీరు మంచి స్థితిలో ఉన్నారు — CyberGuard రక్షణలను ప్రారంభించి ఉంచండి.",
-
   "screenshotTitle": "స్క్రీన్‌షాట్ స్కానర్",
   "screenshotPrompt": "అనుమానాస్పద పేజీ స్క్రీన్‌షాట్‌ను స్కాన్ చేయండి",
   "screenshotDesc": "నకిలీ బ్యాంక్, UPI, OTP, లాగిన్, KYC, లాటరీ మరియు సపోర్ట్ మోసాలను గుర్తిస్తుంది. చిత్రాలు పరికరంలోనే విశ్లేషించబడతాయి.",
@@ -413,7 +389,6 @@
   "screenshotBrand": "ప్రస్తావించబడిన బ్రాండ్: {brand}",
   "screenshotIndicators": "సూచికలు",
   "screenshotExtractedText": "సంగ్రహించిన వచనం",
-
   "scamFakeBank": "నకిలీ బ్యాంక్ పేజీ",
   "scamFakeUpi": "నకిలీ UPI / చెల్లింపు పేజీ",
   "scamFakeOtp": "నకిలీ OTP అభ్యర్థన",
@@ -427,5 +402,35 @@
   "scamReasonBrand": "ప్రస్తావించబడిన బ్రాండ్: {brand}",
   "scamReasonUrgency": "అత్యవసర / ఒత్తిడి పదాలు: \"{word}\"",
   "scamReasonNoIndicators": "వచనంలో మోసం సూచికలు ఏవీ కనుగొనబడలేదు",
-  "scamReasonNoText": "చిత్రంలో చదవగలిగే వచనం ఏదీ కనుగొనబడలేదు"
+  "scamReasonNoText": "చిత్రంలో చదవగలిగే వచనం ఏదీ కనుగొనబడలేదు",
+  "authTitle": "CyberGuard AI లో సైన్ ఇన్ చేయండి",
+  "authSubtitle": "మీ భద్రతా సెట్టింగ్‌లను అన్ని పరికరాల్లో సమకాలీకరించండి",
+  "authSignIn": "సైన్ ఇన్",
+  "authSignUp": "ఖాతా సృష్టించండి",
+  "authPassword": "పాస్‌వర్డ్",
+  "authContinueGoogle": "Google తో కొనసాగండి",
+  "authForgotPassword": "పాస్‌వర్డ్ మర్చిపోయారా?",
+  "authNoAccount": "కొత్తవారా? ఖాతా సృష్టించండి",
+  "authHaveAccount": "ఇప్పటికే ఖాతా ఉందా? సైన్ ఇన్ చేయండి",
+  "authOr": "లేదా",
+  "authContinueOffline": "ఖాతా లేకుండా కొనసాగండి",
+  "authResetSent": "ఆ చిరునామా నమోదై ఉంటే, రీసెట్ లింక్ పంపబడుతుంది.",
+  "authUnavailableTitle": "ఈ బిల్డ్‌లో సైన్-ఇన్ సెటప్ కాలేదు",
+  "authUnavailableBody": "ఈ యాప్ Firebase ఆధారాలు లేకుండా నిర్మించబడింది, కాబట్టి ఖాతాలు అందుబాటులో లేవు. మిగతావన్నీ ఎప్పటిలాగే ఆఫ్‌లైన్‌లో పనిచేస్తాయి.",
+  "authErrInvalidEmail": "ఆ ఇమెయిల్ చిరునామా సరిగ్గా లేదు",
+  "authErrWrongPassword": "ఇమెయిల్ లేదా పాస్‌వర్డ్ తప్పు",
+  "authErrUserNotFound": "ఆ ఇమెయిల్‌కు ఖాతా కనుగొనబడలేదు",
+  "authErrEmailInUse": "ఆ ఇమెయిల్‌కు ఇప్పటికే ఖాతా ఉంది",
+  "authErrWeakPassword": "కనీసం 6 అక్షరాలు వాడండి",
+  "authErrNetwork": "కనెక్షన్ లేదు. మీ నెట్‌వర్క్ తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.",
+  "authErrUnknown": "ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+  "authSignOut": "సైన్ అవుట్",
+  "authSignedInAs": "{email} గా సైన్ ఇన్ అయ్యారు",
+  "@authSignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  }
 }

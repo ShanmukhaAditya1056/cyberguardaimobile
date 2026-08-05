@@ -1382,4 +1382,80 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get scamReasonNoText => 'చిత్రంలో చదవగలిగే వచనం ఏదీ కనుగొనబడలేదు';
+
+  @override
+  String get authTitle => 'CyberGuard AI లో సైన్ ఇన్ చేయండి';
+
+  @override
+  String get authSubtitle =>
+      'మీ భద్రతా సెట్టింగ్‌లను అన్ని పరికరాల్లో సమకాలీకరించండి';
+
+  @override
+  String get authSignIn => 'సైన్ ఇన్';
+
+  @override
+  String get authSignUp => 'ఖాతా సృష్టించండి';
+
+  @override
+  String get authPassword => 'పాస్‌వర్డ్';
+
+  @override
+  String get authContinueGoogle => 'Google తో కొనసాగండి';
+
+  @override
+  String get authForgotPassword => 'పాస్‌వర్డ్ మర్చిపోయారా?';
+
+  @override
+  String get authNoAccount => 'కొత్తవారా? ఖాతా సృష్టించండి';
+
+  @override
+  String get authHaveAccount => 'ఇప్పటికే ఖాతా ఉందా? సైన్ ఇన్ చేయండి';
+
+  @override
+  String get authOr => 'లేదా';
+
+  @override
+  String get authContinueOffline => 'ఖాతా లేకుండా కొనసాగండి';
+
+  @override
+  String get authResetSent =>
+      'ఆ చిరునామా నమోదై ఉంటే, రీసెట్ లింక్ పంపబడుతుంది.';
+
+  @override
+  String get authUnavailableTitle => 'ఈ బిల్డ్‌లో సైన్-ఇన్ సెటప్ కాలేదు';
+
+  @override
+  String get authUnavailableBody =>
+      'ఈ యాప్ Firebase ఆధారాలు లేకుండా నిర్మించబడింది, కాబట్టి ఖాతాలు అందుబాటులో లేవు. మిగతావన్నీ ఎప్పటిలాగే ఆఫ్‌లైన్‌లో పనిచేస్తాయి.';
+
+  @override
+  String get authErrInvalidEmail => 'ఆ ఇమెయిల్ చిరునామా సరిగ్గా లేదు';
+
+  @override
+  String get authErrWrongPassword => 'ఇమెయిల్ లేదా పాస్‌వర్డ్ తప్పు';
+
+  @override
+  String get authErrUserNotFound => 'ఆ ఇమెయిల్‌కు ఖాతా కనుగొనబడలేదు';
+
+  @override
+  String get authErrEmailInUse => 'ఆ ఇమెయిల్‌కు ఇప్పటికే ఖాతా ఉంది';
+
+  @override
+  String get authErrWeakPassword => 'కనీసం 6 అక్షరాలు వాడండి';
+
+  @override
+  String get authErrNetwork =>
+      'కనెక్షన్ లేదు. మీ నెట్‌వర్క్ తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get authErrUnknown =>
+      'ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get authSignOut => 'సైన్ అవుట్';
+
+  @override
+  String authSignedInAs(String email) {
+    return '$email గా సైన్ ఇన్ అయ్యారు';
+  }
 }

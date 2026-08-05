@@ -4,6 +4,26 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+// Firebase auth is optional at build time.
+//
+// The google-services plugin fails the whole build when google-services.json
+// is absent, which would break a clean checkout and CI for everyone who has
+// not set up a Firebase project. Applying it only when the file is actually
+// there keeps the app buildable either way: without it Firebase.initializeApp
+// throws at startup, AuthService catches that and reports itself
+// unconfigured, and the login screen explains what is missing.
+//
+// To turn auth on: create a Firebase project, register the Android app as
+// com.cyberguard.ai with your signing SHA-1, and drop the downloaded
+// google-services.json into android/app/. Nothing else needs changing.
+def googleServicesConfig = file("google-services.json")
+if (googleServicesConfig.exists()) {
+    apply plugin: "com.google.gms.google-services"
+    logger.lifecycle("google-services.json found — Firebase auth enabled")
+} else {
+    logger.lifecycle("google-services.json absent — building without Firebase auth")
+}
+
 android {
     namespace "com.cyberguard.ai"
     compileSdk flutter.compileSdkVersion

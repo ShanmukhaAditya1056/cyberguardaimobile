@@ -1373,4 +1373,78 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get scamReasonNoText => 'छवि में कोई पठनीय पाठ नहीं मिला';
+
+  @override
+  String get authTitle => 'CyberGuard AI में साइन इन करें';
+
+  @override
+  String get authSubtitle => 'अपनी सुरक्षा सेटिंग्स सभी डिवाइस पर सिंक करें';
+
+  @override
+  String get authSignIn => 'साइन इन';
+
+  @override
+  String get authSignUp => 'खाता बनाएँ';
+
+  @override
+  String get authPassword => 'पासवर्ड';
+
+  @override
+  String get authContinueGoogle => 'Google से जारी रखें';
+
+  @override
+  String get authForgotPassword => 'पासवर्ड भूल गए?';
+
+  @override
+  String get authNoAccount => 'नए हैं? खाता बनाएँ';
+
+  @override
+  String get authHaveAccount => 'पहले से खाता है? साइन इन करें';
+
+  @override
+  String get authOr => 'या';
+
+  @override
+  String get authContinueOffline => 'बिना खाते के जारी रखें';
+
+  @override
+  String get authResetSent =>
+      'यदि वह पता पंजीकृत है, तो रीसेट लिंक भेजा जा रहा है।';
+
+  @override
+  String get authUnavailableTitle => 'इस बिल्ड में साइन-इन सेट नहीं है';
+
+  @override
+  String get authUnavailableBody =>
+      'यह ऐप Firebase क्रेडेंशियल के बिना बनाया गया था, इसलिए खाते उपलब्ध नहीं हैं। बाकी सब कुछ हमेशा की तरह ऑफ़लाइन काम करता है।';
+
+  @override
+  String get authErrInvalidEmail => 'यह ईमेल पता सही नहीं लगता';
+
+  @override
+  String get authErrWrongPassword => 'ईमेल या पासवर्ड ग़लत है';
+
+  @override
+  String get authErrUserNotFound => 'इस ईमेल के लिए कोई खाता नहीं मिला';
+
+  @override
+  String get authErrEmailInUse => 'इस ईमेल के लिए खाता पहले से मौजूद है';
+
+  @override
+  String get authErrWeakPassword => 'कम से कम 6 अक्षर इस्तेमाल करें';
+
+  @override
+  String get authErrNetwork =>
+      'कोई कनेक्शन नहीं। अपना नेटवर्क जाँचें और फिर कोशिश करें।';
+
+  @override
+  String get authErrUnknown => 'कुछ ग़लत हो गया। कृपया फिर कोशिश करें।';
+
+  @override
+  String get authSignOut => 'साइन आउट';
+
+  @override
+  String authSignedInAs(String email) {
+    return '$email के रूप में साइन इन';
+  }
 }
