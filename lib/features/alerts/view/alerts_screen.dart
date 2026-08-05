@@ -206,6 +206,10 @@ class _FilterChips extends StatelessWidget {
       ('malware', l.alertsFilterMalware, AppColors.danger),
       ('breach', l.alertsFilterBreach, AppColors.critical),
       ('wifi', l.alertsFilterWifi, AppColors.safe),
+      // The Smart Link Interceptor writes alerts with module 'interceptor'
+      // (link_interceptor_repository.dart). Without a chip for it those alerts
+      // were only ever reachable under "All".
+      ('interceptor', l.linkProtection, AppColors.blue),
     ];
 
     return SingleChildScrollView(
@@ -254,13 +258,22 @@ class _AlertCard extends StatelessWidget {
 
   const _AlertCard({required this.alert, required this.onTap});
 
+  // AlertModel.type is only ever 'critical' or 'warning' in practice — see the
+  // AlertModel() call sites in the repositories. 'high' and 'medium' were
+  // handled here but are never produced, while 'warning' was not, so every
+  // warning fell through to the green "all clear" branch: a WiFi threat or a
+  // blocked link rendered as a reassuring mint tick. 'safe' and 'info' are
+  // kept because AlertModel documents them.
   ({Color tile, Color accent}) _palette() {
     switch (alert.type) {
       case 'critical':
       case 'high':
         return (tile: BlinkCard.roseTile, accent: BlinkCard.roseAccent);
+      case 'warning':
       case 'medium':
         return (tile: BlinkCard.peachTile, accent: BlinkCard.peachAccent);
+      case 'info':
+        return (tile: BlinkCard.amberTile, accent: BlinkCard.amberAccent);
       default:
         return (tile: BlinkCard.mintTile, accent: BlinkCard.mintAccent);
     }
@@ -270,9 +283,11 @@ class _AlertCard extends StatelessWidget {
     switch (alert.type) {
       case 'critical':
         return Icons.dangerous_rounded;
+      case 'warning':
       case 'high':
         return Icons.warning_amber_rounded;
       case 'medium':
+      case 'info':
         return Icons.info_rounded;
       default:
         return Icons.check_circle_rounded;

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/services.dart' show rootBundle;
 
 /// On-device Wi-Fi anomaly detector — loads an Isolation Forest trained
@@ -37,7 +38,7 @@ class WifiMlService {
     _triedLoad = true;
     try {
       final raw = await rootBundle.loadString(assetPath);
-      final json = jsonDecode(raw) as Map<String, dynamic>;
+      final json = await compute(jsonDecode, raw) as Map<String, dynamic>;
       _model = _IsolationForest.fromJson(
           (json['model'] as Map).cast<String, dynamic>());
       final scaler = (json['scaler'] as Map).cast<String, dynamic>();
