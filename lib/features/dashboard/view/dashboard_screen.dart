@@ -8,6 +8,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/automation_ids.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../data/models/scan_result_model.dart';
 import '../../../data/repositories/wifi_repository.dart';
 import '../../../data/services/platform_channel_service.dart';
 import '../../../shared/widgets/animated_gradient_bg.dart';
@@ -253,9 +254,19 @@ class _DashboardContent extends StatelessWidget {
           const SizedBox(height: 24),
         ],
 
-        // The recent-alerts list used to sit here. Alerts are still reachable
-        // from the bell in the app bar (which keeps showing the unread count)
-        // and from notification taps.
+        // This week's scans. (The recent-alerts list used to sit here; alerts
+        // are still reachable from the bell in the app bar, which keeps
+        // showing the unread count, and from notification taps.)
+        if (state.weekScans.isNotEmpty) ...[
+          SectionTitle(
+            title: AppLocalizations.of(context)!.phishingScanHistory,
+            actionLabel: AppLocalizations.of(context)!.seeAll,
+            onAction: () => GoRouter.of(context).push('/phishing'),
+          ),
+          const SizedBox(height: 12),
+          _WeekScanHistory(scans: state.weekScans),
+          const SizedBox(height: 24),
+        ],
 
         const SizedBox(height: 100), // Bottom padding for FAB
       ],
@@ -650,6 +661,145 @@ class _DefenseGrid extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The last seven days of scans, grouped under a header per day.
+///
+/// Reads `scan_results`, so it covers every module that persists a scan —
+/// phishing, malware, breach, Wi-Fi and intercepted links — rather than the
+/// daily score rollups the chart above it draws from.
+class _WeekScanHistory extends StatelessWidget {
+  final List<ScanResultModel> scans;
+
+  const _WeekScanHistory({required this.scans});
+
+  static const _maxRows = 12;
+
+  @override
+  Widget build(BuildContext context) {
+    // scans arrives newest-first, so insertion order gives newest day first
+    // and newest scan first inside each day.
+    final byDay = <String, List<ScanResultModel>>{};
+    for (final scan in scans.take(_maxRows)) {
+      byDay.putIfAbsent(DateFormatter.dayLabel(scan.timestamp), () => []).add(scan);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final entry in byDay.entries) ...[
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 6, top: 2),
+              child: Text(entry.key,
+                  style: AppTextStyles.captionMedium
+                      .copyWith(color: AppColors.textMedium)),
+            ),
+            GlassCard(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Column(
+                children: [
+                  for (var i = 0; i < entry.value.length; i++) ...[
+                    if (i > 0) _Divider(),
+                    _ScanRow(scan: entry.value[i]),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ScanRow extends StatelessWidget {
+  final ScanResultModel scan;
+
+  const _ScanRow({required this.scan});
+
+  static const _moduleIcons = <String, IconData>{
+    'phishing': Icons.link_rounded,
+    'malware': Icons.android_rounded,
+    'breach': Icons.mark_email_unread_rounded,
+    'wifi': Icons.wifi_rounded,
+    'link_intercept': Icons.shield_rounded,
+  };
+
+  /// Verdicts are per-module strings, not a shared enum, so map the ones the
+  /// repositories actually write. isThreat covers severity; this is only for
+  /// the human-readable chip.
+  static const _verdictLabels = <String, String>{
+    'threats_found': 'Threats',
+    'link_intercept': 'Blocked',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final isThreat = scan.isThreat;
+    final color = isThreat ? AppColors.danger : AppColors.safe;
+    final label = _verdictLabels[scan.verdict] ??
+        (scan.verdict.isEmpty
+            ? '—'
+            : scan.verdict[0].toUpperCase() + scan.verdict.substring(1));
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(
+              _moduleIcons[scan.type] ?? Icons.security_rounded,
+              size: 16,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  scan.input.isEmpty ? scan.type : scan.input,
+                  style: AppTextStyles.bodySmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 1),
+                Text(label,
+                    style: AppTextStyles.caption.copyWith(color: color)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            DateFormatter.timeOnly(scan.timestamp),
+            style: AppTextStyles.caption
+                .copyWith(color: AppColors.textMedium),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Divider(
+        height: 1,
+        thickness: 1,
+        indent: 54,
+        endIndent: 12,
+        color: AppColors.textMedium.withValues(alpha: 0.12),
+      );
 }
 
 class _ScanFab extends StatelessWidget {

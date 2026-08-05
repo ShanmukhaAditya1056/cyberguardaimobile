@@ -269,6 +269,9 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                 color: Colors.white),
             onPressed: () async {
               await _controller.toggleTorch();
+              // Leaving the scanner while the torch call is in flight would
+              // otherwise throw "setState() called after dispose()".
+              if (!mounted) return;
               setState(() => _torchOn = !_torchOn);
             },
           ),

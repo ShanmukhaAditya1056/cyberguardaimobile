@@ -26,6 +26,9 @@ class _ArbitrationLogScreenState extends State<ArbitrationLogScreen> {
 
   Future<void> _clear() async {
     await OverrideLogService.clear();
+    // Popping the screen while the clear is in flight would otherwise throw
+    // "setState() called after dispose()".
+    if (!mounted) return;
     setState(() => _entries = OverrideLogService.all());
   }
 

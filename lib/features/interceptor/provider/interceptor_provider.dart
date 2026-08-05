@@ -77,6 +77,16 @@ class InterceptorNotifier extends StateNotifier<InterceptorState> {
     state = state.copyWith(isAnalyzing: true, error: null);
     try {
       final risk = await _repo.analyze(link.url, sourceApp: link.sourceApp);
+      // analyze() can hit the network, and links arrive from other apps at
+      // arbitrary moments — if the provider was torn down while it was in
+      // flight, touching `state` throws "Cannot use ... after dispose". The
+      // browser hand-off below still has to happen either way.
+      if (!mounted) {
+        if (risk.action == LinkAction.allow) {
+          await _channel.openInBrowser(link.url);
+        }
+        return;
+      }
       if (risk.action == LinkAction.allow) {
         // No threat — open without nagging the user.
         state = state.copyWith(isAnalyzing: false, clearPending: true);
@@ -89,6 +99,7 @@ class InterceptorNotifier extends StateNotifier<InterceptorState> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(isAnalyzing: false, error: e.toString());
     }
   }
@@ -98,6 +109,9 @@ class InterceptorNotifier extends StateNotifier<InterceptorState> {
     final risk = state.pending;
     if (risk == null) return;
     await _channel.openInBrowser(risk.url);
+    // Handing off to the browser routinely backgrounds this app, so the
+    // notifier may be gone by the time we get here.
+    if (!mounted) return;
     state = state.copyWith(clearPending: true);
   }
 

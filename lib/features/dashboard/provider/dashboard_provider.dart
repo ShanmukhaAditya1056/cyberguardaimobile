@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/score_calculator.dart';
 import '../../../data/models/alert_model.dart';
+import '../../../data/models/scan_result_model.dart';
 import '../../../data/models/score_entry_model.dart';
 import '../../../data/services/hive_service.dart';
 
@@ -25,6 +26,12 @@ class DashboardState {
   final DashboardStats stats;
   final List<ScoreEntryModel> scoreHistory;
   final List<AlertModel> recentAlerts;
+
+  /// Scans from the last 7 days, newest first, for the week-history
+  /// section. Sourced from the scan_results box rather than score
+  /// history, so it reflects individual scans rather than daily rollups.
+  final List<ScanResultModel> weekScans;
+
   final bool isLoading;
   final String? error;
 
@@ -37,6 +44,7 @@ class DashboardState {
     required this.stats,
     required this.scoreHistory,
     required this.recentAlerts,
+    required this.weekScans,
     required this.isLoading,
     this.error,
   });
@@ -54,6 +62,7 @@ class DashboardState {
         ),
         scoreHistory: [],
         recentAlerts: [],
+        weekScans: [],
         isLoading: false,
       );
 
@@ -66,6 +75,7 @@ class DashboardState {
     DashboardStats? stats,
     List<ScoreEntryModel>? scoreHistory,
     List<AlertModel>? recentAlerts,
+    List<ScanResultModel>? weekScans,
     bool? isLoading,
     String? error,
   }) {
@@ -78,6 +88,7 @@ class DashboardState {
       stats: stats ?? this.stats,
       scoreHistory: scoreHistory ?? this.scoreHistory,
       recentAlerts: recentAlerts ?? this.recentAlerts,
+      weekScans: weekScans ?? this.weekScans,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
@@ -97,6 +108,16 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       final threatsFound = HiveService.getThreatCount();
       final scoreHistory = HiveService.getScoreHistory(days: 7);
       final alerts = HiveService.getAlerts().take(5).toList();
+
+      // getScanResults() is already sorted newest-first; cut it at the 7-day
+      // boundary from the start of today so "this week" means seven calendar
+      // days, not a rolling 168 hours.
+      final now = DateTime.now();
+      final weekStart =
+          DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
+      final weekScans = HiveService.getScanResults()
+          .where((s) => s.timestamp.isAfter(weekStart))
+          .toList();
 
       final unified = ScoreCalculator.calculate(
         phishingScore: settings.phishingScore,
@@ -119,6 +140,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         ),
         scoreHistory: scoreHistory,
         recentAlerts: alerts,
+        weekScans: weekScans,
         isLoading: false,
       );
     } catch (e) {

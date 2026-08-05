@@ -45,10 +45,33 @@ class ScanResultModel extends HiveObject {
     this.extraData,
   });
 
-  bool get isThreat => verdict.toLowerCase() == 'phishing' ||
-      verdict.toLowerCase() == 'malicious' ||
-      verdict.toLowerCase() == 'breached' ||
-      verdict.toLowerCase() == 'unsafe';
+  /// Every verdict string the writers actually produce that means "this was a
+  /// threat". Keep in step with the `verdict:` arguments in the repositories:
+  ///
+  ///   phishing_repository        'phishing' | 'safe'
+  ///   malware_repository         'threats_found' | 'clean'
+  ///   breach_repository          'breached' | 'safe'
+  ///   link_interceptor_repository ThreatLevel.label.toLowerCase(), i.e.
+  ///                              'safe' | 'suspicious' | 'dangerous' | 'critical'
+  ///
+  /// 'threats_found' and the two malicious interceptor bands were missing, so
+  /// getThreatCount() — and the "Threats Found" tile on the dashboard — did
+  /// not count a single malware detection or blocked link.
+  ///
+  /// 'suspicious' is deliberately excluded, matching ThreatLevel.isMalicious,
+  /// which treats only dangerous/critical as malicious. 'malicious' and
+  /// 'unsafe' are kept for records written by older builds.
+  static const _threatVerdicts = <String>{
+    'phishing',
+    'threats_found',
+    'breached',
+    'dangerous',
+    'critical',
+    'malicious',
+    'unsafe',
+  };
+
+  bool get isThreat => _threatVerdicts.contains(verdict.toLowerCase());
 }
 
 @HiveType(typeId: 5)
