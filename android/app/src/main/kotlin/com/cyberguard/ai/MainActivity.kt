@@ -1,5 +1,6 @@
 package com.cyberguard.ai
 
+import android.Manifest
 import android.app.Activity
 import android.app.role.RoleManager
 import android.content.ComponentName
@@ -9,9 +10,11 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.provider.Settings
@@ -501,14 +504,48 @@ class MainActivity : FlutterActivity() {
                 )
             }
 
-            val wifiInfo = wifiManager.connectionInfo
+            // Android 12 (S) deprecated WifiManager.getConnectionInfo(). The
+            // supported path is the WifiInfo hanging off the active network's
+            // NetworkCapabilities; it is also the only one that reliably
+            // carries a real SSID on newer releases. Fall back to the old call
+            // when transportInfo is absent (pre-S, or a redacted instance).
+            val wifiInfo: WifiInfo? =
+                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    capabilities?.transportInfo as? WifiInfo
+                } else {
+                    null
+                }) ?: @Suppress("DEPRECATION") wifiManager.connectionInfo
+
             val rawSsid = wifiInfo?.ssid ?: ""
             val cleanedSsid = rawSsid.trim().removePrefix("\"").removeSuffix("\"")
-            val ssid = if (
+            val ssidHidden =
                 cleanedSsid.isEmpty() ||
+                cleanedSsid.equals(WifiManager.UNKNOWN_SSID, ignoreCase = true) ||
                 cleanedSsid.equals("<unknown ssid>", ignoreCase = true) ||
                 cleanedSsid == "0x"
-            ) "Unknown" else cleanedSsid
+
+            // The SSID is redacted rather than absent when the caller is not
+            // allowed to see it. Two separate causes, and the user can only
+            // act on them if we say which one it is: the runtime permission
+            // may be missing, or the device-wide Location toggle may be off —
+            // Android withholds the SSID for the latter even when the
+            // permission itself is granted.
+            if (ssidHidden) {
+                if (!hasWifiNamePermission()) {
+                    return wifiUnavailable(
+                        "permission_required",
+                        "Allow the location / nearby-devices permission to read the Wi-Fi network name",
+                    )
+                }
+                if (!isLocationServiceOn()) {
+                    return wifiUnavailable(
+                        "location_off",
+                        "Turn on Location in system settings — Android hides the Wi-Fi name while it is off, even with the permission granted",
+                    )
+                }
+            }
+
+            val ssid = if (ssidHidden) "Unknown" else cleanedSsid
 
             val bssid = (wifiInfo?.bssid ?: "").let {
                 if (it == "02:00:00:00:00:00") "" else it
@@ -562,6 +599,48 @@ class MainActivity : FlutterActivity() {
                 "hasInternet" to false,
                 "isSecured" to false,
             )
+        }
+    }
+
+    /// Shared shape for every "we cannot report a network" outcome, so the
+    /// Dart side only ever has to switch on `status`.
+    private fun wifiUnavailable(status: String, message: String): Map<String, Any> =
+        mapOf(
+            "status" to status,
+            "message" to message,
+            "ssid" to "",
+            "bssid" to "",
+            "rssi" to -100,
+            "linkSpeed" to 0,
+            "frequency" to 0,
+            "ipAddress" to "",
+            "isWifi" to false,
+            "hasInternet" to false,
+            "isSecured" to false,
+        )
+
+    /// True when at least one permission that unlocks the SSID is granted.
+    /// NEARBY_WIFI_DEVICES is the Android 13+ route; ACCESS_FINE_LOCATION
+    /// covers everything before it (and still works after).
+    private fun hasWifiNamePermission(): Boolean {
+        val fine = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+        if (fine) return true
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.NEARBY_WIFI_DEVICES) ==
+            PackageManager.PERMISSION_GRANTED
+    }
+
+    /// The device-wide Location toggle, which is separate from the app's
+    /// permission grant. Android returns "<unknown ssid>" while this is off.
+    private fun isLocationServiceOn(): Boolean {
+        val lm = getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return false
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            lm.isLocationEnabled
+        } else {
+            @Suppress("DEPRECATION")
+            lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
         }
     }
 

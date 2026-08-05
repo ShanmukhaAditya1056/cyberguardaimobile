@@ -8,6 +8,7 @@ import 'data/repositories/malware_repository.dart';
 import 'data/repositories/phishing_repository.dart';
 import 'data/services/hive_service.dart';
 import 'data/services/notification_service.dart';
+import 'data/services/wifi_auto_scan_service.dart';
 import 'data/services/wifi_ml_service.dart';
 import 'app.dart';
 
@@ -60,6 +61,11 @@ Future<void> main() async {
 
   // Initialise notifications
   await NotificationService.init();
+
+  // Backs the "Auto Wi-Fi Scan" setting. Subscribing costs nothing while the
+  // device stays put — the service only wakes on a connectivity change, and
+  // re-reads the setting on each event.
+  WifiAutoScanService.instance.start();
 
   // Warm up every on-device ML model. Each call no-ops if its asset is
   // missing, so a partial bundle never blocks app start.

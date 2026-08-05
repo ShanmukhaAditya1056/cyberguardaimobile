@@ -61,8 +61,11 @@ class WifiNotifier extends StateNotifier<WifiState> {
       );
     } catch (e) {
       final msg = e.toString().replaceFirst('Exception: ', '');
+      // Case-insensitive: the platform messages start sentences with
+      // "Location", which a lowercase-only match would miss.
+      final lower = msg.toLowerCase();
       final isPermission =
-          msg.contains('permission') || msg.contains('location');
+          lower.contains('permission') || lower.contains('location');
       state = state.copyWith(
         isScanning: false,
         error: msg,

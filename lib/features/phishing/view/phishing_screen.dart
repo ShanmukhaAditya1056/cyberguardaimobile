@@ -9,7 +9,9 @@ import '../../../core/theme/app_gradients.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/automation_ids.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/url_extractor.dart';
 import '../../../data/repositories/phishing_repository.dart';
+import '../../../data/services/hive_service.dart';
 import '../../../data/services/permission_service.dart';
 import '../../../data/services/platform_channel_service.dart';
 import '../../../shared/widgets/animated_gradient_bg.dart';
@@ -40,6 +42,39 @@ class _PhishingScreenState extends ConsumerState<PhishingScreen>
   void initState() {
     super.initState();
     _tabs = TabController(length: 2, vsync: this);
+    _maybeAutoFillFromClipboard();
+  }
+
+  /// Backs the "Clipboard Scan — Scan URLs copied to clipboard" switch, which
+  /// was stored in Hive but never read, so it did nothing.
+  ///
+  /// Reads the clipboard once when the scanner opens and, only if it holds
+  /// something that actually parses as a URL, drops it into the field ready to
+  /// scan. It stops short of auto-scanning: that would fire a network lookup
+  /// on whatever the user happened to copy last.
+  ///
+  /// Gated on the setting because reading the clipboard is not free — Android
+  /// 12+ shows the user a toast every time an app does it, so an app that
+  /// peeked regardless of the switch would look like it was snooping.
+  Future<void> _maybeAutoFillFromClipboard() async {
+    try {
+      if (!HiveService.getSettings().clipboardScan) return;
+    } catch (_) {
+      return; // settings unavailable — do not touch the clipboard
+    }
+    if (_urlCtrl.text.isNotEmpty) return;
+
+    final text = (await FlutterClipboard.paste()).trim();
+    if (!mounted || text.isEmpty) return;
+
+    // Reuse the extractor the scanner itself uses, so "looks like a URL"
+    // means exactly the same thing here as everywhere else.
+    final urls = UrlExtractor.extractUrls(text);
+    if (urls.isEmpty) return;
+
+    _urlCtrl.text = urls.first;
+    _urlCtrl.selection =
+        TextSelection.collapsed(offset: _urlCtrl.text.length);
   }
 
   @override

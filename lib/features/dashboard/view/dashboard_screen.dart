@@ -40,8 +40,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     // an error to the user. If location perm isn't already granted or Wi-Fi
     // is off, we silently skip it and the scan still "succeeds".
     try {
-      final status = await Permission.location.status;
-      if (status.isGranted) {
+      // Either permission unlocks the SSID — checking only `location` meant
+      // Android 13+ users who granted nearby-devices instead had the Wi-Fi
+      // leg of the quick scan skipped silently. Mirrors PermissionService.
+      final granted = await Permission.location.isGranted ||
+          await Permission.nearbyWifiDevices.isGranted;
+      if (granted) {
         final repo = WifiRepository(PlatformChannelService());
         final result = await repo.analyzeCurrentNetwork();
         ref

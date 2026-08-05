@@ -74,6 +74,17 @@ class WifiRepository {
       throw Exception(
           'You are not connected to any Wi-Fi network. Connect first, then scan.');
     }
+    // Android redacts the SSID rather than failing, so without these the scan
+    // would quietly record a network called "Unknown". Both messages contain
+    // the words the provider looks for to flag this as a permission problem.
+    if (status == 'permission_required') {
+      throw Exception((wifiData['message'] as String?) ??
+          'Location permission is needed to read the Wi-Fi network name');
+    }
+    if (status == 'location_off') {
+      throw Exception((wifiData['message'] as String?) ??
+          'Turn on Location to read the Wi-Fi network name');
+    }
     if (status == 'error') {
       throw Exception(
           (wifiData['message'] as String?) ?? 'Failed to read Wi-Fi state');

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../core/constants/app_constants.dart';
+import 'hive_service.dart';
 
 /// Semantic destinations carried in a notification payload. The router layer
 /// (see `app.dart`) maps these to real paths so the data layer stays free of
@@ -141,12 +142,29 @@ class NotificationService {
     navToken.value++;
   }
 
+  /// Honours the "Real-time Alerts" switch in Settings.
+  ///
+  /// The toggle was stored but never read, so turning it off changed nothing.
+  /// It gates threat notifications only — alerts are still recorded and stay
+  /// visible in the Alerts screen, because silencing a security app's
+  /// notifications should not also hide its findings.
+  static bool get _alertsEnabled {
+    try {
+      return HiveService.getSettings().realTimeAlerts;
+    } catch (_) {
+      // Settings box not open yet (very early startup) — fail open so a
+      // threat is never silently dropped.
+      return true;
+    }
+  }
+
   static Future<void> showCriticalThreat({
     required String title,
     required String body,
     int id = 1,
     String target = NotifTarget.alerts,
   }) async {
+    if (!_alertsEnabled) return;
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
         'cyberguard_critical',
@@ -185,6 +203,7 @@ class NotificationService {
     int id = 2,
     String target = NotifTarget.alerts,
   }) async {
+    if (!_alertsEnabled) return;
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
         'cyberguard_warning',
@@ -219,6 +238,7 @@ class NotificationService {
     required String body,
     int id = 3,
   }) async {
+    if (!_alertsEnabled) return;
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
         AppConstants.notifChannelId,
