@@ -18,6 +18,11 @@ dependencies:
 
   # UI
   google_fonts: ^6.2.1
+  # Ships the CupertinoIcons font. Nothing here uses CupertinoIcons directly,
+  # but the Cupertino widgets the framework falls back to (text-selection
+  # toolbar, adaptive back chevron) reference its IconData, and the release
+  # build warns about the missing font family without it.
+  cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.10
   lottie: ^3.1.2
   shimmer: ^3.0.0
