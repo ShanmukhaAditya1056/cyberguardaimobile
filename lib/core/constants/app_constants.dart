@@ -42,6 +42,27 @@ class AppConstants {
   static const int historyDisplayLimit = 50;
   static const int alertDisplayLimit = 100;
 
+  // ── Retention ────────────────────────────────────────────────────────────
+  // Every history box used to grow without limit, and because getAlerts() and
+  // getScanResults() read the whole box and re-sort it on each call, the cost
+  // of a single alert tap scaled with everything ever recorded. These caps
+  // bound both the disk footprint and that per-read work.
+  //
+  // Sized well above what the UI can surface: historyDisplayLimit shows 50
+  // scans and alertDisplayLimit 100, so the caps leave plenty of scrollback.
+  static const int maxScanResults = 500;
+  static const int maxAlerts = 300;
+  static const int maxWifiScans = 200;
+  static const int maxScoreEntries = 90;
+
+  /// Age cutoff applied once per launch. Anything older is dropped even if
+  /// the box is under its cap.
+  static const int retentionDays = 90;
+
+  /// Pruning sorts the box, so it is amortised: a box is only trimmed once it
+  /// runs this far past its cap, then goes back down to exactly the cap.
+  static const int pruneSlack = 25;
+
   // Animation durations (ms)
   static const int animFast = 150;
   static const int animNormal = 300;

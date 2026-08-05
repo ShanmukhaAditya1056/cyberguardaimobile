@@ -41,7 +41,79 @@ class HiveService {
       await _openAllBoxes();
     }
 
+    await sweepExpired();
+
     _initialized = true;
+  }
+
+  // ── Retention ─────────────────────────────────────────────────────────────
+
+  /// Drops history older than [AppConstants.retentionDays] from every box that
+  /// accumulates over time. Runs once per launch, after the boxes are open.
+  ///
+  /// Existing installs can be carrying an unbounded backlog from before any of
+  /// this existed, so this also trims each box back to its cap — that first
+  /// sweep is the one that reclaims real space.
+  static Future<void> sweepExpired() async {
+    final cutoff =
+        DateTime.now().subtract(const Duration(days: AppConstants.retentionDays));
+
+    await _dropOlderThan<ScanResultModel>(_scanBox, cutoff, (r) => r.timestamp);
+    await _dropOlderThan<AlertModel>(_alertsBox, cutoff, (a) => a.timestamp);
+    await _dropOlderThan<WifiScanModel>(_wifiBox, cutoff, (s) => s.timestamp);
+    await _dropOlderThan<ScoreEntryModel>(_scoreBox, cutoff, (e) => e.date);
+
+    await _trimToCap<ScanResultModel>(
+        _scanBox, AppConstants.maxScanResults, (r) => r.timestamp,
+        force: true);
+    await _trimToCap<AlertModel>(
+        _alertsBox, AppConstants.maxAlerts, (a) => a.timestamp,
+        force: true);
+    await _trimToCap<WifiScanModel>(
+        _wifiBox, AppConstants.maxWifiScans, (s) => s.timestamp,
+        force: true);
+    await _trimToCap<ScoreEntryModel>(
+        _scoreBox, AppConstants.maxScoreEntries, (e) => e.date,
+        force: true);
+  }
+
+  static Future<void> _dropOlderThan<T>(
+    Box<T> box,
+    DateTime cutoff,
+    DateTime Function(T) stamp,
+  ) async {
+    final doomed = <dynamic>[];
+    for (final key in box.keys) {
+      final value = box.get(key);
+      if (value != null && stamp(value).isBefore(cutoff)) doomed.add(key);
+    }
+    if (doomed.isNotEmpty) await box.deleteAll(doomed);
+  }
+
+  /// Trims [box] down to its newest [cap] entries.
+  ///
+  /// Sorting is the expensive part, so on the write path this no-ops until the
+  /// box is [AppConstants.pruneSlack] past the cap — the cost is paid once
+  /// every `pruneSlack` writes rather than on every single one. [force] skips
+  /// that hysteresis for the launch sweep.
+  static Future<void> _trimToCap<T>(
+    Box<T> box,
+    int cap,
+    DateTime Function(T) stamp, {
+    bool force = false,
+  }) async {
+    final threshold = force ? cap : cap + AppConstants.pruneSlack;
+    if (box.length <= threshold) return;
+
+    final entries = <(dynamic, DateTime)>[];
+    for (final key in box.keys) {
+      final value = box.get(key);
+      if (value != null) entries.add((key, stamp(value)));
+    }
+    entries.sort((a, b) => b.$2.compareTo(a.$2)); // newest first
+
+    final doomed = entries.skip(cap).map((e) => e.$1).toList();
+    if (doomed.isNotEmpty) await box.deleteAll(doomed);
   }
 
   static Future<void> _openAllBoxes() async {
@@ -98,6 +170,8 @@ class HiveService {
 
   static Future<void> saveScanResult(ScanResultModel result) async {
     await _scanBox.put(result.id, result);
+    await _trimToCap<ScanResultModel>(
+        _scanBox, AppConstants.maxScanResults, (r) => r.timestamp);
   }
 
   static List<ScanResultModel> getScanResults({String? type}) {
@@ -125,6 +199,8 @@ class HiveService {
 
   static Future<void> saveAlert(AlertModel alert) async {
     await _alertsBox.put(alert.id, alert);
+    await _trimToCap<AlertModel>(
+        _alertsBox, AppConstants.maxAlerts, (a) => a.timestamp);
   }
 
   static List<AlertModel> getAlerts() {
@@ -138,6 +214,23 @@ class HiveService {
       alert.isRead = true;
       await alert.save();
     }
+  }
+
+  /// Flips every unread alert in one write.
+  ///
+  /// The previous version called `alert.save()` per alert, which is a separate
+  /// disk transaction each — hundreds of them for a busy backlog, on the UI
+  /// isolate. `putAll` commits the batch once.
+  static Future<void> markAllAlertsRead() async {
+    final updates = <dynamic, AlertModel>{};
+    for (final key in _alertsBox.keys) {
+      final alert = _alertsBox.get(key);
+      if (alert != null && !alert.isRead) {
+        alert.isRead = true;
+        updates[key] = alert;
+      }
+    }
+    if (updates.isNotEmpty) await _alertsBox.putAll(updates);
   }
 
   static Future<void> deleteAlert(String id) async {
@@ -158,6 +251,8 @@ class HiveService {
 
   static Future<void> saveWifiScan(WifiScanModel scan) async {
     await _wifiBox.put(scan.timestamp.millisecondsSinceEpoch.toString(), scan);
+    await _trimToCap<WifiScanModel>(
+        _wifiBox, AppConstants.maxWifiScans, (s) => s.timestamp);
   }
 
   static List<WifiScanModel> getWifiScans() {
@@ -193,6 +288,8 @@ class HiveService {
   static Future<void> saveScoreEntry(ScoreEntryModel entry) async {
     final key = '${entry.date.year}-${entry.date.month}-${entry.date.day}';
     await _scoreBox.put(key, entry);
+    await _trimToCap<ScoreEntryModel>(
+        _scoreBox, AppConstants.maxScoreEntries, (e) => e.date);
   }
 
   static List<ScoreEntryModel> getScoreHistory({int days = 7}) {

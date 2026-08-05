@@ -18,11 +18,5 @@ class AlertRepository {
 
   Future<void> add(AlertModel alert) => HiveService.saveAlert(alert);
 
-  Future<void> markAllRead() async {
-    final alerts = HiveService.getAlerts().where((a) => !a.isRead);
-    for (final alert in alerts) {
-      alert.isRead = true;
-      await alert.save();
-    }
-  }
+  Future<void> markAllRead() => HiveService.markAllAlertsRead();
 }

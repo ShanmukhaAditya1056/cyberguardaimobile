@@ -23,7 +23,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- WAKE_LOCK deliberately absent. Nothing acquires one: there is no
+         PowerManager use anywhere in the Kotlin sources, no plugin declares
+         it, and NotificationService only ever calls show() — there are no
+         zonedSchedule/exact-alarm paths that would need the CPU held awake.
+         Incoming SMS already arrive with their own broadcast wakelock. -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"/>
 

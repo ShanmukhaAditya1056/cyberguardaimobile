@@ -136,20 +136,36 @@ jobs:
         env:
           GRADLE_OPTS: '-Xmx4g -Dorg.gradle.daemon=false'
 
-      - name: Report APK size
+      - name: Build release App Bundle
+        # The universal APK carries libflutter/libapp/ML Kit for all three
+        # ABIs at once. Play splits an .aab per device, so the actual download
+        # is roughly a third of the APK. This is the artifact to ship.
+        run: flutter build appbundle --release
+        env:
+          GRADLE_OPTS: '-Xmx4g -Dorg.gradle.daemon=false'
+
+      - name: Report artifact sizes
         run: |
           APK=build/app/outputs/flutter-apk/app-release.apk
-          SIZE=$(du -h "$APK" | cut -f1)
-          echo "## Release APK" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Size: **$SIZE**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Commit: \`$(echo "${{ github.sha }}" | cut -c1-8)\`" >> "$GITHUB_STEP_SUMMARY"
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          {
+            echo "## Release artifacts"
+            echo ""
+            echo "| Artifact | Size | Notes |"
+            echo "|---|---|---|"
+            echo "| Universal APK | $(du -h "$APK" | cut -f1) | all ABIs, sideload only |"
+            echo "| App Bundle | $(du -h "$AAB" | cut -f1) | Play splits per device |"
+            echo ""
+            echo "Commit \`$(echo "${{ github.sha }}" | cut -c1-8)\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload release APK
+      - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: app-release
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
   # ── Load test ───────────────────────────────────────────────────────────
