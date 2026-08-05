@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,8 +14,28 @@ import 'app.dart';
 /// Singleton WiFi ML service so any provider can read its latest scan.
 final wifiMlService = WifiMlService();
 
+/// Inter and the three Noto Sans faces are bundled under the SIL Open Font
+/// License, which requires the licence to travel with the binary. Registering
+/// them here surfaces both texts in the standard `showLicensePage` sheet.
+void _registerFontLicenses() {
+  LicenseRegistry.addLicense(() async* {
+    for (final entry in const <(String, List<String>)>[
+      ('assets/fonts/OFL-Inter.txt', ['Inter']),
+      (
+        'assets/fonts/OFL-NotoSans.txt',
+        ['Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Telugu'],
+      ),
+    ]) {
+      final text = await rootBundle.loadString(entry.$1);
+      yield LicenseEntryWithLineBreaks(entry.$2, text);
+    }
+  });
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  _registerFontLicenses();
 
   // Lock to portrait
   await SystemChrome.setPreferredOrientations([

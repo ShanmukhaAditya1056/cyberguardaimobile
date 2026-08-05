@@ -249,16 +249,9 @@ class _DashboardContent extends StatelessWidget {
           const SizedBox(height: 24),
         ],
 
-        // Recent alerts
-        if (state.recentAlerts.isNotEmpty) ...[
-          SectionTitle(
-            title: AppLocalizations.of(context)!.recentAlerts,
-            actionLabel: AppLocalizations.of(context)!.seeAll,
-            onAction: () => GoRouter.of(context).push('/alerts'),
-          ),
-          const SizedBox(height: 12),
-          _RecentAlertsList(alerts: state.recentAlerts.take(3).toList()),
-        ],
+        // The recent-alerts list used to sit here. Alerts are still reachable
+        // from the bell in the app bar (which keeps showing the unread count)
+        // and from notification taps.
 
         const SizedBox(height: 100), // Bottom padding for FAB
       ],
@@ -651,134 +644,6 @@ class _DefenseGrid extends StatelessWidget {
             .toList(),
       ),
       ),
-    );
-  }
-}
-
-class _RecentAlertsList extends StatelessWidget {
-  final List alerts;
-
-  const _RecentAlertsList({required this.alerts});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: List.generate(alerts.length, (i) {
-          final alert = alerts[i];
-          final color = alert.type == 'critical'
-              ? AppColors.critical
-              : alert.type == 'warning'
-                  ? AppColors.warning
-                  : AppColors.safe;
-          return _StaggeredItem(
-            index: i,
-            child: GlassCard(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(14),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      alert.type == 'critical'
-                          ? Icons.error
-                          : alert.type == 'warning'
-                              ? Icons.warning
-                              : Icons.check_circle,
-                      size: 18,
-                      color: color,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          alert.title as String,
-                          style: AppTextStyles.bodyMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          DateFormatter.timeAgo(alert.timestamp as DateTime),
-                          style: AppTextStyles.caption,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (!alert.isRead)
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: color,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class _StaggeredItem extends StatefulWidget {
-  final int index;
-  final Widget child;
-
-  const _StaggeredItem({required this.index, required this.child});
-
-  @override
-  State<_StaggeredItem> createState() => _StaggeredItemState();
-}
-
-class _StaggeredItemState extends State<_StaggeredItem>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-  late Animation<double> _opacity;
-  late Animation<Offset> _offset;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _opacity = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    _offset = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
-
-    Future.delayed(Duration(milliseconds: widget.index * 80), () {
-      if (mounted) _ctrl.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _opacity,
-      child: SlideTransition(position: _offset, child: widget.child),
     );
   }
 }

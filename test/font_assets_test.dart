@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:cyberguard_ai/core/theme/app_text_styles.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Regression guard for the font assets declared in pubspec.yaml.
@@ -47,9 +49,66 @@ List<String> _declaredFontAssets(String pubspec) {
       .toList();
 }
 
+/// Family names declared with `- family:` in the fonts: block.
+List<String> _declaredFamilies(String pubspec) => RegExp(r'-\s*family:\s*(\S+)')
+    .allMatches(pubspec)
+    .map((m) => m.group(1)!)
+    .toList();
+
 void main() {
   final pubspec = File('pubspec.yaml').readAsStringSync();
   final assets = _declaredFontAssets(pubspec);
+  final families = _declaredFamilies(pubspec);
+
+  group('Indic fallback families are wired up', () {
+    // A fallback name that matches no declared family is silently ignored by
+    // Flutter — Devanagari/Tamil/Telugu would quietly render as tofu again
+    // with nothing in the build output to say why. Catch the typo here.
+    for (final family in AppTextStyles.fontFallback) {
+      test('$family is declared as a font family in pubspec.yaml', () {
+        expect(families, contains(family),
+            reason: 'AppTextStyles.fontFallback names "$family", but '
+                'pubspec.yaml only declares: ${families.join(", ")}');
+      });
+    }
+
+    test('every typography token carries the fallback', () {
+      final styles = <String, TextStyle>{
+        'display': AppTextStyles.display,
+        'headline': AppTextStyles.headline,
+        'title': AppTextStyles.title,
+        'body': AppTextStyles.body,
+        'caption': AppTextStyles.caption,
+        'button': AppTextStyles.button,
+        'label': AppTextStyles.label,
+        'mono': AppTextStyles.mono,
+      };
+      styles.forEach((name, style) {
+        expect(style.fontFamilyFallback, AppTextStyles.fontFallback,
+            reason: 'AppTextStyles.$name is missing fontFamilyFallback, so '
+                'Hindi/Tamil/Telugu text in that style has no Noto face');
+      });
+    });
+  });
+
+  group('OFL licences ship with the fonts', () {
+    // main.dart streams these into LicenseRegistry. A missing file only blows
+    // up when someone opens the licence page, so assert it here instead.
+    for (final path in const [
+      'assets/fonts/OFL-Inter.txt',
+      'assets/fonts/OFL-NotoSans.txt',
+    ]) {
+      test('$path exists and is declared as an asset', () {
+        final file = File(path);
+        expect(file.existsSync(), isTrue, reason: '$path is missing on disk');
+        expect(file.readAsStringSync(), contains('SIL OPEN FONT LICENSE'),
+            reason: '$path does not look like an OFL licence');
+        expect(pubspec, contains('- $path'),
+            reason: '$path is not listed under flutter: assets:, so '
+                'rootBundle.loadString will throw at runtime');
+      });
+    }
+  });
 
   group('declared font assets are loadable by Flutter', () {
     test('pubspec.yaml actually declares font assets', () {

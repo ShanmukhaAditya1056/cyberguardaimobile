@@ -94,6 +94,10 @@ flutter:
   uses-material-design: true
   generate: true
 
+  # Inter carries Latin/Greek/Cyrillic only, so the Hindi, Tamil and Telugu
+  # locales need a companion face per script. They are wired up as
+  # `fontFamilyFallback` (see AppTextStyles.fontFallback) rather than being
+  # referenced directly, so Inter still wins for every glyph it actually has.
   fonts:
     - family: Inter
       fonts:
@@ -105,8 +109,42 @@ flutter:
         - asset: assets/fonts/Inter-Bold.ttf
           weight: 700
 
+    - family: NotoSansDevanagari
+      fonts:
+        - asset: assets/fonts/NotoSansDevanagari-Regular.ttf
+        - asset: assets/fonts/NotoSansDevanagari-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NotoSansDevanagari-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSansDevanagari-Bold.ttf
+          weight: 700
+
+    - family: NotoSansTamil
+      fonts:
+        - asset: assets/fonts/NotoSansTamil-Regular.ttf
+        - asset: assets/fonts/NotoSansTamil-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NotoSansTamil-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSansTamil-Bold.ttf
+          weight: 700
+
+    - family: NotoSansTelugu
+      fonts:
+        - asset: assets/fonts/NotoSansTelugu-Regular.ttf
+        - asset: assets/fonts/NotoSansTelugu-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NotoSansTelugu-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSansTelugu-Bold.ttf
+          weight: 700
+
   assets:
     - assets/animations/
     - assets/data/
     - assets/models/
     - assets/models/tflite/
+    # Bundled so main.dart can feed them to LicenseRegistry — the OFL requires
+    # the licence to ship alongside the fonts.
+    - assets/fonts/OFL-Inter.txt
+    - assets/fonts/OFL-NotoSans.txt

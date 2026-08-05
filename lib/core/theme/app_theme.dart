@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app_colors.dart';
+import 'app_text_styles.dart';
 
 /// Zomato-inspired clean light theme.
 class AppTheme {
@@ -81,7 +82,7 @@ class AppTheme {
             fontSize: 14,
             fontWeight: FontWeight.w700,
             color: textOnDark),
-      ),
+      ).apply(fontFamilyFallback: AppTextStyles.fontFallback),
       appBarTheme: const AppBarTheme(
         backgroundColor: bgDark,
         elevation: 0,
@@ -264,7 +265,7 @@ class AppTheme {
           color: AppColors.textMedium,
           letterSpacing: 0.5,
         ),
-      ),
+      ).apply(fontFamilyFallback: AppTextStyles.fontFallback),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         elevation: 0,
