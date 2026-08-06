@@ -18,9 +18,14 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <!-- RECEIVE_BOOT_COMPLETED, FOREGROUND_SERVICE and
+         FOREGROUND_SERVICE_DATA_SYNC deliberately absent. They existed only to
+         keep PhishingGuardService resident and to restart it after a reboot.
+         The SMS guard is now a manifest receiver (see below), which Android
+         re-registers across reboots on its own, so none of the three has a
+         caller left. Dropping FOREGROUND_SERVICE_DATA_SYNC also removes a
+         service-type declaration that never honestly described SMS scanning —
+         something Android 14+ and Play review are strict about. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
     <!-- WAKE_LOCK deliberately absent. Nothing acquires one: there is no
@@ -90,23 +95,23 @@
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
             android:exported="false"/>
 
-        <!-- Background SMS phishing guard. Runs as a foreground service so
-             incoming SMS keep getting scanned even after the user kills the
-             app. Scanning is done entirely in native Kotlin — no Dart runtime
-             needed. -->
-        <service
-            android:name=".PhishingGuardService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync"/>
-
-        <!-- Auto-restart the guard after device boot, if user enabled it. -->
+        <!-- Background SMS phishing guard.
+             SMS_RECEIVED is on the implicit-broadcast allowlist, so this is
+             delivered to even when nothing of the app is running — Android
+             starts the process for it. That is why there is no longer a
+             resident foreground service (nor a BootReceiver to restart one):
+             a manifest receiver survives reboots by itself.
+             Scanning is native Kotlin in SmsGuard — no Dart runtime needed —
+             and no-ops unless the user turned the guard on.
+             MUST NOT also be registered dynamically: both would fire and every
+             message would be scanned twice. -->
         <receiver
-            android:name=".BootReceiver"
+            android:name=".SmsReceiver"
             android:exported="true"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+            android:enabled="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
         </receiver>
     </application>

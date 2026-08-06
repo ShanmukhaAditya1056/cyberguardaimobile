@@ -33,8 +33,6 @@ class MainActivity : FlutterActivity() {
     private val LINK_CHANNEL = "com.cyberguard.ai/link"
     private val LINK_EVENT_CHANNEL = "com.cyberguard.ai/link_stream"
 
-    private val smsReceiver = SmsReceiver()
-    private var smsReceiverRegistered = false
 
     // ── Smart Link Interceptor plumbing ──────────────────────────────────
     // Links delivered while Flutter is alive go straight to this sink; a
@@ -115,12 +113,10 @@ class MainActivity : FlutterActivity() {
                     }
                     "startSmsListener" -> {
                         try {
-                            // Start the long-lived foreground service so
-                            // scanning survives the activity being killed.
-                            PhishingGuardService.start(applicationContext)
-                            // Also keep the in-activity dynamic receiver
-                            // alive for the same-process EventChannel.
-                            registerSmsReceiver()
+                            // Just a flag now. The manifest receiver is always
+                            // registered; SmsGuard.handle() no-ops until this
+                            // is set, so nothing is scanned without consent.
+                            SmsGuard.setEnabled(applicationContext, true)
                             result.success(true)
                         } catch (e: Exception) {
                             result.error("UNAVAILABLE", e.message, null)
@@ -128,8 +124,7 @@ class MainActivity : FlutterActivity() {
                     }
                     "stopSmsListener" -> {
                         try {
-                            PhishingGuardService.stop(applicationContext)
-                            unregisterSmsReceiver()
+                            SmsGuard.setEnabled(applicationContext, false)
                             result.success(true)
                         } catch (e: Exception) {
                             result.error("UNAVAILABLE", e.message, null)
@@ -137,9 +132,7 @@ class MainActivity : FlutterActivity() {
                     }
                     "isSmsGuardRunning" -> {
                         try {
-                            result.success(
-                                PhishingGuardService.isEnabled(applicationContext)
-                            )
+                            result.success(SmsGuard.isEnabled(applicationContext))
                         } catch (e: Exception) {
                             result.error("UNAVAILABLE", e.message, null)
                         }
@@ -345,28 +338,13 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun registerSmsReceiver() {
-        if (smsReceiverRegistered) return
-        val filter = IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION).apply {
-            priority = 999
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(smsReceiver, filter, Context.RECEIVER_EXPORTED)
-        } else {
-            @Suppress("UnspecifiedRegisterReceiverFlag")
-            registerReceiver(smsReceiver, filter)
-        }
-        smsReceiverRegistered = true
-    }
-
-    private fun unregisterSmsReceiver() {
-        if (!smsReceiverRegistered) return
-        try { unregisterReceiver(smsReceiver) } catch (_: Throwable) {}
-        smsReceiverRegistered = false
-    }
+    // SmsReceiver is declared in AndroidManifest.xml and must not also be
+    // registered here — both registrations would fire and every message would
+    // be scanned twice, raising duplicate notifications. The manifest receiver
+    // runs in this same process, so SmsBus still reaches the EventChannel sink
+    // for live in-app updates exactly as before.
 
     override fun onDestroy() {
-        unregisterSmsReceiver()
         super.onDestroy()
     }
 

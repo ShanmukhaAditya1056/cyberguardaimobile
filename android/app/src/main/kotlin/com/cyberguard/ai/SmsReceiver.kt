@@ -7,11 +7,18 @@ import android.os.Build
 import android.provider.Telephony
 import android.telephony.SmsMessage
 
-/// Receives incoming SMS broadcasts and forwards { address, body, date }
-/// to whatever Dart-side EventChannel listener is registered through
-/// [SmsBus]. Registered dynamically by MainActivity so the receiver is
-/// only active while the app is running (no manifest receiver = no
-/// implicit-broadcast Android 14 restriction).
+/// Receives incoming SMS broadcasts, hands { address, body, date } to the
+/// Dart-side EventChannel via [SmsBus], and runs the native background scan
+/// through [SmsGuard].
+///
+/// Declared in the manifest rather than registered dynamically. SMS_RECEIVED
+/// sits on the implicit-broadcast allowlist, so a manifest receiver is still
+/// delivered to on modern Android — the process is started for it if nothing
+/// is running. That is what let the resident foreground service go.
+///
+/// It must be registered in exactly one place: a manifest entry *and* a
+/// dynamic registration would both fire, scanning every message twice and
+/// raising duplicate notifications.
 class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
@@ -39,13 +46,17 @@ class SmsReceiver : BroadcastReceiver() {
             }
 
             for ((sender, body) in grouped) {
-                SmsBus.publish(
-                    mapOf(
-                        "address" to sender,
-                        "body" to body.toString(),
-                        "date" to ts.toString(),
-                    )
+                val event = mapOf<String, Any?>(
+                    "address" to sender,
+                    "body" to body.toString(),
+                    "date" to ts.toString(),
                 )
+                // Live in-app UI (buffered until the Dart sink attaches).
+                SmsBus.publish(event)
+                // Background scan. No-ops unless the user enabled the guard,
+                // and runs here rather than in a service because this may be
+                // the only thing the process was started for.
+                SmsGuard.handle(context.applicationContext, event)
             }
         } catch (_: Throwable) {
             // Never crash the system broadcast pipeline.
@@ -55,12 +66,15 @@ class SmsReceiver : BroadcastReceiver() {
 
 /// Singleton fan-out from the receiver to (a) the EventChannel sink set up
 /// in MainActivity for live in-app UI updates, and (b) any number of native
-/// "taps" — used by [PhishingGuardService] so the background scanner sees
-/// every SMS too.
+/// "taps".
+///
+/// The taps list is vestigial: the background scanner used to subscribe here
+/// from a foreground service, and now [SmsReceiver] calls [SmsGuard] directly.
+/// It is kept because it is the natural extension point for any future native
+/// subscriber, and costs nothing while empty.
 ///
 /// Multiple SMS can arrive while the Dart engine is still attaching, so we
-/// buffer the last N events for the Dart sink and replay on attach. Native
-/// taps don't need buffering — they're registered before the receiver fires.
+/// buffer the last N events for the Dart sink and replay on attach.
 object SmsBus {
     private const val BUFFER_LIMIT = 20
     private val buffer = ArrayDeque<Map<String, Any?>>()
