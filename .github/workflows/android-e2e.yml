@@ -40,8 +40,24 @@ env:
 
 jobs:
   # ── Stage 1-5: static checks + APK build ────────────────────────────────
+  # ── Repo hygiene ────────────────────────────────────────────────────────
+  # Cheap and first: a rejected 600 MB blob is the difference between a failed
+  # check and a history rewrite. Same script the pre-commit hook runs, so the
+  # two cannot drift.
+  hygiene:
+    name: Repo hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for oversized, vendored or secret files
+        run: bash tool/check_repo_hygiene.sh
+
   build:
     name: Build APK
+    needs: hygiene
     runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:

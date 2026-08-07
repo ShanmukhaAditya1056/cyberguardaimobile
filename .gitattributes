@@ -1,0 +1,63 @@
+# Line-ending and diff policy.
+#
+# Why this exists: android/app/src/main/java/.../GeneratedPluginRegistrant.java
+# is rewritten by `flutter pub get` with LF, while Git had been handing the
+# working tree CRLF. It came back "modified" after almost every build with an
+# empty diff, and every commit printed "LF will be replaced by CRLF". That
+# noise hides real changes and turns into phantom conflicts as soon as more
+# than one machine touches the repo.
+#
+# Normalise everything to LF in the repository and in the working tree. The
+# toolchain here is LF-native anyway (Gradle, Flutter, the shell scripts under
+# automation/), so there is nothing that wants CRLF except .bat.
+
+* text=auto eol=lf
+
+# ── Must keep CRLF ────────────────────────────────────────────────────────
+# Windows batch files break subtly with LF line endings.
+*.bat           text eol=crlf
+
+# ── Must keep LF ──────────────────────────────────────────────────────────
+# Executed by sh; CRLF here yields "bad interpreter" / "\r: command not found".
+gradlew         text eol=lf
+*.sh            text eol=lf
+
+# ── Binary: never touch, never diff ───────────────────────────────────────
+# Marking these explicitly rather than relying on `text=auto` detection —
+# a font or a pickled model that Git guesses wrong gets corrupted on
+# checkout, silently, and only shows up at runtime.
+*.ttf           binary
+*.otf           binary
+*.woff          binary
+*.woff2         binary
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.ico           binary
+*.webp          binary
+*.pkl           binary
+*.xlsx          binary
+*.jar           binary
+*.keystore      binary
+*.jks           binary
+*.apk           binary
+*.aab           binary
+*.so            binary
+*.dll           binary
+*.tflite        binary
+*.pt            binary
+*.pth           binary
+*.onnx          binary
+*.safetensors   binary
+
+# ── Generated ─────────────────────────────────────────────────────────────
+# Collapsed in GitHub diffs and excluded from language stats. Still tracked,
+# because the build needs them and CI does not run gen-l10n.
+lib/l10n/generated/**   linguist-generated=true
+*.g.dart                linguist-generated=true
+automation/config/auto-ids.generated.js  linguist-generated=true
+pubspec.lock            linguist-generated=true
+
+# Vendored — not our code, keep it out of language stats.
+android/gradle/wrapper/**  linguist-vendored=true

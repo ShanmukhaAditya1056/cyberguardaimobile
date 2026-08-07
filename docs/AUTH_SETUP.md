@@ -1,3 +1,6 @@
+<!-- See docs/REPO_HYGIENE.md for the guards that keep credentials and
+     oversized files out of history. -->
+
 # Enabling sign-in
 
 Sign-in (email/password and "Continue with Google") is built on Firebase Auth

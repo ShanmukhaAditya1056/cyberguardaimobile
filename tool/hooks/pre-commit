@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#
+# Blocks oversized files, build output, virtualenvs and credentials before
+# they reach a commit. Cheap here; a history rewrite later.
+#
+# Install with: bash tool/install_hooks.sh
+# Bypass once with: git commit --no-verify   (CI still enforces it)
+
+set -euo pipefail
+
+exec bash "$(git rev-parse --show-toplevel)/tool/check_repo_hygiene.sh" --staged
