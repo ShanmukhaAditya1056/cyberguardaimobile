@@ -26,6 +26,19 @@ class AutoId {
   static const onboardingSkip = 'cg_onboarding_skip';
   static const onboardingNext = 'cg_onboarding_next';
 
+  // ── Login ─────────────────────────────────────────────────────────────
+  // Sign-in is mandatory whenever Firebase is configured, so the suite has to
+  // be able to get through this screen to reach anything else.
+  static const loginRoot = 'cg_login_root';
+  static const loginEmail = 'cg_login_email';
+  static const loginPassword = 'cg_login_password';
+  static const loginSubmit = 'cg_login_submit';
+  static const loginGoogle = 'cg_login_google';
+  static const loginTabSignIn = 'cg_login_tab_signin';
+  static const loginTabRegister = 'cg_login_tab_register';
+  static const loginError = 'cg_login_error';
+  static const loginUnavailable = 'cg_login_unavailable';
+
   // ── Dashboard ─────────────────────────────────────────────────────────
   static const dashboardRoot = 'cg_dashboard_root';
   static const dashboardScoreRing = 'cg_dashboard_score_ring';

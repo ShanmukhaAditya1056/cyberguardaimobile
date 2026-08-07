@@ -24,6 +24,35 @@ if (googleServicesConfig.exists()) {
     logger.lifecycle("google-services.json absent — building without Firebase auth")
 }
 
+// Release signing, kept out of version control.
+//
+// Create android/key.properties (gitignored) with:
+//   storeFile=/absolute/path/to/upload-keystore.jks
+//   storePassword=...
+//   keyAlias=upload
+//   keyPassword=...
+//
+// Generate the keystore with:
+//   keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA \
+//     -keysize 2048 -validity 10000 -alias upload
+//
+// Then add that keystore's SHA-1 to the Firebase console, or Google sign-in
+// works in debug and fails in production — see docs/AUTH_SETUP.md.
+//
+// Without the file the release variant falls back to the debug keystore so
+// CI and local release builds keep working. That fallback is fine for testing
+// and NOT shippable: Play rejects debug-signed uploads, and a debug key is
+// public knowledge.
+def keystorePropertiesFile = rootProject.file("key.properties")
+def keystoreProperties = new Properties()
+def hasReleaseKeystore = keystorePropertiesFile.exists()
+if (hasReleaseKeystore) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+    logger.lifecycle("key.properties found — release will be signed with the upload keystore")
+} else {
+    logger.lifecycle("key.properties absent — release falls back to the DEBUG keystore (not shippable)")
+}
+
 android {
     namespace "com.cyberguard.ai"
     compileSdk flutter.compileSdkVersion
@@ -48,9 +77,31 @@ android {
         multiDexEnabled true
     }
 
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            release {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            // Falls back to debug signing so CI and local release builds keep
+            // working without a keystore. Play rejects debug-signed uploads,
+            // so shipping requires android/key.properties.
+            signingConfig hasReleaseKeystore
+                ? signingConfigs.release
+                : signingConfigs.debug
+
+            // R8 is deliberately off. The app resolves ML Kit, Firebase and
+            // several Flutter plugins reflectively, and shrinking without a
+            // tested keep-rule set strips classes that only fail at runtime —
+            // the worst possible failure mode for a security app. Turning this
+            // on is worth doing, but only alongside a device test pass.
             minifyEnabled false
             shrinkResources false
         }

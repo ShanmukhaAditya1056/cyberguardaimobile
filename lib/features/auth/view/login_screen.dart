@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_gradients.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/automation_ids.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
@@ -129,57 +130,64 @@ class _LoginScreenState extends State<LoginScreen>
       backgroundColor: AppColors.bg,
       // resizeToAvoidBottomInset defaults to true; the scroll view below keeps
       // the form reachable once the keyboard covers half the screen.
-      body: Column(
-        children: [
-          _Hero(fade: _fade, l: l, registerMode: _registerMode),
-          Expanded(
-            child: FadeTransition(
-              opacity: _fade,
-              child: SlideTransition(
-                position: _slide,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-                  child: AuthService.isConfigured
-                      ? _buildCard(l)
-                      : _buildUnavailable(l),
+      body: Semantics(
+        identifier: AutoId.loginRoot,
+        child: Column(
+          children: [
+            _Hero(fade: _fade, l: l, registerMode: _registerMode),
+            Expanded(
+              child: FadeTransition(
+                opacity: _fade,
+                child: SlideTransition(
+                  position: _slide,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+                    child: AuthService.isConfigured
+                        ? _buildCard(l)
+                        : _buildUnavailable(l),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   /// Shown only when the build has no Firebase credentials. An explanation,
   /// not a disabled form — controls that cannot possibly work read as a bug.
-  Widget _buildUnavailable(AppLocalizations l) => Container(
-        margin: const EdgeInsets.only(top: 24),
-        padding: const EdgeInsets.all(24),
-        decoration: _cardDecoration,
-        child: Column(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: AppColors.warningLightBg,
-                shape: BoxShape.circle,
+  Widget _buildUnavailable(AppLocalizations l) => Semantics(
+        identifier: AutoId.loginUnavailable,
+        container: true,
+        child: Container(
+          margin: const EdgeInsets.only(top: 24),
+          padding: const EdgeInsets.all(24),
+          decoration: _cardDecoration,
+          child: Column(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: AppColors.warningLightBg,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.cloud_off_rounded,
+                    color: AppColors.warning, size: 24),
               ),
-              child: const Icon(Icons.cloud_off_rounded,
-                  color: AppColors.warning, size: 24),
-            ),
-            const SizedBox(height: 14),
-            Text(l.authUnavailableTitle,
-                style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
-            const SizedBox(height: 8),
-            Text(
-              l.authUnavailableBody,
-              style:
-                  AppTextStyles.caption.copyWith(color: AppColors.textMedium),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: 14),
+              Text(l.authUnavailableTitle,
+                  style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
+              const SizedBox(height: 8),
+              Text(
+                l.authUnavailableBody,
+                style:
+                    AppTextStyles.caption.copyWith(color: AppColors.textMedium),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
 
@@ -220,6 +228,7 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
                 const SizedBox(height: 20),
                 _Field(
+                  autoIdent: AutoId.loginEmail,
                   controller: _emailCtrl,
                   enabled: !_busy,
                   label: l.breachTabEmail,
@@ -243,6 +252,7 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
                 const SizedBox(height: 14),
                 _Field(
+                  autoIdent: AutoId.loginPassword,
                   controller: _passwordCtrl,
                   enabled: !_busy,
                   label: l.authPassword,
@@ -292,6 +302,7 @@ class _LoginScreenState extends State<LoginScreen>
                 if (_error != null && _error!.isNotEmpty) _ErrorBanner(_error!),
                 const SizedBox(height: 16),
                 _PrimaryButton(
+                  autoIdent: AutoId.loginSubmit,
                   label: _registerMode ? l.authSignUp : l.authSignIn,
                   busyLabel: l.authSigningIn,
                   busy: _busy,
@@ -301,6 +312,7 @@ class _LoginScreenState extends State<LoginScreen>
                 _OrDivider(label: l.authOr),
                 const SizedBox(height: 18),
                 _GoogleButton(
+                  autoIdent: AutoId.loginGoogle,
                   label: l.authContinueGoogle,
                   enabled: !_busy,
                   onTap: () => _runAuth(AuthService.signInWithGoogle),
@@ -335,7 +347,8 @@ class _Hero extends StatelessWidget {
   final AppLocalizations l;
   final bool registerMode;
 
-  const _Hero({required this.fade, required this.l, required this.registerMode});
+  const _Hero(
+      {required this.fade, required this.l, required this.registerMode});
 
   @override
   Widget build(BuildContext context) {
@@ -456,8 +469,10 @@ class _ModeTabs extends StatelessWidget {
           ),
           Row(
             children: [
-              _tab(signInLabel, !registerMode, () => onChanged(false)),
-              _tab(registerLabel, registerMode, () => onChanged(true)),
+              _tab(AutoId.loginTabSignIn, signInLabel, !registerMode,
+                  () => onChanged(false)),
+              _tab(AutoId.loginTabRegister, registerLabel, registerMode,
+                  () => onChanged(true)),
             ],
           ),
         ],
@@ -465,18 +480,25 @@ class _ModeTabs extends StatelessWidget {
     );
   }
 
-  Widget _tab(String label, bool active, VoidCallback onTap) => Expanded(
-        child: GestureDetector(
-          onTap: enabled ? onTap : null,
-          behavior: HitTestBehavior.opaque,
-          child: Center(
-            child: AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 180),
-              style: AppTextStyles.bodySmall.copyWith(
-                color: active ? AppColors.blue : AppColors.textMedium,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+  Widget _tab(
+          String autoIdent, String label, bool active, VoidCallback onTap) =>
+      Expanded(
+        child: Semantics(
+          identifier: autoIdent,
+          button: true,
+          container: true,
+          child: GestureDetector(
+            onTap: enabled ? onTap : null,
+            behavior: HitTestBehavior.opaque,
+            child: Center(
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 180),
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: active ? AppColors.blue : AppColors.textMedium,
+                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                ),
+                child: Text(label),
               ),
-              child: Text(label),
             ),
           ),
         ),
@@ -484,6 +506,7 @@ class _ModeTabs extends StatelessWidget {
 }
 
 class _Field extends StatelessWidget {
+  final String autoIdent;
   final TextEditingController controller;
   final bool enabled;
   final String label;
@@ -498,6 +521,7 @@ class _Field extends StatelessWidget {
   final String? Function(String?)? validator;
 
   const _Field({
+    required this.autoIdent,
     required this.controller,
     required this.enabled,
     required this.label,
@@ -519,35 +543,44 @@ class _Field extends StatelessWidget {
           borderSide: BorderSide(color: c, width: w),
         );
 
-    return TextFormField(
-      controller: controller,
-      enabled: enabled,
-      obscureText: obscure,
-      keyboardType: keyboardType,
-      autofillHints: autofill,
-      textInputAction: textInputAction,
-      onFieldSubmitted: onSubmitted,
-      validator: validator,
-      style: AppTextStyles.body.copyWith(color: AppColors.textDark),
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        filled: true,
-        fillColor: AppColors.bg,
-        prefixIcon: Icon(icon, size: 19, color: AppColors.textLight),
-        suffixIcon: suffix,
-        labelStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.textMedium),
-        hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.textLight),
-        floatingLabelStyle: AppTextStyles.bodySmall
-            .copyWith(color: AppColors.blue, fontWeight: FontWeight.w600),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
-        border: border(AppColors.border),
-        enabledBorder: border(AppColors.border),
-        focusedBorder: border(AppColors.blue, 1.6),
-        errorBorder: border(AppColors.danger),
-        focusedErrorBorder: border(AppColors.danger, 1.6),
-        errorStyle: AppTextStyles.caption.copyWith(color: AppColors.danger),
+    // `textField: true` so UiAutomator2 exposes it as an editable node; the
+    // identifier surfaces as resource-id for the page object to target.
+    return Semantics(
+      identifier: autoIdent,
+      textField: true,
+      container: true,
+      child: TextFormField(
+        controller: controller,
+        enabled: enabled,
+        obscureText: obscure,
+        keyboardType: keyboardType,
+        autofillHints: autofill,
+        textInputAction: textInputAction,
+        onFieldSubmitted: onSubmitted,
+        validator: validator,
+        style: AppTextStyles.body.copyWith(color: AppColors.textDark),
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          filled: true,
+          fillColor: AppColors.bg,
+          prefixIcon: Icon(icon, size: 19, color: AppColors.textLight),
+          suffixIcon: suffix,
+          labelStyle:
+              AppTextStyles.bodySmall.copyWith(color: AppColors.textMedium),
+          hintStyle:
+              AppTextStyles.bodySmall.copyWith(color: AppColors.textLight),
+          floatingLabelStyle: AppTextStyles.bodySmall
+              .copyWith(color: AppColors.blue, fontWeight: FontWeight.w600),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+          border: border(AppColors.border),
+          enabledBorder: border(AppColors.border),
+          focusedBorder: border(AppColors.blue, 1.6),
+          errorBorder: border(AppColors.danger),
+          focusedErrorBorder: border(AppColors.danger, 1.6),
+          errorStyle: AppTextStyles.caption.copyWith(color: AppColors.danger),
+        ),
       ),
     );
   }
@@ -558,36 +591,43 @@ class _ErrorBanner extends StatelessWidget {
   const _ErrorBanner(this.message);
 
   @override
-  Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(top: 14),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.dangerLightBg,
-          borderRadius: BorderRadius.circular(11),
-          border: Border.all(color: AppColors.danger.withValues(alpha: 0.25)),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.error_outline_rounded,
-                color: AppColors.danger, size: 17),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(message,
-                  style: AppTextStyles.caption
-                      .copyWith(color: AppColors.dangerDark)),
-            ),
-          ],
+  Widget build(BuildContext context) => Semantics(
+        identifier: AutoId.loginError,
+        liveRegion: true,
+        container: true,
+        child: Container(
+          margin: const EdgeInsets.only(top: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.dangerLightBg,
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(color: AppColors.danger.withValues(alpha: 0.25)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.error_outline_rounded,
+                  color: AppColors.danger, size: 17),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(message,
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppColors.dangerDark)),
+              ),
+            ],
+          ),
         ),
       );
 }
 
 class _PrimaryButton extends StatelessWidget {
+  final String autoIdent;
   final String label;
   final String busyLabel;
   final bool busy;
   final VoidCallback onTap;
 
   const _PrimaryButton({
+    required this.autoIdent,
     required this.label,
     required this.busyLabel,
     required this.busy,
@@ -596,44 +636,49 @@ class _PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: busy ? null : onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        height: 52,
-        decoration: BoxDecoration(
-          gradient: AppGradients.blue,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: busy
-              ? null
-              : [
-                  BoxShadow(
-                    color: AppColors.blue.withValues(alpha: 0.3),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-        ),
-        child: Center(
-          child: busy
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(
-                      width: 17,
-                      height: 17,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
+    return Semantics(
+      identifier: autoIdent,
+      button: true,
+      container: true,
+      child: GestureDetector(
+        onTap: busy ? null : onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          height: 52,
+          decoration: BoxDecoration(
+            gradient: AppGradients.blue,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: busy
+                ? null
+                : [
+                    BoxShadow(
+                      color: AppColors.blue.withValues(alpha: 0.3),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
-                    const SizedBox(width: 10),
-                    Text(busyLabel,
-                        style: AppTextStyles.button.copyWith(fontSize: 14)),
                   ],
-                )
-              : Text(label, style: AppTextStyles.button),
+          ),
+          child: Center(
+            child: busy
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 17,
+                        height: 17,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(busyLabel,
+                          style: AppTextStyles.button.copyWith(fontSize: 14)),
+                    ],
+                  )
+                : Text(label, style: AppTextStyles.button),
+          ),
         ),
       ),
     );
@@ -662,11 +707,13 @@ class _OrDivider extends StatelessWidget {
 }
 
 class _GoogleButton extends StatelessWidget {
+  final String autoIdent;
   final String label;
   final bool enabled;
   final VoidCallback onTap;
 
   const _GoogleButton({
+    required this.autoIdent,
     required this.label,
     required this.enabled,
     required this.onTap,
@@ -674,31 +721,36 @@ class _GoogleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: enabled ? 1 : 0.5,
-      child: GestureDetector(
-        onTap: enabled ? onTap : null,
-        child: Container(
-          height: 52,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.border, width: 1.4),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const _GoogleGlyph(size: 19),
-              const SizedBox(width: 11),
-              Flexible(
-                child: Text(
-                  label,
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.textDark),
-                  overflow: TextOverflow.ellipsis,
+    return Semantics(
+      identifier: autoIdent,
+      button: true,
+      container: true,
+      child: Opacity(
+        opacity: enabled ? 1 : 0.5,
+        child: GestureDetector(
+          onTap: enabled ? onTap : null,
+          child: Container(
+            height: 52,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.border, width: 1.4),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const _GoogleGlyph(size: 19),
+                const SizedBox(width: 11),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(color: AppColors.textDark),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

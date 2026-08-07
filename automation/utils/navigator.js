@@ -2,6 +2,7 @@
 
 const dashboard = require('../pages/dashboard.page');
 const onboarding = require('../pages/onboarding.page');
+const login = require('../pages/login.page');
 const { getDriver } = require('../drivers/driver-factory');
 const { AutoId } = require('../config/auto-ids.generated');
 const logger = require('./logger');
@@ -22,6 +23,7 @@ const log = logger('navigator');
 const ROUTES = {
   '/': { name: 'Splash', reachable: 'cold-start', rootId: AutoId.splashRoot },
   '/onboarding': { name: 'Onboarding', reachable: 'first-run', rootId: AutoId.onboardingRoot },
+  '/login': { name: 'Login', reachable: 'gate', rootId: AutoId.loginRoot },
   '/dashboard': { name: 'Dashboard', reachable: 'home', rootId: AutoId.dashboardRoot },
   '/phishing': { name: 'Phishing', reachable: 'module-card', label: 'Phishing', rootId: AutoId.phishingUrlInput },
   '/phishing/qr': { name: 'QR Scanner', reachable: 'from-phishing', rootId: AutoId.qrRoot },
@@ -51,6 +53,21 @@ async function toDashboard({ maxBacks = 6 } = {}) {
   if (await onboarding.isShown({ timeout: 1500 })) {
     await onboarding.skip();
   }
+
+  // Sign-in gate. Present only when the build carries Firebase
+  // credentials; CI has none, so the gate stands down there and this is a
+  // no-op. When it IS present it must be cleared, or every route below
+  // times out against a login form.
+  const auth = await login.signInFromEnv();
+  if (auth === 'no-credentials') {
+    throw new Error(
+      'The sign-in gate is up but CG_TEST_EMAIL / CG_TEST_PASSWORD are not set. ' +
+      'This build has Firebase configured, so the suite cannot reach any screen ' +
+      'without an account. Set both variables, or run against a build without ' +
+      'android/app/google-services.json.',
+    );
+  }
+  if (auth === 'signed-in') log.info('Signed in through the auth gate');
 
   for (let i = 0; i < maxBacks; i += 1) {
     if (await dashboard.isOpen({ timeout: 1200 })) {

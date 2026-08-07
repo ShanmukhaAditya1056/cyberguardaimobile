@@ -316,6 +316,27 @@ jobs:
           cache: npm
           cache-dependency-path: automation/package-lock.json
 
+      - name: Report which build configuration is under test
+        # The suite behaves differently depending on whether the APK was
+        # built with Firebase credentials. Without them the sign-in gate
+        # stands down and the suite exercises an ungated app — which is
+        # NOT what ships. Say so loudly rather than reporting a silent
+        # green against a configuration nobody installs.
+        run: |
+          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            echo "AUTH_MODE=gated" >> "$GITHUB_ENV"
+            echo "- Auth: **gated** (Firebase configured, suite signs in)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "AUTH_MODE=ungated" >> "$GITHUB_ENV"
+            {
+              echo "- Auth: **ungated** — no GOOGLE_SERVICES_JSON secret."
+              echo "  The sign-in gate is inactive in this build, so the E2E run does"
+              echo "  **not** cover the shipping configuration. Add the"
+              echo "  GOOGLE_SERVICES_JSON, CG_TEST_EMAIL and CG_TEST_PASSWORD secrets"
+              echo "  to close that gap — see docs/AUTH_SETUP.md."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Install automation dependencies
         working-directory: automation
         run: npm ci
@@ -410,7 +431,7 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Run suite"
-            npm test
+            CG_TEST_EMAIL="${{ secrets.CG_TEST_EMAIL }}" \n            CG_TEST_PASSWORD="${{ secrets.CG_TEST_PASSWORD }}" \n            npm test
             SUITE_EXIT=$?
             echo "::endgroup::"
 

@@ -21,7 +21,6 @@ dependencies:
   # toolbar, adaptive back chevron) reference its IconData, and the release
   # build warns about the missing font family without it.
   cupertino_icons: ^1.0.8
-  flutter_svg: ^2.0.10
   shimmer: ^3.0.0
   percent_indicator: ^4.2.3
   fl_chart: ^0.68.0
