@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 /// Why a sign-in attempt failed, in terms the UI can act on.
@@ -170,4 +171,22 @@ class AuthService {
         'network-request-failed' => AuthFailure.networkError,
         _ => AuthFailure.unknown,
       };
+}
+
+/// Bridges [AuthService.authStateChanges] to GoRouter's `refreshListenable`,
+/// so the route guard re-runs the moment a session starts or ends. Without it
+/// signing out would leave the user sitting on a protected screen until they
+/// happened to navigate.
+class AuthStateNotifier extends ChangeNotifier {
+  StreamSubscription<User?>? _sub;
+
+  AuthStateNotifier() {
+    _sub = AuthService.authStateChanges.listen((_) => notifyListeners());
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
 }

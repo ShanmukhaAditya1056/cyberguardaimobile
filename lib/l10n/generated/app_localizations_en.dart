@@ -1446,4 +1446,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String authSignedInAs(String email) {
     return 'Signed in as $email';
   }
+
+  @override
+  String get authWelcomeBack => 'Welcome back';
+
+  @override
+  String get authCreateAccountTitle => 'Create your account';
+
+  @override
+  String get authHeroTagline => 'Your phone\'s security, in one place';
+
+  @override
+  String get authTabSignIn => 'Sign In';
+
+  @override
+  String get authTabRegister => 'Register';
+
+  @override
+  String get authSecuredNote => 'Protected by end-to-end encrypted sign-in';
+
+  @override
+  String get authSigningIn => 'Signing you in…';
 }

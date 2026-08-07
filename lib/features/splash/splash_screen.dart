@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../data/services/auth_service.dart';
 import '../../data/services/hive_service.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -24,11 +25,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     await Future.delayed(const Duration(milliseconds: 1200));
     if (!mounted) return;
     final settings = HiveService.getSettings();
-    if (settings.onboardingComplete) {
-      context.go('/dashboard');
-    } else {
+    if (!settings.onboardingComplete) {
       context.go('/onboarding');
+      return;
     }
+    // Sign-in is mandatory, so send unauthenticated users straight to /login
+    // rather than bouncing them off the dashboard via the router guard —
+    // the guard would catch it either way, but this avoids a visible flash
+    // of the dashboard on a cold start.
+    if (AuthService.isConfigured && !AuthService.isSignedIn) {
+      context.go('/login');
+      return;
+    }
+    context.go('/dashboard');
   }
 
   @override

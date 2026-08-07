@@ -734,5 +734,12 @@
         "type": "String"
       }
     }
-  }
+  },
+  "authWelcomeBack": "Welcome back",
+  "authCreateAccountTitle": "Create your account",
+  "authHeroTagline": "Your phone's security, in one place",
+  "authTabSignIn": "Sign In",
+  "authTabRegister": "Register",
+  "authSecuredNote": "Protected by end-to-end encrypted sign-in",
+  "authSigningIn": "Signing you in…"
 }

@@ -1458,4 +1458,26 @@ class AppLocalizationsTe extends AppLocalizations {
   String authSignedInAs(String email) {
     return '$email గా సైన్ ఇన్ అయ్యారు';
   }
+
+  @override
+  String get authWelcomeBack => 'మళ్లీ స్వాగతం';
+
+  @override
+  String get authCreateAccountTitle => 'మీ ఖాతాను సృష్టించండి';
+
+  @override
+  String get authHeroTagline => 'మీ ఫోన్ భద్రత, ఒకే చోట';
+
+  @override
+  String get authTabSignIn => 'సైన్ ఇన్';
+
+  @override
+  String get authTabRegister => 'నమోదు';
+
+  @override
+  String get authSecuredNote =>
+      'ఎండ్-టు-ఎండ్ ఎన్క్రిప్టెడ్ సైన్-ఇన్ ద్వారా రక్షించబడింది';
+
+  @override
+  String get authSigningIn => 'సైన్ ఇన్ చేస్తోంది…';
 }

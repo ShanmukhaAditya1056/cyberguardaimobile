@@ -432,5 +432,12 @@
         "type": "String"
       }
     }
-  }
+  },
+  "authWelcomeBack": "மீண்டும் வரவேற்கிறோம்",
+  "authCreateAccountTitle": "உங்கள் கணக்கை உருவாக்குங்கள்",
+  "authHeroTagline": "உங்கள் தொலைபேசியின் பாதுகாப்பு, ஒரே இடத்தில்",
+  "authTabSignIn": "உள்நுழை",
+  "authTabRegister": "பதிவு",
+  "authSecuredNote": "கேர்ப்பு முதல் கேர்ப்பு வரை என்கிரிப்ட் செய்யப்பட்டது",
+  "authSigningIn": "உள்நுழைகிறது…"
 }

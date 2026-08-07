@@ -1468,4 +1468,26 @@ class AppLocalizationsTa extends AppLocalizations {
   String authSignedInAs(String email) {
     return '$email ஆக உள்நுழைந்துள்ளீர்கள்';
   }
+
+  @override
+  String get authWelcomeBack => 'மீண்டும் வரவேற்கிறோம்';
+
+  @override
+  String get authCreateAccountTitle => 'உங்கள் கணக்கை உருவாக்குங்கள்';
+
+  @override
+  String get authHeroTagline => 'உங்கள் தொலைபேசியின் பாதுகாப்பு, ஒரே இடத்தில்';
+
+  @override
+  String get authTabSignIn => 'உள்நுழை';
+
+  @override
+  String get authTabRegister => 'பதிவு';
+
+  @override
+  String get authSecuredNote =>
+      'கேர்ப்பு முதல் கேர்ப்பு வரை என்கிரிப்ட் செய்யப்பட்டது';
+
+  @override
+  String get authSigningIn => 'உள்நுழைகிறது…';
 }

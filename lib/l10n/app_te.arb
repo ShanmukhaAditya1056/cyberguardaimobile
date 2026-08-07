@@ -432,5 +432,12 @@
         "type": "String"
       }
     }
-  }
+  },
+  "authWelcomeBack": "మళ్లీ స్వాగతం",
+  "authCreateAccountTitle": "మీ ఖాతాను సృష్టించండి",
+  "authHeroTagline": "మీ ఫోన్ భద్రత, ఒకే చోట",
+  "authTabSignIn": "సైన్ ఇన్",
+  "authTabRegister": "నమోదు",
+  "authSecuredNote": "ఎండ్-టు-ఎండ్ ఎన్క్రిప్టెడ్ సైన్-ఇన్ ద్వారా రక్షించబడింది",
+  "authSigningIn": "సైన్ ఇన్ చేస్తోంది…"
 }

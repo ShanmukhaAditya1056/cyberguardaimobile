@@ -2657,6 +2657,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Signed in as {email}'**
   String authSignedInAs(String email);
+
+  /// No description provided for @authWelcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get authWelcomeBack;
+
+  /// No description provided for @authCreateAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get authCreateAccountTitle;
+
+  /// No description provided for @authHeroTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone\'s security, in one place'**
+  String get authHeroTagline;
+
+  /// No description provided for @authTabSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get authTabSignIn;
+
+  /// No description provided for @authTabRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get authTabRegister;
+
+  /// No description provided for @authSecuredNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected by end-to-end encrypted sign-in'**
+  String get authSecuredNote;
+
+  /// No description provided for @authSigningIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing you in…'**
+  String get authSigningIn;
 }
 
 class _AppLocalizationsDelegate

@@ -1447,4 +1447,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String authSignedInAs(String email) {
     return '$email के रूप में साइन इन';
   }
+
+  @override
+  String get authWelcomeBack => 'वापस स्वागत है';
+
+  @override
+  String get authCreateAccountTitle => 'अपना खाता बनाएँ';
+
+  @override
+  String get authHeroTagline => 'आपके फ़ोन की सुरक्षा, एक ही जगह';
+
+  @override
+  String get authTabSignIn => 'साइन इन';
+
+  @override
+  String get authTabRegister => 'पंजीकरण';
+
+  @override
+  String get authSecuredNote => 'एंड-टू-एंड एन्क्रिप्टेड साइन-इन से सुरक्षित';
+
+  @override
+  String get authSigningIn => 'साइन इन किया जा रहा है…';
 }

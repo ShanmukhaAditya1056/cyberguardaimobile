@@ -432,5 +432,12 @@
         "type": "String"
       }
     }
-  }
+  },
+  "authWelcomeBack": "वापस स्वागत है",
+  "authCreateAccountTitle": "अपना खाता बनाएँ",
+  "authHeroTagline": "आपके फ़ोन की सुरक्षा, एक ही जगह",
+  "authTabSignIn": "साइन इन",
+  "authTabRegister": "पंजीकरण",
+  "authSecuredNote": "एंड-टू-एंड एन्क्रिप्टेड साइन-इन से सुरक्षित",
+  "authSigningIn": "साइन इन किया जा रहा है…"
 }

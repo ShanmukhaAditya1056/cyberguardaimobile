@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/repositories/malware_repository.dart';
+import '../../data/services/auth_service.dart';
 import '../../data/services/hive_service.dart';
 import '../../features/alerts/view/alerts_screen.dart';
 import '../../features/auth/view/login_screen.dart';
@@ -20,9 +21,66 @@ import '../../features/settings/view/settings_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/wifi/view/wifi_screen.dart';
 
+/// Routes reachable without a session. Everything else requires sign-in.
+const _publicRoutes = <String>{'/', '/onboarding', '/login'};
+
+/// Onboarding + sign-in gate. Returns a path to redirect to, or null to allow.
+///
+/// Sign-in is mandatory: every route outside [_publicRoutes] requires a
+/// session, enforced here at the router rather than per screen so no deep
+/// link, notification tap or `context.go` can slip past it.
+///
+/// The single bypass is deliberate. When the build carries no Firebase
+/// credentials, signing in is *impossible*, so enforcing the gate would brick
+/// the app permanently — on CI, and on any clean checkout without
+/// google-services.json. There the gate stands down instead of locking
+/// everyone out of a tool they cannot authenticate into. Whenever auth can
+/// actually work, it is enforced with no way around it.
+/// Pure form of the guard, split out so the gate can be tested without a
+/// Hive box, a Firebase project or a live router.
+@visibleForTesting
+String? resolveRoute({
+  required String path,
+  required bool onboardingComplete,
+  required bool authConfigured,
+  required bool signedIn,
+}) {
+  // Splash decides where to go itself; never bounce it.
+  if (path == '/') return null;
+
+  // First launch still goes through onboarding before anything else.
+  if (!onboardingComplete) {
+    return path == '/onboarding' ? null : '/onboarding';
+  }
+
+  if (!authConfigured) return null;
+
+  if (!signedIn && !_publicRoutes.contains(path)) return '/login';
+
+  // Already authenticated — don't strand the user on the login screen.
+  if (signedIn && path == '/login') return '/dashboard';
+
+  return null;
+}
+
+String? _routeGuard(BuildContext context, GoRouterState state) {
+  final path = state.matchedLocation;
+  if (path == '/') return null; // avoid a Hive read on every splash frame
+  return resolveRoute(
+    path: path,
+    onboardingComplete: HiveService.getSettings().onboardingComplete,
+    authConfigured: AuthService.isConfigured,
+    signedIn: AuthService.isSignedIn,
+  );
+}
+
 final appRouter = GoRouter(
   initialLocation: '/',
   debugLogDiagnostics: false,
+  redirect: _routeGuard,
+  // Re-evaluates the guard on sign-in and sign-out, so signing out drops
+  // straight back to /login from wherever the user happened to be.
+  refreshListenable: AuthStateNotifier(),
   routes: [
     // Splash
     GoRoute(
@@ -132,21 +190,6 @@ final appRouter = GoRouter(
       builder: (_, __) => const SettingsScreen(),
     ),
   ],
-
-  // Redirect to onboarding if not completed
-  redirect: (context, state) {
-    final settings = HiveService.getSettings();
-    final onboarded = settings.onboardingComplete;
-    final location = state.matchedLocation;
-
-    // Always allow splash + onboarding
-    if (location == '/' || location == '/onboarding') return null;
-
-    // Force onboarding on first launch
-    if (!onboarded) return '/onboarding';
-
-    return null;
-  },
 
   // Error page
   errorBuilder: (context, state) => Scaffold(
