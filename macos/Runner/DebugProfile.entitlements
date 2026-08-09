@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Off for the same reason as in Release.entitlements: the App Scanner and
+	     Wi-Fi probes shell out to system_profiler and friends, which the
+	     sandbox blocks outright. Keeping debug and release aligned also means a
+	     capability never works in development and then fails in the shipped
+	     build. -->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+
+	<!-- Dart runs JIT in debug and profile builds. -->
+	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+
+	<!-- The Flutter tool attaches to the Dart VM service over a local socket,
+	     so a debug build has to be able to listen as well as connect. -->
+	<key>com.apple.security.network.server</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+
+	<key>com.apple.security.device.camera</key>
+	<true/>
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+</dict>
+</plist>

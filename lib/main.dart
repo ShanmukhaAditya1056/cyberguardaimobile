@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/platform/app_platform.dart';
 import 'data/repositories/malware_repository.dart';
 import 'data/repositories/phishing_repository.dart';
 import 'data/services/auth_service.dart';
@@ -39,23 +40,29 @@ Future<void> main() async {
 
   _registerFontLicenses();
 
-  // Lock to portrait
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  // Portrait lock and edge-to-edge system bars are handheld concepts. On the
+  // desktops the window manager owns the frame, and calling these there is at
+  // best a no-op and at worst fights the compositor over a status bar that
+  // does not exist.
+  if (AppPlatform.canLockOrientation) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
 
-  // Full immersive edge-to-edge
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ),
-  );
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  if (AppPlatform.hasSystemUiOverlays) {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
 
   // Initialise Hive
   await HiveService.init();

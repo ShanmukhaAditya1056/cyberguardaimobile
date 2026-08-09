@@ -1,0 +1,70 @@
+# Pinned to 15.5 because google_mlkit_text_recognition's pod requires it. The
+# Xcode project's IPHONEOS_DEPLOYMENT_TARGET is set to the same value; both have
+# to agree or CocoaPods emits a target-mismatch warning on every pod and the
+# ML Kit pod fails to integrate.
+platform :ios, '15.5'
+
+# CocoaPods analytics sends network stats synchronously, which slows down builds.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  use_frameworks!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+
+    target.build_configurations.each do |config|
+      # Several transitive pods still declare an older floor than the app.
+      # Without this they build against their own target and the linker warns
+      # on every file; forcing them up to the app's floor is the standard fix.
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
+
+      # permission_handler reads its permission set from compile-time macros:
+      # anything not listed here is stripped out, which is what keeps App Store
+      # review from asking why a security scanner links the HealthKit or
+      # Bluetooth permission code. Only the two the app actually prompts for
+      # are enabled — camera for the QR scanner, photos for image import.
+      #
+      # Note what is *not* here: PERMISSION_SMS does not exist on iOS at all,
+      # and PERMISSION_LOCATION is omitted because reading the Wi-Fi SSID needs
+      # the wifi-info entitlement rather than a location grant, so prompting
+      # for location would gain the user nothing.
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+        'PERMISSION_CAMERA=1',
+        'PERMISSION_PHOTOS=1',
+        'PERMISSION_NOTIFICATIONS=1',
+      ]
+    end
+  end
+end

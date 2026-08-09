@@ -20,6 +20,8 @@ import '../../features/phishing/view/qr_scanner_screen.dart';
 import '../../features/settings/view/settings_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/wifi/view/wifi_screen.dart';
+import '../../shared/widgets/unsupported_module_screen.dart';
+import '../platform/app_platform.dart';
 
 /// Routes reachable without a session. Everything else requires sign-in.
 const _publicRoutes = <String>{'/', '/onboarding', '/login'};
@@ -114,16 +116,37 @@ final appRouter = GoRouter(
       builder: (_, __) => const PhishingScreen(),
     ),
 
-    // QR code phishing scanner
+    // QR code phishing scanner. The scanner plugin has no Windows or Linux
+    // implementation, for either the camera or the image decoder.
     GoRoute(
       path: '/phishing/qr',
-      builder: (_, __) => const QrScannerScreen(),
+      builder: (_, __) => AppPlatform.canDecodeQrFromImage
+          ? const QrScannerScreen()
+          : const UnsupportedModuleScreen(
+              moduleName: 'QR Scanner',
+              icon: Icons.qr_code_scanner_rounded,
+              reason: 'The QR decoder this app uses has no Windows or Linux '
+                  'build. Paste the link from the QR code into the Phishing '
+                  'scanner instead — it runs the same detection engine.',
+              availableOn: ['Android', 'iOS', 'macOS'],
+            ),
     ),
 
-    // Malware scanner
+    // Malware scanner. Needs an installed-software inventory, which iOS's
+    // sandbox does not expose to any app.
     GoRoute(
       path: '/malware',
-      builder: (_, __) => const MalwareScreen(),
+      builder: (_, __) => AppPlatform.canEnumerateInstalledApps
+          ? const MalwareScreen()
+          : const UnsupportedModuleScreen(
+              moduleName: 'App Scanner',
+              icon: Icons.bug_report_rounded,
+              reason: 'iOS does not let one app see what else is installed, '
+                  'so there is no inventory to scan. Apple reviews every app '
+                  'on the App Store before it ships, which covers much of the '
+                  'same ground.',
+              availableOn: ['Android', 'Windows', 'macOS', 'Linux'],
+            ),
     ),
 
     // App detail (extra = ScannedApp)
@@ -178,10 +201,21 @@ final appRouter = GoRouter(
       builder: (_, __) => const PredictiveRiskScreen(),
     ),
 
-    // Screenshot AI scanner (Feature 3)
+    // Screenshot AI scanner (Feature 3). Depends on ML Kit, which Google
+    // builds for Android and iOS only.
     GoRoute(
       path: '/screenshot',
-      builder: (_, __) => const ScreenshotScannerScreen(),
+      builder: (_, __) => AppPlatform.canRunOcr
+          ? const ScreenshotScannerScreen()
+          : const UnsupportedModuleScreen(
+              moduleName: 'Screenshot Scanner',
+              icon: Icons.image_search_rounded,
+              reason: 'Reading text out of an image needs on-device OCR, and '
+                  'the engine this uses ships for phones only. Sending your '
+                  'screenshots to a cloud OCR service instead would defeat the '
+                  'point of an offline scanner.',
+              availableOn: ['Android', 'iOS'],
+            ),
     ),
 
     // Settings

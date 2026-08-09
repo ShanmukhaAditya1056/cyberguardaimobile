@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../../core/platform/app_platform.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_gradients.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -44,8 +45,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       // Either permission unlocks the SSID — checking only `location` meant
       // Android 13+ users who granted nearby-devices instead had the Wi-Fi
       // leg of the quick scan skipped silently. Mirrors PermissionService.
-      final granted = await Permission.location.isGranted ||
-          await Permission.nearbyWifiDevices.isGranted;
+      //
+      // Only Android gates the SSID this way. Everywhere else the question is
+      // whether the platform can read the network at all, which is a
+      // build-time fact rather than a permission — and asking
+      // `Permission.location` on Linux, where permission_handler has no
+      // implementation, throws rather than answering.
+      final granted = AppPlatform.isAndroid
+          ? await Permission.location.isGranted ||
+              await Permission.nearbyWifiDevices.isGranted
+          : AppPlatform.canProbeNetworkHealth;
       if (granted) {
         final repo = WifiRepository(PlatformChannelService());
         final result = await repo.analyzeCurrentNetwork();
@@ -610,7 +619,7 @@ class _DefenseGrid extends StatelessWidget {
       (Icons.image_search_rounded, l.defenseScreenshotScan, AppColors.safe, '/screenshot'),
       (Icons.online_prediction_rounded, l.defensePredictiveRisk, AppColors.warning, '/risk'),
       (Icons.balance_rounded, l.defenseArbitrationLog, AppColors.critical, '/arbitration'),
-    ];
+    ].where((t) => AppPlatform.isModuleAvailable(t.$4.substring(1))).toList();
     return Semantics(
       identifier: AutoId.dashboardDefenseGrid,
       child: Padding(

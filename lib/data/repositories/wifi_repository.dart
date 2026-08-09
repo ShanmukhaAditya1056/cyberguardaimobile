@@ -11,6 +11,12 @@ import '../services/wifi_ml_service.dart';
 // Single shared Isolation Forest instance, loaded lazily on first scan.
 final _wifiMl = WifiMlService();
 
+/// Highest trust score a network can reach when the host could not read its
+/// encryption, signal or access point. Sits just under the 80-point "low risk"
+/// threshold, so an unverifiable network lands in "medium" — not alarming, but
+/// never presented as clean.
+const int _unverifiedNetworkCeiling = 75;
+
 class WifiCheckResult {
   final String name;
   final bool passed;
@@ -40,6 +46,12 @@ class WifiAnalysisResult {
   final int latencyMs;
   final bool bssidChanged;
 
+  /// False when the host cannot see who it is connected to — currently iOS
+  /// without the Wi-Fi entitlement. The SSID, BSSID, signal and encryption
+  /// fields are then placeholders, and the UI must say so instead of
+  /// presenting them as findings.
+  final bool identityAvailable;
+
   const WifiAnalysisResult({
     required this.ssid,
     required this.bssid,
@@ -54,6 +66,7 @@ class WifiAnalysisResult {
     required this.dnsHealthy,
     required this.latencyMs,
     required this.bssidChanged,
+    this.identityAvailable = true,
   });
 }
 
@@ -90,6 +103,13 @@ class WifiRepository {
           (wifiData['message'] as String?) ?? 'Failed to read Wi-Fi state');
     }
 
+    // Hosts that cannot see the network's identity say so explicitly. iOS is
+    // the only one today: SSID, BSSID, signal and cipher all need the Wi-Fi
+    // entitlement. The reachability checks below need none of that, so the
+    // module still runs — it just reports on what it can actually observe
+    // rather than on placeholder values.
+    final identityAvailable = wifiData['identityAvailable'] as bool? ?? true;
+
     final ssid = wifiData['ssid'] as String? ?? 'Unknown';
     final bssid = wifiData['bssid'] as String? ?? '';
     final rssi = wifiData['rssi'] as int? ?? -100;
@@ -98,6 +118,9 @@ class WifiRepository {
     final ipAddress = wifiData['ipAddress'] as String? ?? '0.0.0.0';
     final isSecured = wifiData['isSecured'] as bool? ?? true;
     final hasInternet = wifiData['hasInternet'] as bool? ?? false;
+    // Desktops report the negotiated cipher by name ("WPA3 Personal",
+    // "WEP (broken encryption)"), which is more useful than a yes/no.
+    final securityLabel = wifiData['securityLabel'] as String?;
 
     // 2. DNS health check using real lookup
     final dnsResult = await _testDns();
@@ -111,28 +134,33 @@ class WifiRepository {
         storedBssid != bssid &&
         bssid.isNotEmpty;
 
-    // 4. Run all checks
+    // 4. Run all checks. The reachability trio applies to every host; the
+    // first three depend on being able to see the network itself.
     final checks = <WifiCheckResult>[
-      WifiCheckResult(
-        name: 'Encryption',
-        passed: isSecured,
-        detail: isSecured
-            ? 'Network is encrypted (WPA2/WPA3)'
-            : 'OPEN network — no encryption!',
-        icon: isSecured ? 'lock' : 'lock_open',
-      ),
-      WifiCheckResult(
-        name: 'Signal Quality',
-        passed: rssi >= -80,
-        detail: rssi >= -50
-            ? 'Excellent signal ($rssi dBm)'
-            : rssi >= -70
-                ? 'Good signal ($rssi dBm)'
-                : rssi >= -80
-                    ? 'Fair signal ($rssi dBm)'
-                    : 'Weak signal ($rssi dBm) — possibly monitored',
-        icon: 'signal_wifi_4_bar',
-      ),
+      if (identityAvailable) ...[
+        WifiCheckResult(
+          name: 'Encryption',
+          passed: isSecured,
+          detail: isSecured
+              ? 'Network is encrypted (${securityLabel ?? 'WPA2/WPA3'})'
+              : securityLabel != null && securityLabel.startsWith('WEP')
+                  ? 'WEP encryption — broken since 2001, treat as open'
+                  : 'OPEN network — no encryption!',
+          icon: isSecured ? 'lock' : 'lock_open',
+        ),
+        WifiCheckResult(
+          name: 'Signal Quality',
+          passed: rssi >= -80,
+          detail: rssi >= -50
+              ? 'Excellent signal ($rssi dBm)'
+              : rssi >= -70
+                  ? 'Good signal ($rssi dBm)'
+                  : rssi >= -80
+                      ? 'Fair signal ($rssi dBm)'
+                      : 'Weak signal ($rssi dBm) — possibly monitored',
+          icon: 'signal_wifi_4_bar',
+        ),
+      ],
       WifiCheckResult(
         name: 'DNS Health',
         passed: dnsHealthy,
@@ -148,16 +176,19 @@ class WifiRepository {
             hasInternet ? 'Internet connection active' : 'No internet access',
         icon: 'public',
       ),
-      WifiCheckResult(
-        name: 'BSSID Consistency',
-        passed: !bssidChanged,
-        detail: bssidChanged
-            ? 'BSSID changed! Possible Evil Twin attack'
-            : storedBssid == null
-                ? 'First time on this network — BSSID recorded'
-                : 'BSSID matches previous connection',
-        icon: 'router',
-      ),
+      if (identityAvailable)
+        WifiCheckResult(
+          name: 'BSSID Consistency',
+          passed: !bssidChanged,
+          detail: bssidChanged
+              ? 'BSSID changed! Possible Evil Twin attack'
+              : bssid.isEmpty
+                  ? 'Access point address not visible — Evil Twin check skipped'
+                  : storedBssid == null
+                      ? 'First time on this network — BSSID recorded'
+                      : 'BSSID matches previous connection',
+          icon: 'router',
+        ),
       WifiCheckResult(
         name: 'Latency',
         passed: latencyMs < 200,
@@ -170,6 +201,15 @@ class WifiRepository {
                     : 'High latency (${latencyMs}ms) — suspicious',
         icon: 'speed',
       ),
+      if (!identityAvailable)
+        const WifiCheckResult(
+          name: 'Network identity',
+          passed: false,
+          detail: 'iOS does not expose the network name, access point or '
+              'encryption to apps without a special entitlement, so those '
+              'checks could not run.',
+          icon: 'visibility_off',
+        ),
     ];
 
     // 5. Calculate trust score from real data
@@ -180,6 +220,31 @@ class WifiRepository {
       rssi: rssi,
       isPublic: !isSecured,
     );
+
+    // A host that cannot inspect the network has not verified it is safe, so
+    // the score is capped below the "low risk" band. Anything higher would let
+    // an unverifiable network read as clean, which is the one outcome a
+    // security tool must not produce. The ML model is skipped for the same
+    // reason: its features are the encryption, signal and BSSID fields that
+    // this host could not read.
+    if (!identityAvailable) {
+      final cappedScore = baseScore.clamp(0, _unverifiedNetworkCeiling);
+      return _buildResult(
+        ssid: ssid,
+        bssid: bssid,
+        rssi: rssi,
+        trustScore: cappedScore,
+        checks: checks,
+        ipAddress: ipAddress,
+        frequency: frequency,
+        linkSpeed: linkSpeed,
+        isSecured: isSecured,
+        dnsHealthy: dnsHealthy,
+        latencyMs: latencyMs,
+        bssidChanged: bssidChanged,
+        identityAvailable: false,
+      );
+    }
 
     // 5b. Run the on-device Isolation Forest. When the model isn't yet
     // loaded the future returns and we fall back to the rules score.
@@ -216,9 +281,44 @@ class WifiRepository {
       }
     }
 
+    return _buildResult(
+      ssid: ssid,
+      bssid: bssid,
+      rssi: rssi,
+      trustScore: trustScore,
+      checks: checks,
+      ipAddress: ipAddress,
+      frequency: frequency,
+      linkSpeed: linkSpeed,
+      isSecured: isSecured,
+      dnsHealthy: dnsHealthy,
+      latencyMs: latencyMs,
+      bssidChanged: bssidChanged,
+      identityAvailable: true,
+    );
+  }
+
+  /// Records the scan, raises an alert when the network is dangerous, and
+  /// returns the result. Shared by both exits from [analyzeCurrentNetwork] so
+  /// a host that can only run the reachability checks still gets its scan
+  /// written to history and still triggers an alert.
+  Future<WifiAnalysisResult> _buildResult({
+    required String ssid,
+    required String bssid,
+    required int rssi,
+    required int trustScore,
+    required List<WifiCheckResult> checks,
+    required String ipAddress,
+    required int frequency,
+    required int linkSpeed,
+    required bool isSecured,
+    required bool dnsHealthy,
+    required int latencyMs,
+    required bool bssidChanged,
+    required bool identityAvailable,
+  }) async {
     final riskLevel = _riskLevel(trustScore);
 
-    // 6. Save to Hive
     final scanModel = WifiScanModel(
       ssid: ssid,
       bssid: bssid,
@@ -237,25 +337,24 @@ class WifiRepository {
     );
     await HiveService.saveWifiScan(scanModel);
 
-    // 7. Create alert if dangerous
     if (riskLevel == 'critical' || riskLevel == 'high') {
+      final failed = checks.where((c) => !c.passed).map((c) => c.name).join(', ');
+      final label = ssid.isEmpty ? 'This network' : '"$ssid"';
       final alert = AlertModel(
         id: _uuid.v4(),
         type: riskLevel == 'critical' ? 'critical' : 'warning',
         title: riskLevel == 'critical'
             ? 'Dangerous Wi-Fi Network'
             : 'Unsafe Wi-Fi Network',
-        description:
-            '"$ssid" — ${checks.where((c) => !c.passed).map((c) => c.name).join(', ')} failed',
+        description: '$label — $failed failed',
         module: 'wifi',
         timestamp: DateTime.now(),
       );
       await HiveService.saveAlert(alert);
-      await NotificationService.showUnsafeWifi(ssid);
+      await NotificationService.showUnsafeWifi(
+        ssid.isEmpty ? 'your current network' : ssid,
+      );
     }
-
-    // 8. Store BSSID for future comparison
-    // (already stored via saveWifiScan)
 
     return WifiAnalysisResult(
       ssid: ssid,
@@ -271,6 +370,7 @@ class WifiRepository {
       dnsHealthy: dnsHealthy,
       latencyMs: latencyMs,
       bssidChanged: bssidChanged,
+      identityAvailable: identityAvailable,
     );
   }
 

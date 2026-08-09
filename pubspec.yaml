@@ -52,6 +52,11 @@ dependencies:
   share_plus: ^11.0.0
   clipboard: ^0.1.3
   path_provider: ^2.1.3
+  # Hands a vetted URL to the system browser. On Android the Smart Link
+  # Interceptor does this through its own channel so it can exclude CyberGuard
+  # from the chooser and avoid looping back into itself; every other platform
+  # has no interceptor to loop through, so this is the hand-off there.
+  url_launcher: ^6.3.0
   intl: ^0.20.2
   flutter_local_notifications: ^17.1.2
   uuid: ^4.3.3
