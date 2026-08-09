@@ -44,6 +44,10 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Restore API key placeholder
+        shell: bash
+        run: ./tool/ci_restore_api_keys.sh
+
       - run: flutter pub get
 
       - name: flutter analyze
@@ -139,6 +143,10 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Restore API key placeholder
+        shell: bash
+        run: ./tool/ci_restore_api_keys.sh
+
       - run: flutter pub get
 
       - name: Build
@@ -170,6 +178,10 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+
+      - name: Restore API key placeholder
+        shell: bash
+        run: ./tool/ci_restore_api_keys.sh
 
       - run: flutter pub get
 

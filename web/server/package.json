@@ -8,10 +8,11 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "//test": "Bare `node --test` auto-discovers test files and works from Node 18. Passing a quoted glob instead needs Node 21+, which silently broke CI on the Node 20 the engines field allows.",
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test",
     "test:e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
