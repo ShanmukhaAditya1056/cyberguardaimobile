@@ -46,7 +46,7 @@ jobs:
 
       - name: Restore API key placeholder
         shell: bash
-        run: ./tool/ci_restore_api_keys.sh
+        run: bash tool/ci_restore_api_keys.sh
 
       - run: flutter pub get
 
@@ -145,7 +145,7 @@ jobs:
 
       - name: Restore API key placeholder
         shell: bash
-        run: ./tool/ci_restore_api_keys.sh
+        run: bash tool/ci_restore_api_keys.sh
 
       - run: flutter pub get
 
@@ -181,7 +181,7 @@ jobs:
 
       - name: Restore API key placeholder
         shell: bash
-        run: ./tool/ci_restore_api_keys.sh
+        run: bash tool/ci_restore_api_keys.sh
 
       - run: flutter pub get
 
