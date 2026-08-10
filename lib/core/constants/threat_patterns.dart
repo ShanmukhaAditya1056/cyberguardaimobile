@@ -72,6 +72,17 @@ class ThreatPatterns {
     // Tech / dev
     'apple.com', 'microsoft.com', 'samsung.com',
     'github.com', 'stackoverflow.com',
+    // First-party infrastructure domains of brands already protected above.
+    // The impersonation rule matches a brand name *anywhere* in the URL, so
+    // without these `login.microsoftonline.com` and `s3.amazonaws.com` score
+    // 20 for "impersonates microsoft/amazon". On their own that stays under
+    // the 35-point threshold, but a single further signal tips them over — and
+    // the commonest one is an OAuth `redirect_uri`, which is percent-encoded
+    // and worth 15. That combination is exactly what an enterprise sign-in URL
+    // looks like, so these belong on the whitelist.
+    'microsoftonline.com', 'azure.com', 'windows.net',
+    'amazonaws.com', 'awsstatic.com',
+    'googleapis.com', 'googleusercontent.com', 'gstatic.com',
     // Finance / insurance
     'bajajfinserv.in', 'lendingkart.com',
     'policybazaar.com', 'coverfox.com', 'acko.com', 'digit.in',
