@@ -186,21 +186,30 @@ jobs:
         run: |
           [ -f build.log ] || { echo "::error::build.log missing — the build died before producing output"; exit 0; }
 
-          # A single annotation is capped well below the size of a CocoaPods
-          # resolution failure, which truncated the useful half of the iOS
-          # error last time. The tail is emitted in ordered chunks instead.
+          # Tailing the log does not work for CocoaPods: it writes megabytes of
+          # CDN progress after the actual failure, so the last N bytes are all
+          # ETag noise and the `[!]` block that names the conflicting pods is
+          # far further back. Search the whole log for the lines that mark a
+          # real error instead, and emit only those — short enough that the
+          # annotation is not truncated.
           #
+          # \r is stripped first because CocoaPods draws progress with carriage
+          # returns, which otherwise collapse the whole log into one line.
+          tr -d '\r' < build.log > clean.log
+
+          grep -n -E '^\[!\]|^Error:|error:|CMake Error|FAILURE:|Could not|conflict|was resolved to|depends on|required by' clean.log \
+            | grep -v -E 'ETag|podspec.json|CDN: trunk|Returning local' \
+            | tail -40 > focus.log || true
+
+          if [ ! -s focus.log ]; then
+            echo "no error-shaped lines matched; falling back to the tail"
+            tail -c 1500 clean.log > focus.log
+          fi
+
           # % must be escaped before newlines become %0A, or the escaping eats
-          # its own encoding; \r from the Windows toolchain truncates an
-          # annotation at the first line if it survives.
-          tail -c 12000 build.log | tr -d '\r' > tail.log
-          split -b 2500 -d tail.log chunk_
-          i=0
-          for f in chunk_*; do
-            i=$((i + 1))
-            msg=$(sed 's/%/%25/g' "$f" | sed ':a;N;$!ba;s/\n/%0A/g')
-            echo "::error title=${{ matrix.target }} build failed (part ${i})::${msg}"
-          done
+          # its own encoding.
+          msg=$(sed 's/%/%25/g' focus.log | sed ':a;N;$!ba;s/\n/%0A/g')
+          echo "::error title=${{ matrix.target }} build failed::${msg}"
 
       - name: Upload build log
         if: failure()
