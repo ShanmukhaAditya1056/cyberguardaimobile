@@ -152,6 +152,9 @@ jobs:
       - name: Build
         shell: bash
         run: |
+          # pipefail matters: without it `tee` returns 0 and a failed build
+          # would be reported as a success.
+          set -o pipefail
           case "${{ matrix.target }}" in
             android) flutter build apk --debug ;;
             linux)   flutter build linux --debug ;;
@@ -160,7 +163,32 @@ jobs:
             # No signing identity on a CI runner, so archiving is skipped.
             # --no-codesign still exercises the full compile and pod install.
             ios)     flutter build ios --debug --no-codesign ;;
-          esac
+          esac 2>&1 | tee build.log
+
+      # Job logs need an authenticated token to read, but check-run annotations
+      # do not. Re-emitting the tail of a failed build as an ::error:: puts the
+      # actual compiler or CocoaPods message somewhere anyone looking at the run
+      # can retrieve it — including tooling that has no credentials.
+      - name: Surface the build failure
+        if: failure()
+        shell: bash
+        run: |
+          [ -f build.log ] || { echo "::error::build.log missing — the build died before producing output"; exit 0; }
+          # % must be escaped first or it eats the newline encoding that follows,
+          # and \r from the Windows toolchain would truncate the annotation.
+          msg=$(tail -c 3500 build.log \
+                | sed 's/%/%25/g' \
+                | tr -d '\r' \
+                | sed ':a;N;$!ba;s/\n/%0A/g')
+          echo "::error title=${{ matrix.target }} build failed::${msg}"
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.target }}
+          path: build.log
+          retention-days: 7
 
   # ── Desktop probes against a real OS ─────────────────────────────────────
   probe:
