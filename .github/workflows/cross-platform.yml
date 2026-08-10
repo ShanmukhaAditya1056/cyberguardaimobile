@@ -3,6 +3,10 @@ name: Cross-platform build & test
 # Builds the Flutter app for every platform it claims to support and runs both
 # test suites.
 #
+# iOS is deliberately absent: the target was removed (see docs/PLATFORMS.md).
+# If it is restored, add `- target: ios / os: macos-latest` to the matrix and
+# `ios) flutter build ios --debug --no-codesign ;;` to the case below.
+#
 # Why this exists: the Android E2E workflow proves the Android build works, and
 # nothing proved the other five did. The desktop probes are written against
 # each OS's own tooling and cannot be exercised on a foreign runner, so this
@@ -117,8 +121,6 @@ jobs:
             os: windows-latest
           - target: macos
             os: macos-latest
-          - target: ios
-            os: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -171,9 +173,6 @@ jobs:
             linux)   flutter build linux --debug ;;
             windows) flutter build windows --debug ;;
             macos)   flutter build macos --debug ;;
-            # No signing identity on a CI runner, so archiving is skipped.
-            # --no-codesign still exercises the full compile and pod install.
-            ios)     flutter build ios --debug --no-codesign ;;
           esac 2>&1 | tee build.log
 
       # Job logs need an authenticated token to read, but check-run annotations

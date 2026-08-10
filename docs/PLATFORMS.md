@@ -1,7 +1,7 @@
 # Platform support
 
-CyberGuard AI runs on six platforms from one codebase, plus a separate MERN
-stack for the browser. This document is the honest account of what works where,
+CyberGuard AI runs on four native platforms from one codebase, plus a separate
+MERN stack for the browser. This document is the honest account of what works where,
 why the gaps exist, and how to build each target.
 
 - [Feature matrix](#feature-matrix)
@@ -14,26 +14,34 @@ why the gaps exist, and how to build each target.
 
 ## Feature matrix
 
-| Module | Android | iOS | Windows | macOS | Linux | Web (MERN) |
-|---|:--:|:--:|:--:|:--:|:--:|:--:|
-| Phishing URL scanner | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Phishing in pasted text | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Live SMS guard | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| QR scanner (camera) | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| QR scanner (from image) | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| Installed-app scanner | ✅ | ❌ | ✅ | ✅ | ✅ | ⚠️ manual |
-| Wi-Fi analysis (full) | ✅ | ❌ | ✅ | ✅ | ✅ | ⚠️ manual |
-| Wi-Fi reachability only | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Breach monitor | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Screenshot scanner | ✅ | ✅ | ❌ | ❌ | ❌ | ⚠️ paste text |
-| Smart Link Interceptor | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Threat fusion / risk / arbitration | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Local notifications | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
-| Unified score + history | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| PDF / CSV export | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Firebase sign-in | ✅ | ✅ | ❌ | ✅ | ❌ | n/a (JWT) |
+| Module | Android | Windows | macOS | Linux | Web (MERN) |
+|---|:--:|:--:|:--:|:--:|:--:|
+| Phishing URL scanner | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Phishing in pasted text | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Live SMS guard | ✅ | ❌ | ❌ | ❌ | ❌ |
+| QR scanner (camera) | ✅ | ❌ | ✅ | ❌ | ❌ |
+| QR scanner (from image) | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Installed-app scanner | ✅ | ✅ | ✅ | ✅ | ⚠️ manual |
+| Wi-Fi analysis (full) | ✅ | ✅ | ✅ | ✅ | ⚠️ manual |
+| Wi-Fi reachability only | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Breach monitor | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Screenshot scanner | ✅ | ❌ | ❌ | ❌ | ⚠️ paste text |
+| Smart Link Interceptor | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Threat fusion / risk / arbitration | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Local notifications | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Unified score + history | ✅ | ✅ | ✅ | ✅ | ✅ |
+| PDF / CSV export | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Firebase sign-in | ✅ | ❌ | ✅ | ❌ | n/a (JWT) |
 
 ✅ full · ⚠️ works from user-supplied input · ❌ not available
+
+> **iOS was removed.** The target scaffolding existed and the Dart side was
+> complete, but `pod install` could not resolve the CocoaPods graph on CI and
+> iOS was the one platform that could not be built or tested from the
+> development machine. Rather than ship a target nobody could verify, it was
+> dropped. The capability layer still models iOS (see below), so restoring it
+> is `flutter create --platforms=ios .` plus re-adding the CI matrix entry —
+> the reasoning for each iOS restriction is kept below for that reason.
 
 Nothing marked ❌ is a stub or a placeholder screen. A module the host cannot
 run is dropped from the dashboard, and its route resolves to a screen that says
@@ -45,33 +53,25 @@ which OS restriction is responsible and where the feature does work.
 
 Every gap below is an OS restriction, not unfinished work.
 
-**Live SMS guard — Android only.** iOS has no public API for reading messages
-at all. What it does offer is an SMS *filter* extension, which is a separate
-app target that never sees message content the host app could exfiltrate —
-a real port rather than a flag flip, and out of scope here. Desktops have no
-inbox.
+**Live SMS guard — Android only.** No desktop has a message inbox to read.
+(Were iOS restored: it has no public message-reading API either. It offers an
+SMS *filter* extension, a separate app target that never sees content the host
+app could exfiltrate — a real port rather than a flag flip.)
 
-**Installed-app scanner — not on iOS.** iOS deliberately does not let one app
-learn what else is installed. `canOpenURL:` can test a hardcoded scheme list,
-which Apple rejects apps for using as an enumeration workaround, and it would
-return a list of guesses rather than an inventory.
+**Installed-app scanner — everywhere but the browser.** All four native targets
+enumerate installed software through their own tooling; see below. A web page
+cannot, by design, so the web build takes the permission list by hand.
 
-**Wi-Fi identity — not on iOS.** SSID and BSSID require the
-`com.apple.developer.networking.wifi-info` entitlement, which needs an approved
-request against a paid account. Without it `CNCopyCurrentNetworkInfo` returns
-nil. The module still runs its reachability half (DNS health, latency,
-captive-portal probe) and says explicitly that it could not see the network,
-capping the trust score below the "low risk" band so an unverifiable network is
-never presented as clean.
+**Screenshot OCR — Android only, now that iOS is gone.** Google ships ML Kit
+for Android and iOS and nothing else. The alternative would be uploading
+screenshots to a cloud OCR service — and a screenshot is the single input most
+likely to contain a bank balance or an OTP, so that trade is not available to
+this app. The web build asks for the text instead and runs the same classifier.
 
-**Screenshot OCR — mobile only.** Google ships ML Kit for Android and iOS and
-nothing else. The alternative would be uploading screenshots to a cloud OCR
-service — and a screenshot is the single input most likely to contain a bank
-balance or an OTP, so that trade is not available to this app.
-
-**QR scanning — no Windows or Linux.** `mobile_scanner` has no implementation
-there, for either the camera or the image decoder. Those platforms point the
-user at the Phishing scanner instead, which runs the same engine on the link.
+**QR scanning — Android and macOS only.** `mobile_scanner` has no Windows or
+Linux implementation, for either the camera or the image decoder. Those
+platforms point the user at the Phishing scanner instead, which runs the same
+engine on the link.
 
 **Smart Link Interceptor — Android only.** Vetting a tapped link before the
 browser sees it requires holding the system default-browser role. Only Android
@@ -83,7 +83,7 @@ recorded and still visible in the Alerts screen; only the OS-level toast is
 missing.
 
 **Firebase sign-in — not on Windows or Linux.** `firebase_core` resolves an
-implementation there, but only Android and Apple read credentials from a
+implementation there, but only Android and macOS read credentials from a
 bundled config file. Windows and Linux need explicit `FirebaseOptions` from the
 FlutterFire CLI, which this repo does not carry. `Firebase.initializeApp()`
 throws, `AuthService` reports itself unconfigured, and the route guard stands
@@ -110,7 +110,7 @@ everything the app learns from the OS. Four implementations sit behind it:
 |---|---|
 | `AndroidDeviceProbe` | One `MethodChannel` into `MainActivity.kt` — the original implementation, unchanged |
 | `DesktopDeviceProbe` | Shells out to tools the OS already ships, per platform |
-| `IosDeviceProbe` | The narrow set the sandbox permits, in pure Dart |
+| `IosDeviceProbe` | Retained but unreachable — the iOS target was removed; kept so restoring it needs no Dart changes |
 | `_NullDeviceProbe` | Backstop for an unrecognised host |
 
 `PlatformChannelService` keeps its original public API and picks the right
@@ -211,7 +211,7 @@ cannot:
 |---|---|---|
 | `analyze` | Linux | `flutter analyze` clean, full unit suite passes |
 | `web` | Linux + Mongo service | Server suite, the e2e harness, and the client build |
-| `build` | one per platform | Android, Linux, Windows, macOS and iOS all compile |
+| `build` | one per platform | Android, Linux, Windows and macOS all compile |
 | `probe` | Linux, Windows, macOS | Runs `probe_report.dart` on each real OS |
 
 The `build` matrix is `fail-fast: false` so one broken target does not hide the
@@ -237,23 +237,35 @@ flutter build apk --release          # or: flutter run
 
 Unchanged. See the main [README](../README.md).
 
-### iOS
+### iOS — removed
 
-Requires macOS with Xcode 15+.
+There is no `ios/` directory. `pod install` could not resolve the CocoaPods
+graph on CI, and iOS was the only platform that could not be built or tested
+from the development machine, so the target was dropped rather than shipped
+unverified.
+
+To restore it:
 
 ```bash
-cd ios && pod install && cd ..
-flutter build ios --release
+flutter create --platforms=ios .
 ```
 
-- Deployment target is **15.5**, set in both the Xcode project and the Podfile.
-  ML Kit's pod requires it; the two must agree or CocoaPods warns on every pod.
-- Bundle id is `com.cyberguard.ai`, matching the Android `applicationId`, so
-  one Firebase project can serve both.
-- Camera and photo-library usage strings are in `ios/Runner/Info.plist`. Apple
-  rejects builds whose wording does not name the concrete use.
-- For sign-in, drop `GoogleService-Info.plist` into `ios/Runner/`. Without it
-  the app builds and runs with auth unconfigured.
+then re-add the matrix entry and build case to `cross-platform.yml` (both are
+noted in a comment there). What the removed target had configured, and would
+need again:
+
+- Deployment target **15.5** in both the Xcode project and the Podfile — ML
+  Kit's pod requires it, and the two must agree or CocoaPods warns on every pod.
+- Bundle id `com.cyberguard.ai`, matching the Android `applicationId`, so one
+  Firebase project serves both. See [AUTH_SETUP.md](AUTH_SETUP.md) — registering
+  it under any other identifier makes Firebase fail silently at runtime.
+- Camera and photo-library usage strings in `Info.plist`; Apple rejects builds
+  whose wording does not name the concrete use.
+- The unresolved blocker: `pod install` failed during dependency resolution
+  with Firebase, ML Kit and Google Sign-In in the same Podfile. Every pairwise
+  constraint between them was checked against the CocoaPods CDN and they do
+  intersect, so the cause is still unknown — the full CocoaPods error was never
+  captured.
 
 ### macOS
 

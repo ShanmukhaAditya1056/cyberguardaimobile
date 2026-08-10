@@ -4,6 +4,13 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 /// The operating system the Flutter build is running on.
 ///
+/// **iOS is modelled here but is not a shipped target.** The `ios/` directory
+/// was removed — see docs/PLATFORMS.md — so `HostPlatform.ios` cannot occur at
+/// runtime and [IosDeviceProbe] is unreachable. Both are kept deliberately:
+/// the capability answers below are the researched, correct ones for iOS, and
+/// discarding them would mean re-deriving which APIs the sandbox permits if
+/// the target is ever restored. Restoring it needs no change to this file.
+///
 /// CyberGuard started as an Android-only app, so a lot of its value comes from
 /// APIs that simply do not exist elsewhere — reading the SMS inbox, enumerating
 /// every installed package, standing in front of the system browser. Rather

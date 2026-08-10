@@ -1,12 +1,12 @@
 # CyberGuard AI
 
-> Intelligent, on-device security assistant for Android, iOS, Windows,
-> macOS and Linux — plus a MERN web build. Phishing detection, malware
+> Intelligent, on-device security assistant for Android, Windows, macOS
+> and Linux — plus a MERN web build. Phishing detection, malware
 > analysis, breach monitoring, and Wi-Fi safety in one app. On every
 > native platform each scan runs locally, and no data leaves the device.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
-[![Platform](https://img.shields.io/badge/Platform-Android%20|%20iOS%20|%20Windows%20|%20macOS%20|%20Linux-3DDC84)](docs/PLATFORMS.md)
+[![Platform](https://img.shields.io/badge/Platform-Android%20|%20Windows%20|%20macOS%20|%20Linux-3DDC84)](docs/PLATFORMS.md)
 [![Web](https://img.shields.io/badge/Web-MERN-61DAFB?logo=react)](web/README.md)
 [![License](https://img.shields.io/badge/License-Educational-blue)](#license)
 [![Tests](https://img.shields.io/badge/flutter%20analyze-clean-success)](#quality)
@@ -83,26 +83,26 @@ detection, and zero server dependency** — small enough to ship in a
 
 ## Platforms
 
-One Flutter codebase covers five native platforms; the browser is served by a
+One Flutter codebase covers four native platforms; the browser is served by a
 separate MERN stack running the same detection engines ported to Node.
 
-| | Android | iOS | Windows | macOS | Linux | Web |
-|---|:--:|:--:|:--:|:--:|:--:|:--:|
-| Phishing (URL, text) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Breach monitor | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Installed-app scanner | ✅ | ❌ | ✅ | ✅ | ✅ | ⚠️ |
-| Wi-Fi analysis | ✅ | ⚠️ | ✅ | ✅ | ✅ | ⚠️ |
-| QR scanner | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| Live SMS guard | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Screenshot scanner | ✅ | ✅ | ❌ | ❌ | ❌ | ⚠️ |
-| Threat fusion / risk / arbitration | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Link interceptor | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| | Android | Windows | macOS | Linux | Web |
+|---|:--:|:--:|:--:|:--:|:--:|
+| Phishing (URL, text) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Breach monitor | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Installed-app scanner | ✅ | ✅ | ✅ | ✅ | ⚠️ |
+| Wi-Fi analysis | ✅ | ✅ | ✅ | ✅ | ⚠️ |
+| QR scanner | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Live SMS guard | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Screenshot scanner | ✅ | ❌ | ❌ | ❌ | ⚠️ |
+| Threat fusion / risk / arbitration | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Link interceptor | ✅ | ❌ | ❌ | ❌ | ❌ |
 
 ✅ full · ⚠️ partial or from user-supplied input · ❌ unavailable
 
-Every ❌ is an OS restriction, not unfinished work — iOS does not let an app
-enumerate what else is installed, no desktop has an SMS inbox, ML Kit has no
-desktop build. A module the host cannot run is dropped from the dashboard, and
+Every ❌ is an OS restriction, not unfinished work — no desktop has an SMS
+inbox, ML Kit has no desktop build, and only Android can hold the default
+browser role. A module the host cannot run is dropped from the dashboard, and
 its route resolves to a screen naming the restriction rather than a dead end.
 
 The desktop builds are not degraded ports: they enumerate installed software
@@ -238,7 +238,6 @@ Subsequent builds are under 30 s.
 Other targets:
 
 ```bash
-flutter build ios --release       # needs macOS + Xcode; run `pod install` first
 flutter build macos --release
 flutter build windows --release   # needs Windows Developer Mode enabled
 flutter build linux --release     # needs libsecret-1-dev, libgtk-3-dev
@@ -288,7 +287,7 @@ cyberguard_ai/
 │       ├── MainActivity.kt       # Platform channel: Wi-Fi, packages
 │       ├── PhishingGuardService.kt   # Foreground SMS scanner
 │       └── SmsReceiver.kt        # SMS BroadcastReceiver
-├── ios/  macos/  windows/  linux/    # Native shells for the other platforms
+├── macos/  windows/  linux/          # Native shells for the other platforms
 ├── web/                          # MERN web build (see web/README.md)
 │   ├── server/                   # Express + Mongoose; engines ported to Node
 │   └── client/                   # React + Vite
