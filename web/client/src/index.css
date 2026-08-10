@@ -1,0 +1,1146 @@
+/*
+ * The app's design system, ported value-for-value.
+ *
+ * Every colour, radius, font size and shadow below is lifted from a specific
+ * Dart source: `lib/core/theme/app_colors.dart` for the palette, and the
+ * widgets in `lib/features/dashboard/widgets/` and `lib/shared/widgets/` for
+ * the component tokens. Where a number looks oddly precise (11.5px, 10.5px,
+ * -0.3em tracking) it is because the Flutter widget uses exactly that.
+ *
+ * The app ships a light theme only — dark was retired pending a redesign — so
+ * this does too. An unreviewed dark mode on a security tool risks a red
+ * "danger" chip landing on a background that makes it look calm.
+ */
+
+/* ── Inter, the same four faces the app bundles ─────────────────────────────
+   Resolved through the @fonts alias in vite.config.js, which points at
+   assets/fonts/ — the Flutter asset directory, not a copy. Naming Inter in
+   font-family without loading it (as this file used to) silently fell back to
+   Segoe UI on Windows and San Francisco on macOS, so the browser rendered
+   different letterforms from the phone while every other value matched. */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('@fonts/Inter-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('@fonts/Inter-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('@fonts/Inter-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+/* The app bundles no face above Bold. Flutter resolves its many w800 styles
+   to this same file, so the web must not reach for a synthetic 800 that the
+   phone never renders — hence 700-800 both map here. */
+@font-face {
+  font-family: 'Inter';
+  src: url('@fonts/Inter-Bold.ttf') format('truetype');
+  font-weight: 700 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ── AppColors ─────────────────────────────────────────────────────────── */
+  --bg: #f7f7f7;
+  --surface: #ffffff;
+  --blue: #1a73e8;
+  --blue-dark: #1557b0;
+  --blue-bg: #e8f0fe;
+
+  --text-dark: #111111;
+  --text-medium: #555555;
+  --text-light: #8a8a8a;
+
+  --divider: #f0f0f0;
+  --border: #e8e8e8;
+
+  --safe: #1ea672;
+  --safe-bg: #e8f5ee;
+  --warning: #f4831f;
+  --warning-bg: #fff3e6;
+  --danger: #e23744;
+  --danger-bg: #ffeaea;
+  --critical: #d4003e;
+  --critical-bg: #ffe0eb;
+
+  /* ── Slate ramp used across the tinted tiles ───────────────────────────── */
+  --slate-900: #0f172a; /* tile headings */
+  --slate-700: #334155; /* tile body */
+  --slate-600: #475569; /* stat labels */
+  --slate-500: #64748b; /* "/100" suffix */
+
+  /* ── Tile / accent pairs (module_card.dart, stats_row.dart) ────────────── */
+  --tile-blue: #e0ebff;
+  --accent-blue: #3b82f6;
+  --tile-orange: #ffe7d6;
+  --accent-orange: #ea580c;
+  --tile-rose: #ffd9de;
+  --accent-rose: #e11d48;
+  --tile-green: #d4f5e2;
+  --accent-green: #10b981;
+  --tile-amber: #fff3d6;
+  --accent-amber: #ca8a04;
+
+  /* Score bands — `_ModuleCardWidgetState._scoreColor` */
+  --score-good: #059669;
+  --score-mid: #d97706;
+  --score-bad: #dc2626;
+
+  /* ── Geometry ──────────────────────────────────────────────────────────── */
+  --r-hero: 24px;
+  --r-module: 20px;
+  --r-stat: 16px;
+  --r-card: 12px;
+  --r-icon: 14px;
+  --r-pill: 20px;
+  --radius: 12px;
+  --radius-sm: 10px;
+
+  --gutter: 20px; /* the app's EdgeInsets.symmetric(horizontal: 20) */
+
+  /* The app's canvas. Holding the web column to a phone's width is what makes
+     the two builds line up: a 2-column module grid stretched across 900px
+     would share every colour with the app and match none of its proportions. */
+  --canvas: 448px;
+
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* GlassCard */
+  --shadow-lg: 0 8px 28px rgba(17, 17, 17, 0.1);
+
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-dark);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+/* ── AppTextStyles ───────────────────────────────────────────────────────── */
+
+h1,
+h2,
+h3 {
+  margin: 0 0 8px;
+}
+/* headline / headline2 / title */
+h1 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+h3 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  line-height: 1.3;
+}
+p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--blue);
+}
+
+/* ── Shell ───────────────────────────────────────────────────────────────── */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The dashboard's SliverAppBar: transparent over the page background, brand on
+   the left, bell and gear on the right. No pill nav — the app has none. */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  max-width: var(--canvas);
+  background: var(--bg);
+  padding: 10px var(--gutter);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px; /* kToolbarHeight */
+}
+
+.appbar .brand {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+  color: var(--text-dark);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.appbar-spacer {
+  flex: 1;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 999px;
+}
+.icon-btn:hover:not(:disabled) {
+  background: var(--divider);
+}
+
+/* The unread count on the bell — 16px circle, 1.5px page-coloured ring, 9px
+   label, offset -4/-4. Straight from dashboard_screen.dart. */
+.badge-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--critical);
+  border: 1.5px solid var(--bg);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* A module screen's AppBar: back arrow, title, actions. */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 0 4px;
+  min-height: 56px;
+}
+.page-header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.content {
+  flex: 1;
+  width: 100%;
+  max-width: var(--canvas);
+  padding: 0 0 96px;
+}
+
+/* Screens inside the canvas keep the app's 20px gutter. The dashboard's own
+   sections manage their padding individually, matching the Flutter tree. */
+.pad {
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+/* ── SectionTitle ────────────────────────────────────────────────────────── */
+
+.section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px var(--gutter);
+}
+.section-title {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: var(--text-dark);
+  margin: 0;
+}
+.section-action {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: var(--r-pill);
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  /* The app's action is an InkWell, not a hyperlink — no underline. */
+  text-decoration: none;
+  white-space: nowrap;
+}
+.section-action:hover:not(:disabled) {
+  background: var(--blue-bg);
+}
+
+/* ── Hero score tile (_ScoreHeader) ──────────────────────────────────────── */
+
+.hero {
+  margin: 8px var(--gutter) 0;
+  border-radius: var(--r-hero);
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--tile);
+  box-shadow: 0 12px 28px -6px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.hero-ring {
+  flex: 0 0 110px;
+  width: 110px;
+  height: 110px;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.hero-ring svg {
+  position: absolute;
+  inset: 0;
+}
+.hero-ring-value {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+  color: var(--text-dark);
+  z-index: 1;
+}
+.hero-ring-suffix {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-medium);
+  z-index: 1;
+}
+
+.hero-body {
+  min-width: 0;
+  flex: 1;
+}
+.hero-greeting {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+}
+.hero-headline {
+  margin: 6px 0 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+  color: var(--slate-900);
+}
+.hero-pill {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--slate-700);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.hero-pill svg {
+  color: var(--accent);
+}
+
+/* ── StatsRow ────────────────────────────────────────────────────────────── */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0 var(--gutter);
+  margin-top: 20px;
+}
+.stat {
+  padding: 12px;
+  border-radius: var(--r-stat);
+  background: var(--tile);
+  box-shadow: 0 6px 12px -4px color-mix(in srgb, var(--accent) 18%, transparent);
+  min-width: 0;
+}
+.stat-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+.stat-value {
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  line-height: 1.1;
+  color: var(--slate-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stat-label {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--slate-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Module grid (module_card.dart) ──────────────────────────────────────── */
+
+.module-grid,
+.defense-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 var(--gutter);
+}
+
+.module {
+  /* childAspectRatio: 0.92 — width / height */
+  aspect-ratio: 0.92;
+  border-radius: var(--r-module);
+  padding: 14px;
+  background: var(--tile);
+  box-shadow: 0 8px 18px -4px color-mix(in srgb, var(--accent) 25%, transparent);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.1s ease-in-out;
+}
+.module:active {
+  transform: scale(0.96); /* the Flutter press animation, same 0.96 */
+}
+.module-top {
+  display: flex;
+  align-items: center;
+}
+.module-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-icon);
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.module-arrow {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+}
+.module-title {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: var(--slate-900);
+}
+.module-sub {
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(51, 65, 85, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.module-score {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+.module-score-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--score);
+}
+.module-score-value {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--score);
+}
+.module-score-max {
+  margin-left: -4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--slate-500);
+}
+
+/* ── Defence tiles (_DefenseGrid) ────────────────────────────────────────── */
+
+.defense {
+  /* childAspectRatio: 2.4 */
+  aspect-ratio: 2.4;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+.defense-icon {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+}
+.defense-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+/* ── GlassCard ───────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+}
+a.card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.card.flush {
+  padding: 4px 0;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* ── Scan history rows (_ScanRow) ────────────────────────────────────────── */
+
+.day-label {
+  padding: 2px 0 6px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-medium);
+}
+.scan-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+/* `Divider(indent: 54, endIndent: 12)`. Drawn as an inset pseudo-element
+   rather than a border on the row, because insetting the border would mean
+   shifting the row's own padding and knocking its icon out of line with the
+   row above it. 54px is exactly where the text column starts: 12 padding +
+   32 icon + 10 gap. */
+.scan-row + .scan-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 54px;
+  right: 12px;
+  height: 1px;
+  background: rgba(85, 85, 85, 0.12);
+}
+.scan-icon {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--tone) 15%, transparent);
+  color: var(--tone);
+  display: grid;
+  place-items: center;
+}
+.scan-body {
+  flex: 1;
+  min-width: 0;
+}
+.scan-input {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.scan-verdict {
+  margin-top: 1px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tone);
+}
+.scan-time {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-medium);
+  white-space: nowrap;
+}
+
+/* ── Forms ───────────────────────────────────────────────────────────────── */
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-medium);
+  margin-bottom: 6px;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text-dark);
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--blue);
+  outline-offset: -1px;
+  border-color: var(--blue);
+}
+textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.field {
+  margin-bottom: 14px;
+}
+.hint {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-light);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+/* GradientButton — AppGradients.blue, 52px tall on the primary action. */
+button {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  padding: 0 20px;
+  min-height: 48px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, #1a6bff, #4a9eff);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+button:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+button.block {
+  width: 100%;
+  min-height: 52px;
+}
+
+button.secondary {
+  background: var(--surface);
+  color: var(--text-dark);
+  border-color: var(--border);
+  font-size: 13px;
+  min-height: 40px;
+}
+button.secondary:hover:not(:disabled) {
+  background: var(--divider);
+  filter: none;
+}
+
+button.link {
+  background: none;
+  border: none;
+  color: var(--blue);
+  padding: 4px 6px;
+  min-height: 0;
+  font-size: 13px;
+  text-decoration: underline;
+}
+button.link:hover:not(:disabled) {
+  background: none;
+  filter: none;
+}
+
+button.danger {
+  background: linear-gradient(135deg, #ff2929, #ff5757);
+}
+
+button.icon-btn {
+  min-height: 0;
+  background: none;
+  color: var(--text-dark);
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.spread {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.muted {
+  color: var(--text-light);
+  font-size: 12px;
+  font-weight: 500;
+}
+.stack > * + * {
+  margin-top: 12px;
+}
+
+/* ── Tab bar (_GlassTabBar) ──────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 var(--gutter) 16px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  /* The app's tab bars carry two tabs; Defence has four, because four screens
+     that are separate routes on the phone share one page here. Scrolling the
+     strip keeps every label on one line rather than wrapping each into two. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+.tabs button {
+  flex: 1 0 auto;
+  min-height: 38px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  color: var(--text-medium);
+  white-space: nowrap;
+}
+.tabs button:hover:not(:disabled) {
+  background: var(--divider);
+  filter: none;
+}
+.tabs button[aria-selected='true'] {
+  background: var(--blue-bg);
+  color: var(--blue);
+}
+
+/* ── RiskBadge ───────────────────────────────────────────────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  text-transform: capitalize;
+  /* The Flutter badge is a 20%→10% gradient of the level colour with a 50%
+     border, not a flat tint. */
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--tone) 20%, transparent),
+    color-mix(in srgb, var(--tone) 10%, transparent)
+  );
+  border: 0.5px solid color-mix(in srgb, var(--tone) 50%, transparent);
+  color: var(--tone);
+}
+.badge.low,
+.badge.safe {
+  --tone: var(--safe);
+}
+.badge.medium,
+.badge.warning {
+  --tone: var(--warning);
+}
+.badge.high {
+  --tone: var(--danger);
+}
+.badge.critical {
+  --tone: var(--critical);
+}
+.badge.info {
+  --tone: var(--blue);
+}
+
+.verdict {
+  border-radius: var(--r-card);
+  padding: 18px 20px;
+  border: 1px solid transparent;
+}
+.verdict.safe {
+  background: var(--safe-bg);
+  border-color: #bde4d1;
+}
+.verdict.phishing {
+  background: var(--critical-bg);
+  border-color: #f4b8cc;
+}
+.verdict h2 {
+  margin-bottom: 4px;
+}
+.verdict.safe h2 {
+  color: var(--safe);
+}
+.verdict.phishing h2 {
+  color: var(--critical);
+}
+
+/* ── ScoreRing (the standalone one used on result screens) ───────────────── */
+
+.score-ring {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.score-ring svg {
+  flex-shrink: 0;
+}
+.score-value {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+.score-label {
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  font-size: 13px;
+}
+
+/* ── ShapBar ─────────────────────────────────────────────────────────────── */
+
+.shap {
+  margin-top: 4px;
+}
+.shap-row {
+  margin-bottom: 10px;
+}
+.shap-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.shap-track {
+  height: 7px;
+  background: var(--divider);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.shap-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+.shap-fill.up {
+  background: var(--danger);
+}
+.shap-fill.down {
+  background: var(--safe);
+}
+
+/* ── Lists ───────────────────────────────────────────────────────────────── */
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.list li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+.list li:last-child {
+  border-bottom: none;
+}
+
+.check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 9px 0;
+}
+.check-icon {
+  font-weight: 800;
+  flex-shrink: 0;
+  width: 18px;
+}
+.check.pass .check-icon {
+  color: var(--safe);
+}
+.check.fail .check-icon {
+  color: var(--danger);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  word-break: break-all;
+}
+
+.banner {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.banner.error {
+  background: var(--danger-bg);
+  color: #9c1f29;
+}
+.banner.info {
+  background: var(--blue-bg);
+  color: var(--blue-dark);
+}
+.banner.warn {
+  background: var(--warning-bg);
+  color: #a04c05;
+}
+
+/* EmptyState */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-light);
+}
+.empty-title {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+.empty-hint {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: -3px;
+  animation: spin 0.7s linear infinite;
+}
+.spinner.dark {
+  border-color: rgba(26, 115, 232, 0.25);
+  border-top-color: var(--blue);
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The ring and the module cards animate in on the app. Honour a reduced-motion
+   preference by holding them at their resting state — the score is in the
+   markup either way, so nothing is lost. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+  .hero-ring svg circle {
+    transition: none !important;
+  }
+  * {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-medium);
+}
+.chip.on {
+  background: var(--blue-bg);
+  border-color: var(--blue);
+  color: var(--blue);
+}
+.chip.crit {
+  border-color: var(--critical);
+}
+.chip.crit.on {
+  background: var(--critical-bg);
+  color: var(--critical);
+}
+
+.auth-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  width: 100%;
+}
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th,
+td {
+  text-align: left;
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--divider);
+}
+th {
+  color: var(--text-medium);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* Available to a screen reader, invisible on screen. Used to carry
+   pass/fail state that is otherwise only conveyed by a ✓/✕ glyph. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

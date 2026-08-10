@@ -92,9 +92,11 @@ With no config:
   permission rationale strings in `lib/core/constants/app_constants.dart` and
   the `settingsLocalStorage` copy need revisiting.
 
-- **Sign-in is not a gate.** Nothing redirects to `/login`. It is reachable
-  from Settings → Account, and the screen always offers "Continue without an
-  account". Making it mandatory would break the offline-first promise.
+- **Sign-in is a gate.** `app_router.dart` redirects every route outside
+  `_publicRoutes` (`/`, `/onboarding`, `/login`) to `/login` when there is no
+  session, enforced at the router so no deep link or notification tap can slip
+  past it.
 
-- **iOS** is not wired up. Add `GoogleService-Info.plist` and the reversed
-  client ID URL scheme to `Info.plist` if you target iOS.
+  The single bypass: when the build carries no Firebase credentials, signing in
+  is *impossible*, so enforcing the gate would brick the app permanently — on
+  CI and on any clean checkout. There the gate stands down.

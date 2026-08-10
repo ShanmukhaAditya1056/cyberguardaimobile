@@ -11,6 +11,17 @@ class AppInfoModel {
   final List<String> permissions;
   final int apkSize;
   final String installerPackage;
+
+  /// Human-readable provenance, when the host can describe it better than
+  /// [installerPackage] can.
+  ///
+  /// [installerPackage] carries the raw id the risk engine scores on;
+  /// this carries the words shown to the user. They are separate because the
+  /// id is a signal, not a phrase — "com.android.vending" is what
+  /// [isFromTrustedStore] tests, and "Google Play Store" is what belongs on
+  /// screen.
+  final String sourceLabel;
+
   Uint8List? iconBytes;
 
   AppInfoModel({
@@ -24,6 +35,7 @@ class AppInfoModel {
     required this.permissions,
     required this.apkSize,
     this.installerPackage = '',
+    this.sourceLabel = '',
     this.iconBytes,
   });
 
@@ -62,6 +74,9 @@ class AppInfoModel {
   }
 
   String get installSourceLabel {
+    // A host that described its own provenance wins — see [sourceLabel].
+    if (sourceLabel.isNotEmpty) return sourceLabel;
+
     switch (installerPackage) {
       case 'com.android.vending':
       case 'com.google.android.feedback':

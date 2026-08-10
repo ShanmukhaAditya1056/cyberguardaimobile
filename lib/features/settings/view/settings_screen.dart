@@ -219,14 +219,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   onChanged: (v) =>
                       ref.read(settingsProvider.notifier).setWifiAutoScan(v),
                 ),
-                _Divider(),
-                _ToggleTile(
-                  title: l.liveSmsGuard,
-                  autoIdent: AutoId.settingsLiveSmsGuard,
-                  subtitle: l.liveSmsGuardSubtitle,
-                  value: _smsLive,
-                  onChanged: _toggleSmsLive,
-                ),
+                // The live SMS guard is a Kotlin BroadcastReceiver. iOS has no
+                // message-reading API and the desktops have no inbox, so the
+                // switch is absent rather than present-but-dead.
+                if (SmsStreamService.isSupported) ...[
+                  _Divider(),
+                  _ToggleTile(
+                    title: l.liveSmsGuard,
+                    autoIdent: AutoId.settingsLiveSmsGuard,
+                    subtitle: l.liveSmsGuardSubtitle,
+                    value: _smsLive,
+                    onChanged: _toggleSmsLive,
+                  ),
+                ],
               ],
             ),
           ),
@@ -241,22 +246,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Column(
               children: [
-                _DefaultBrowserTile(
-                  isDefault: _isDefaultBrowser,
-                  onSetDefault: _requestDefaultBrowser,
-                ),
-                _Divider(),
-                _ToggleTile(
-                  title: l.linkInterceptorTitle,
-                  autoIdent: AutoId.settingsLinkInterceptor,
-                  subtitle: l.linkInterceptorSub,
-                  value: _interceptorEnabled,
-                  onChanged: (v) async {
-                    await InterceptorPrefs.setInterceptorEnabled(v);
-                    if (mounted) setState(() => _interceptorEnabled = v);
-                  },
-                ),
-                _Divider(),
+                // Vetting a tapped link before the browser sees it requires
+                // holding the system default-browser role, which only Android
+                // hands to a third-party app. The two settings below —
+                // reputation lookups and link history — belong to the scanner
+                // rather than the interceptor and work everywhere, so only
+                // these two tiles are gated.
+                if (LinkInterceptorChannel.isSupported) ...[
+                  _DefaultBrowserTile(
+                    isDefault: _isDefaultBrowser,
+                    onSetDefault: _requestDefaultBrowser,
+                  ),
+                  _Divider(),
+                  _ToggleTile(
+                    title: l.linkInterceptorTitle,
+                    autoIdent: AutoId.settingsLinkInterceptor,
+                    subtitle: l.linkInterceptorSub,
+                    value: _interceptorEnabled,
+                    onChanged: (v) async {
+                      await InterceptorPrefs.setInterceptorEnabled(v);
+                      if (mounted) setState(() => _interceptorEnabled = v);
+                    },
+                  ),
+                  _Divider(),
+                ],
                 _ToggleTile(
                   title: l.cloudIntelTitle,
                   autoIdent: AutoId.settingsCloudIntel,

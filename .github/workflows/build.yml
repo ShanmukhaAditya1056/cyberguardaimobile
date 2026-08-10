@@ -1,0 +1,166 @@
+name: Build & test
+
+# CyberGuard ships two builds, and this checks both:
+#
+#   * the Flutter app, which targets Android only, and
+#   * the MERN web build under web/, which is a separate codebase with its own
+#     UI and its own JavaScript ports of the detection engines.
+#
+# The Android E2E workflow drives the app on an emulator; this compiles it and
+# runs the unit suites, so a broken build is reported in two minutes rather
+# than after an emulator boot.
+#
+# `flutter analyze` and the Dart unit suite are independent of the build, so
+# they run once on Linux rather than being repeated inside the build job.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.41.8'
+  NODE_VERSION: '20'
+
+jobs:
+  analyze:
+    name: Analyze & unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore API key placeholder
+        shell: bash
+        run: bash tool/ci_restore_api_keys.sh
+
+      - run: flutter pub get
+
+      - name: flutter analyze
+        run: flutter analyze
+
+      - name: flutter test
+        run: flutter test --reporter expanded
+
+  # ── The MERN stack ───────────────────────────────────────────────────────
+  web:
+    name: Web (MERN)
+    runs-on: ubuntu-latest
+    services:
+      # The main suite needs no database on purpose, so it runs on a clean
+      # checkout. The e2e harness does, and it is worth running here because it
+      # covers the per-account isolation checks nothing else does.
+      mongo:
+        image: mongo:7
+        ports: ['27017:27017']
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+        working-directory: web
+
+      - name: Server tests (no database)
+        run: npm test --workspace server
+        working-directory: web
+
+      - name: End-to-end (real MongoDB)
+        run: npm run test:e2e --workspace server
+        working-directory: web
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/cyberguard_ci
+          JWT_SECRET: ci-only-not-a-real-secret
+
+      - name: Client build
+        run: npm run build
+        working-directory: web
+
+  # ── The Android app ──────────────────────────────────────────────────────
+  android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore API key placeholder
+        shell: bash
+        run: bash tool/ci_restore_api_keys.sh
+
+      - run: flutter pub get
+
+      - name: Build
+        shell: bash
+        run: |
+          # pipefail matters: without it `tee` returns 0 and a failed build
+          # would be reported as a success.
+          set -o pipefail
+          flutter build apk --debug 2>&1 | tee build.log
+
+      # Job logs need an authenticated token to read, but check-run annotations
+      # do not. Re-emitting the salient lines of a failed build as an ::error::
+      # puts the actual compiler message somewhere anyone looking at the run can
+      # retrieve it — including tooling that has no credentials.
+      - name: Surface the build failure
+        if: failure()
+        shell: bash
+        run: |
+          [ -f build.log ] || { echo "::error::build.log missing — the build died before producing output"; exit 0; }
+
+          # \r is stripped first because Gradle draws progress with carriage
+          # returns, which otherwise collapse the whole log into one line.
+          tr -d '\r' < build.log > clean.log
+
+          grep -n -E '^Error:|error:|FAILURE:|Could not|Execution failed' clean.log \
+            | tail -40 > focus.log || true
+
+          if [ ! -s focus.log ]; then
+            echo "no error-shaped lines matched; falling back to the tail"
+            tail -c 1500 clean.log > focus.log
+          fi
+
+          # % must be escaped before newlines become %0A, or the escaping eats
+          # its own encoding.
+          msg=$(sed 's/%/%25/g' focus.log | sed ':a;N;$!ba;s/\n/%0A/g')
+          echo "::error title=Android build failed::${msg}"
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-android
+          path: build.log
+          retention-days: 7

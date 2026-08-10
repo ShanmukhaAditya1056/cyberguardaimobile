@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/platform/app_platform.dart';
 import 'hive_service.dart';
 
 /// Semantic destinations carried in a notification payload. The router layer
@@ -15,10 +16,15 @@ class NotifTarget {
   static const report = 'report';
 }
 
-/// Android action-button ids.
+/// Action-button ids, shared by every platform's notification payload.
 const _actionView = 'view';
 const _actionDismiss = 'dismiss';
 const _actionViewReport = 'view_report';
+
+/// Apple requires the set of action buttons to be declared up front as a
+/// *category*, registered at initialisation, and referenced by id when the
+/// notification is posted — unlike Android, where the actions travel with each
+/// notification. These two ids cover the two shapes this app posts.
 
 /// Runs on a background isolate when an action that does *not* open the UI is
 /// tapped (currently only "Dismiss"). Registering it is what makes Android's
@@ -52,10 +58,24 @@ class NotificationService {
     return target;
   }
 
+  /// True once the host's notification backend is up. Callers invoke the
+  /// `show*` helpers unconditionally; they return without doing anything when
+  /// this is false.
+  static bool get isAvailable => _initialized;
+
   static Future<void> init() async {
     if (_initialized) return;
 
+    // Where the plugin has no implementation, initialising it throws out of
+    // the platform interface. Alerts are still recorded and still shown
+    // in-app; only the OS-level toast would be missing.
+    if (!AppPlatform.canPostNotifications) return;
+
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    // Permissions are requested explicitly below rather than by the plugin at
+    // initialisation, so the OS prompt appears when the user has already seen
+    // the app rather than during the first frame of the splash screen.
     const initSettings = InitializationSettings(android: androidInit);
 
     await _plugin.initialize(
@@ -79,10 +99,26 @@ class NotificationService {
     _initialized = true;
   }
 
+  /// Android 13+ and both Apple platforms gate notifications behind a runtime
+  /// prompt. Linux's freedesktop backend has no such concept, so
+  /// `resolvePlatformSpecificImplementation` returns null there and this is a
+  /// no-op — which is why every call below is null-safe rather than branched
+  /// on the platform.
   static Future<void> _requestPermission() async {
-    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    await androidPlugin?.requestNotificationsPermission();
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
+
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
   static Future<void> _createChannels() async {
@@ -164,7 +200,7 @@ class NotificationService {
     int id = 1,
     String target = NotifTarget.alerts,
   }) async {
-    if (!_alertsEnabled) return;
+    if (!_initialized || !_alertsEnabled) return;
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
         'cyberguard_critical',
@@ -203,7 +239,7 @@ class NotificationService {
     int id = 2,
     String target = NotifTarget.alerts,
   }) async {
-    if (!_alertsEnabled) return;
+    if (!_initialized || !_alertsEnabled) return;
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
         'cyberguard_warning',
@@ -238,7 +274,7 @@ class NotificationService {
     required String body,
     int id = 3,
   }) async {
-    if (!_alertsEnabled) return;
+    if (!_initialized || !_alertsEnabled) return;
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
         AppConstants.notifChannelId,
@@ -298,6 +334,7 @@ class NotificationService {
   }
 
   static Future<void> cancelAll() async {
+    if (!_initialized) return;
     await _plugin.cancelAll();
   }
 }

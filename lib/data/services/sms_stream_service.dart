@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/platform/app_platform.dart';
 import '../../core/utils/url_extractor.dart';
 import '../models/alert_model.dart';
 import '../repositories/phishing_repository.dart';
@@ -26,8 +27,16 @@ class SmsStreamService {
 
   static bool get isRunning => _running;
 
+  /// Whether this host has an SMS inbox to guard at all. The settings toggle
+  /// reads this to decide between offering the switch and explaining why it is
+  /// absent, rather than showing a control that cannot work.
+  static bool get isSupported => AppPlatform.canReadSms;
+
   static Future<bool> start() async {
     if (_running) return true;
+    // The EventChannel below is served by a Kotlin BroadcastReceiver, so it
+    // exists only in the Android build.
+    if (!isSupported) return false;
 
     final status = await Permission.sms.request();
     if (!status.isGranted) return false;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../core/platform/app_platform.dart';
 import '../../data/services/hive_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/blink_card.dart';
@@ -89,9 +90,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   Future<void> _grantPermissionsAndFinish() async {
     setState(() => _isGrantingPermissions = true);
     try {
-      await Permission.sms.request();
-      await Permission.location.request();
-      await Permission.notification.request();
+      // permission_handler needs a platform implementation; without one this
+      // would throw rather than return a status.
+      if (AppPlatform.hasRuntimePermissions) {
+        if (AppPlatform.canReadSms) await Permission.sms.request();
+        await Permission.location.request();
+        await Permission.notification.request();
+      }
     } finally {
       if (mounted) {
         final settings = HiveService.getSettings();

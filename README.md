@@ -1,12 +1,13 @@
 # CyberGuard AI
 
-> Intelligent, fully on-device mobile security assistant for Android.
-> Phishing detection, malware analysis, breach monitoring, and Wi-Fi
-> safety in one Flutter app — every scan runs locally, no data leaves
-> the phone.
+> Intelligent, on-device security assistant for Android — plus a MERN web
+> build. Phishing detection, malware analysis, breach monitoring, and Wi-Fi
+> safety in one app. On Android every scan runs locally, and no data leaves
+> the device.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
-[![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android)](https://developer.android.com)
+[![Platform](https://img.shields.io/badge/Platform-Android-3DDC84)](#feature-matrix)
+[![Web](https://img.shields.io/badge/Web-MERN-61DAFB?logo=react)](web/README.md)
 [![License](https://img.shields.io/badge/License-Educational-blue)](#license)
 [![Tests](https://img.shields.io/badge/flutter%20analyze-clean-success)](#quality)
 
@@ -17,6 +18,7 @@
 - [What it does](#what-it-does)
 - [Why it exists](#why-it-exists)
 - [Feature matrix](#feature-matrix)
+- [Platforms](#platforms)
 - [Screens](#screens)
 - [How it's built](#how-its-built)
 - [On-device machine learning](#on-device-machine-learning)
@@ -78,6 +80,35 @@ detection, and zero server dependency** — small enough to ship in a
 | 13 | k-Anonymity privacy | SHA-1 prefix lookup, never full hash | ✓ |
 | 14 | Local-only storage | Hive (encrypted via `flutter_secure_storage`) | ✓ |
 | 15 | Theme | Light theme (dark removed pending redesign) | ✓ |
+
+## Platforms
+
+CyberGuard ships two builds: the Flutter app, which targets Android, and a
+separate MERN stack that serves the browser using the same detection engines
+ported to Node.
+
+| | Android | Web |
+|---|:--:|:--:|
+| Phishing (URL, text) | ✅ | ✅ |
+| Breach monitor | ✅ | ✅ |
+| Installed-app scanner | ✅ | ⚠️ |
+| Wi-Fi analysis | ✅ | ⚠️ |
+| QR scanner | ✅ | ❌ |
+| Live SMS guard | ✅ | ❌ |
+| Screenshot scanner | ✅ | ⚠️ |
+| Threat fusion / risk / arbitration | ✅ | ✅ |
+| Link interceptor | ✅ | ❌ |
+
+✅ full · ⚠️ partial or from user-supplied input · ❌ unavailable
+
+Every ❌ and ⚠️ in the Web column is a browser restriction, not unfinished
+work. No web API exposes the installed-app list or the connected network's
+SSID, a page can never be handed an incoming SMS, and only Android can hold the
+default browser role. Where the browser cannot *measure* an input it asks for
+it and runs the identical engine over it, rather than guessing.
+
+**[`web/README.md`](web/README.md)** covers the MERN stack: setup, engine
+parity with the Dart app, and the privacy model for a server-backed build.
 
 ## Screens
 
@@ -152,6 +183,16 @@ Dart on the UI thread in under 10 ms, and ship as part of the APK's
 | "Storage is local + encrypted" | Hive boxes with `flutter_secure_storage`-managed AES key. |
 | "No analytics" | No Firebase / Sentry / Crashlytics / Mixpanel dependencies in [`pubspec.yaml`](pubspec.yaml). |
 
+These hold for the Android build.
+
+**The web build is different, and says so.** A server-backed app cannot claim
+"nothing leaves the device". What it does guarantee: passwords are hashed in
+the browser and only a 5-character hash prefix is ever transmitted — the API
+*rejects* anything that is not a prefix and suffix, so a password cannot be
+relayed onward even by a misbehaving client. Email addresses are used for the
+lookup and dropped; only a masked form and hash prefix are stored. Full detail
+in [`web/README.md`](web/README.md#privacy).
+
 See [`THREAT_MODEL.md`](THREAT_MODEL.md) for what we defend against and
 what's explicitly out of scope.
 
@@ -182,6 +223,18 @@ flutter run
 
 The first build takes 2–4 minutes (Gradle 8.11.1, NDK download).
 Subsequent builds are under 30 s.
+
+### Run the web build
+
+```bash
+cd web
+npm install
+cp server/.env.example server/.env   # then set JWT_SECRET
+npm run dev                          # API :4000, client :5173
+```
+
+Needs Node 20+ and a MongoDB instance. Full setup in
+[`web/README.md`](web/README.md).
 
 ### Optional: configure HIBP API key
 
@@ -215,15 +268,21 @@ cyberguard_ai/
 │       ├── MainActivity.kt       # Platform channel: Wi-Fi, packages
 │       ├── PhishingGuardService.kt   # Foreground SMS scanner
 │       └── SmsReceiver.kt        # SMS BroadcastReceiver
+├── web/                          # MERN web build (see web/README.md)
+│   ├── server/                   # Express + Mongoose; engines ported to Node
+│   └── client/                   # React + Vite
 ├── assets/
 │   ├── animations/               # Lottie files
-│   └── models/                   # JSON ML weights (~2.5 MB total)
+│   └── models/                   # JSON ML weights (~2.5 MB total).
+│                                 # Read by the app AND the web server.
 ├── lib/
 │   ├── app.dart                  # Root MaterialApp + theme
 │   ├── main.dart                 # Entry point + Hive init
 │   ├── core/                     # Theme, utils, helpers
+│   │   └── platform/             # Per-OS capability declarations
 │   ├── data/                     # Repositories, services, models
 │   │   ├── services/             # ML services, platform channel, Hive
+│   │   │   └── device/           # DeviceProbe + per-OS implementations
 │   │   ├── repositories/         # One per module
 │   │   └── models/               # Data classes (Hive-annotated)
 │   ├── features/                 # One folder per screen
@@ -249,6 +308,7 @@ cyberguard_ai/
 
 | Document | What it covers |
 |---|---|
+| [`web/README.md`](web/README.md) | The MERN stack: setup, engine parity with the Dart app, what a browser cannot do, and the privacy model for a server-backed build. |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Layered architecture, state management, native channels, on-device ML pipeline. |
 | [`THREAT_MODEL.md`](THREAT_MODEL.md) | STRIDE analysis: who we defend against, attack surfaces in scope and out of scope, residual risks. |
 | [`ML_EVALUATION.md`](ML_EVALUATION.md) | Per-model accuracy, precision/recall, confusion matrices, SHAP feature importance, ensemble weighting. |
@@ -257,6 +317,15 @@ cyberguard_ai/
 ## Quality
 
 - `flutter analyze` → **0 issues**
+- `flutter test` → **163 tests** passing
+- `npm test --workspace server` (in `web/`) → **90 tests** passing
+- `npm run test:e2e --workspace server` → **20 end-to-end checks** against a
+  real MongoDB, including per-account isolation and the arbitration override
+- CI (`.github/workflows/build.yml`) builds the Android APK and runs both
+  suites; `.github/workflows/android-e2e.yml` drives the app on an emulator
+- Cross-language engine parity anchored by `test/engine_parity_test.dart` and
+  `web/server/test/engines.test.js`, which pin the same numbers for the same
+  inputs
 - 4 locales fully translated (en / hi / ta / te)
 - All user-visible strings localised, no hardcoded copy in screens
 - Material 3 theming, responsive layouts, accessibility-aware

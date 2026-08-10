@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../core/platform/app_platform.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_gradients.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/gradient_button.dart';
 
+/// Runtime permission prompts, and the rationale sheet shown before each one.
+///
+/// Every entry point below is guarded by [AppPlatform.hasRuntimePermissions],
+/// because `permission_handler` needs a platform implementation and touching
+/// `Permission.x` without one throws `MissingPluginException` rather than
+/// returning "denied".
+///
+/// This says nothing about whether a *feature* exists on the host — that is
+/// [AppPlatform]'s job. A refused permission and an absent capability are
+/// different answers and the UI words them differently.
 class PermissionService {
   /// Request SMS permission with rationale bottom sheet
   static Future<bool> requestSmsPermission(BuildContext context) async {
+    if (!AppPlatform.hasRuntimePermissions) return false;
     final status = await Permission.sms.status;
     if (status.isGranted) return true;
 
@@ -37,6 +49,9 @@ class PermissionService {
   /// system returns "<unknown ssid>" and SSID surfaces as "Unknown" in the
   /// UI, regardless of the user's actual network.
   static Future<bool> requestLocationPermission(BuildContext context) async {
+    // Android gates the SSID behind either of two permissions; a host with no
+    // permission model has nothing to prompt for.
+    if (!AppPlatform.isAndroid) return AppPlatform.canReadWifiIdentity;
     final locStatus = await Permission.location.status;
     final nearbyStatus = await Permission.nearbyWifiDevices.status;
     if (locStatus.isGranted || nearbyStatus.isGranted) return true;
@@ -65,6 +80,11 @@ class PermissionService {
   /// Request notification permission (Android 13+)
   static Future<bool> requestNotificationPermission(
       BuildContext context) async {
+    // On the desktops NotificationService.init() already asked the OS through
+    // the notification plugin itself, so there is nothing further to request.
+    if (!AppPlatform.hasRuntimePermissions) {
+      return AppPlatform.canPostNotifications;
+    }
     final status = await Permission.notification.status;
     if (status.isGranted) return true;
 
@@ -165,6 +185,13 @@ class PermissionService {
 
   /// Check all permissions and return status map
   static Future<Map<String, bool>> checkAllPermissions() async {
+    if (!AppPlatform.hasRuntimePermissions) {
+      return {
+        'sms': AppPlatform.canReadSms,
+        'location': AppPlatform.canReadWifiIdentity,
+        'notification': AppPlatform.canPostNotifications,
+      };
+    }
     return {
       'sms': await Permission.sms.isGranted,
       'location': await Permission.location.isGranted,
