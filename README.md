@@ -1,12 +1,13 @@
 # CyberGuard AI
 
-> Intelligent, fully on-device mobile security assistant for Android.
-> Phishing detection, malware analysis, breach monitoring, and Wi-Fi
-> safety in one Flutter app — every scan runs locally, no data leaves
-> the phone.
+> Intelligent, on-device security assistant for Android, Windows, macOS
+> and Linux — plus a MERN web build. Phishing detection, malware
+> analysis, breach monitoring, and Wi-Fi safety in one app. On every
+> native platform each scan runs locally, and no data leaves the device.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
-[![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android)](https://developer.android.com)
+[![Platform](https://img.shields.io/badge/Platform-Android%20|%20Windows%20|%20macOS%20|%20Linux-3DDC84)](docs/PLATFORMS.md)
+[![Web](https://img.shields.io/badge/Web-MERN-61DAFB?logo=react)](web/README.md)
 [![License](https://img.shields.io/badge/License-Educational-blue)](#license)
 [![Tests](https://img.shields.io/badge/flutter%20analyze-clean-success)](#quality)
 
@@ -17,6 +18,7 @@
 - [What it does](#what-it-does)
 - [Why it exists](#why-it-exists)
 - [Feature matrix](#feature-matrix)
+- [Platforms](#platforms)
 - [Screens](#screens)
 - [How it's built](#how-its-built)
 - [On-device machine learning](#on-device-machine-learning)
@@ -78,6 +80,41 @@ detection, and zero server dependency** — small enough to ship in a
 | 13 | k-Anonymity privacy | SHA-1 prefix lookup, never full hash | ✓ |
 | 14 | Local-only storage | Hive (encrypted via `flutter_secure_storage`) | ✓ |
 | 15 | Theme | Light theme (dark removed pending redesign) | ✓ |
+
+## Platforms
+
+One Flutter codebase covers four native platforms; the browser is served by a
+separate MERN stack running the same detection engines ported to Node.
+
+| | Android | Windows | macOS | Linux | Web |
+|---|:--:|:--:|:--:|:--:|:--:|
+| Phishing (URL, text) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Breach monitor | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Installed-app scanner | ✅ | ✅ | ✅ | ✅ | ⚠️ |
+| Wi-Fi analysis | ✅ | ✅ | ✅ | ✅ | ⚠️ |
+| QR scanner | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Live SMS guard | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Screenshot scanner | ✅ | ❌ | ❌ | ❌ | ⚠️ |
+| Threat fusion / risk / arbitration | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Link interceptor | ✅ | ❌ | ❌ | ❌ | ❌ |
+
+✅ full · ⚠️ partial or from user-supplied input · ❌ unavailable
+
+Every ❌ is an OS restriction, not unfinished work — no desktop has an SMS
+inbox, ML Kit has no desktop build, and only Android can hold the default
+browser role. A module the host cannot run is dropped from the dashboard, and
+its route resolves to a screen naming the restriction rather than a dead end.
+
+The desktop builds are not degraded ports: they enumerate installed software
+and inspect the connected network through each OS's own tooling (registry and
+MSIX manifests on Windows, `system_profiler` and Info.plist declarations on
+macOS, Flatpak/Snap sandbox metadata on Linux), then map those declarations
+into the same `android.permission.*` vocabulary the trained models expect — so
+one risk engine and one set of weights serve every platform.
+
+**[`docs/PLATFORMS.md`](docs/PLATFORMS.md)** has the full matrix, the reasoning
+behind each gap, and per-platform build instructions.
+**[`web/README.md`](web/README.md)** covers the MERN stack.
 
 ## Screens
 
@@ -152,6 +189,18 @@ Dart on the UI thread in under 10 ms, and ship as part of the APK's
 | "Storage is local + encrypted" | Hive boxes with `flutter_secure_storage`-managed AES key. |
 | "No analytics" | No Firebase / Sentry / Crashlytics / Mixpanel dependencies in [`pubspec.yaml`](pubspec.yaml). |
 
+These hold for all five native platforms. The desktop builds shell out to
+read-only OS tools (`netsh`, `system_profiler`, `nmcli`, the registry) and send
+nothing anywhere; the iOS build makes the same single HIBP call and no other.
+
+**The web build is different, and says so.** A server-backed app cannot claim
+"nothing leaves the device". What it does guarantee: passwords are hashed in
+the browser and only a 5-character hash prefix is ever transmitted — the API
+*rejects* anything that is not a prefix and suffix, so a password cannot be
+relayed onward even by a misbehaving client. Email addresses are used for the
+lookup and dropped; only a masked form and hash prefix are stored. Full detail
+in [`web/README.md`](web/README.md#privacy).
+
 See [`THREAT_MODEL.md`](THREAT_MODEL.md) for what we defend against and
 what's explicitly out of scope.
 
@@ -166,6 +215,9 @@ what's explicitly out of scope.
   of late 2025)
 - A real Android device for Wi-Fi / SMS testing (emulator only works for
   phishing URL scanning)
+
+Per-platform prerequisites (Xcode, Developer Mode, `libsecret-1-dev`) are in
+[`docs/PLATFORMS.md`](docs/PLATFORMS.md).
 
 ### Build & run
 
@@ -182,6 +234,26 @@ flutter run
 
 The first build takes 2–4 minutes (Gradle 8.11.1, NDK download).
 Subsequent builds are under 30 s.
+
+Other targets:
+
+```bash
+flutter build macos --release
+flutter build windows --release   # needs Windows Developer Mode enabled
+flutter build linux --release     # needs libsecret-1-dev, libgtk-3-dev
+```
+
+### Run the web build
+
+```bash
+cd web
+npm install
+cp server/.env.example server/.env   # then set JWT_SECRET
+npm run dev                          # API :4000, client :5173
+```
+
+Needs Node 20+ and a MongoDB instance. Full setup in
+[`web/README.md`](web/README.md).
 
 ### Optional: configure HIBP API key
 
@@ -215,15 +287,22 @@ cyberguard_ai/
 │       ├── MainActivity.kt       # Platform channel: Wi-Fi, packages
 │       ├── PhishingGuardService.kt   # Foreground SMS scanner
 │       └── SmsReceiver.kt        # SMS BroadcastReceiver
+├── macos/  windows/  linux/          # Native shells for the other platforms
+├── web/                          # MERN web build (see web/README.md)
+│   ├── server/                   # Express + Mongoose; engines ported to Node
+│   └── client/                   # React + Vite
 ├── assets/
 │   ├── animations/               # Lottie files
-│   └── models/                   # JSON ML weights (~2.5 MB total)
+│   └── models/                   # JSON ML weights (~2.5 MB total).
+│                                 # Read by the app AND the web server.
 ├── lib/
 │   ├── app.dart                  # Root MaterialApp + theme
 │   ├── main.dart                 # Entry point + Hive init
 │   ├── core/                     # Theme, utils, helpers
+│   │   └── platform/             # Per-OS capability declarations
 │   ├── data/                     # Repositories, services, models
 │   │   ├── services/             # ML services, platform channel, Hive
+│   │   │   └── device/           # DeviceProbe + per-OS implementations
 │   │   ├── repositories/         # One per module
 │   │   └── models/               # Data classes (Hive-annotated)
 │   ├── features/                 # One folder per screen
@@ -249,6 +328,8 @@ cyberguard_ai/
 
 | Document | What it covers |
 |---|---|
+| [`docs/PLATFORMS.md`](docs/PLATFORMS.md) | Full per-platform feature matrix, why each gap exists, how the capability layer and desktop probes work, build steps for all six targets. |
+| [`web/README.md`](web/README.md) | The MERN stack: setup, engine parity with the Dart app, what a browser cannot do, and the privacy model for a server-backed build. |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Layered architecture, state management, native channels, on-device ML pipeline. |
 | [`THREAT_MODEL.md`](THREAT_MODEL.md) | STRIDE analysis: who we defend against, attack surfaces in scope and out of scope, residual risks. |
 | [`ML_EVALUATION.md`](ML_EVALUATION.md) | Per-model accuracy, precision/recall, confusion matrices, SHAP feature importance, ensemble weighting. |
@@ -257,6 +338,17 @@ cyberguard_ai/
 ## Quality
 
 - `flutter analyze` → **0 issues**
+- `flutter test` → **212 tests** passing
+- `npm test --workspace server` (in `web/`) → **90 tests** passing
+- `npm run test:e2e --workspace server` → **20 end-to-end checks** against a
+  real MongoDB, including per-account isolation and the arbitration override
+- `dart run tool/probe_report.dart` → runs the desktop probes against the
+  machine you are on and checks what they found
+- CI (`.github/workflows/cross-platform.yml`) builds all five native platforms,
+  runs both suites, and runs the probe report on Linux, Windows and macOS
+- Cross-language engine parity anchored by `test/engine_parity_test.dart` and
+  `web/server/test/engines.test.js`, which pin the same numbers for the same
+  inputs
 - 4 locales fully translated (en / hi / ta / te)
 - All user-visible strings localised, no hardcoded copy in screens
 - Material 3 theming, responsive layouts, accessibility-aware

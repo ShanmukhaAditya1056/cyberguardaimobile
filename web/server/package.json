@@ -1,0 +1,30 @@
+{
+  "name": "server",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "CyberGuard AI API — Express + MongoDB, running the same detection engines as the app",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "//test": "Bare `node --test` auto-discovers test files and works from Node 18. Passing a quoted glob instead needs Node 21+, which silently broke CI on the Node 20 the engines field allows.",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "test": "node --test",
+    "test:e2e": "node scripts/e2e.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "zod": "^3.24.1"
+  }
+}

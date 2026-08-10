@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  App Sandbox is deliberately OFF on macOS.
+
+	  The sandbox forbids a process from exec'ing another binary, and the App
+	  Scanner is built entirely on that: `system_profiler` for the installed
+	  software inventory, `grep` over each bundle's Info.plist for its declared
+	  permissions, `system_profiler SPAirPortDataType` for the connected
+	  network. Under the sandbox all of those return nothing, and the two
+	  headline modules on this platform would be permanently empty.
+
+	  The cost is that this build cannot ship through the Mac App Store, which
+	  requires the sandbox. It is distributed directly instead, signed with a
+	  Developer ID and notarised — the same route every macOS security tool
+	  takes, and for the same reason. See docs/PLATFORMS.md.
+
+	  Hardened Runtime stays on (it is a separate setting in the Xcode project),
+	  so the binary is still checked at launch and notarisation still applies.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+
+	<!-- Outbound HTTPS: the HIBP range API and the captive-portal reachability
+	     probe. No inbound listener is needed in a release build. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+
+	<!-- Live QR scanning via mobile_scanner. macOS still shows its own TCC
+	     prompt the first time the session starts. -->
+	<key>com.apple.security.device.camera</key>
+	<true/>
+
+	<!-- Reading an image the user picked for QR decoding, and writing an
+	     exported PDF/CSV report to a location they chose. -->
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+</dict>
+</plist>

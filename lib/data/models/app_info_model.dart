@@ -11,6 +11,18 @@ class AppInfoModel {
   final List<String> permissions;
   final int apkSize;
   final String installerPackage;
+
+  /// Human-readable provenance, when the host can describe it better than
+  /// [installerPackage] can.
+  ///
+  /// The desktop probes reuse Android's installer ids so that
+  /// [isFromTrustedStore] — and through it the trust discount the risk engine
+  /// applies — keeps working unchanged. Those ids are the right *signal* but
+  /// the wrong *words*: without this field the App Scanner told a Windows user
+  /// that 89 of their programs came from the Google Play Store. The scoring
+  /// stays shared; only the label is per-platform.
+  final String sourceLabel;
+
   Uint8List? iconBytes;
 
   AppInfoModel({
@@ -24,6 +36,7 @@ class AppInfoModel {
     required this.permissions,
     required this.apkSize,
     this.installerPackage = '',
+    this.sourceLabel = '',
     this.iconBytes,
   });
 
@@ -62,6 +75,9 @@ class AppInfoModel {
   }
 
   String get installSourceLabel {
+    // A host that described its own provenance wins — see [sourceLabel].
+    if (sourceLabel.isNotEmpty) return sourceLabel;
+
     switch (installerPackage) {
       case 'com.android.vending':
       case 'com.google.android.feedback':

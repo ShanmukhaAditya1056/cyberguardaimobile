@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/platform/app_platform.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../provider/dashboard_provider.dart';
@@ -50,7 +51,14 @@ class ModuleGrid extends StatelessWidget {
         score: state.wifiScore,
         route: '/wifi',
       ),
-    ];
+    ]
+        // A module the host cannot run is dropped rather than shown disabled.
+        // Its route still resolves — to an explanation screen — so anything
+        // that deep-links to it lands somewhere sensible, but the dashboard
+        // should not offer a scan that cannot happen. The grid is two columns
+        // and reflows on its own, so removing one leaves no gap.
+        .where((m) => AppPlatform.isModuleAvailable(m.route.substring(1)))
+        .toList();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),

@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../core/platform/app_platform.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_gradients.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/gradient_button.dart';
 
+/// Runtime permission prompts, and the rationale sheet shown before each one.
+///
+/// Only Android and iOS have runtime permissions in this sense. On the desktops
+/// a process is granted network and filesystem access when it launches — there
+/// is nothing to ask for, and `permission_handler` has no Linux implementation
+/// at all, so touching `Permission.x` there throws `MissingPluginException`.
+/// Every entry point below therefore short-circuits to "granted" on a host
+/// without a permission model, which is the truthful answer: the capability is
+/// already available.
+///
+/// This says nothing about whether a *feature* exists on the host — that is
+/// [AppPlatform]'s job. SMS scanning is unavailable on Windows because Windows
+/// has no inbox, not because a permission was refused.
 class PermissionService {
   /// Request SMS permission with rationale bottom sheet
   static Future<bool> requestSmsPermission(BuildContext context) async {
+    if (!AppPlatform.hasRuntimePermissions) return false;
     final status = await Permission.sms.status;
     if (status.isGranted) return true;
 
@@ -37,6 +52,10 @@ class PermissionService {
   /// system returns "<unknown ssid>" and SSID surfaces as "Unknown" in the
   /// UI, regardless of the user's actual network.
   static Future<bool> requestLocationPermission(BuildContext context) async {
+    // Reading the SSID is gated on location only on Android. The desktops hand
+    // it over freely, and on iOS no permission unlocks it at all — it needs a
+    // build-time entitlement, so prompting would be theatre.
+    if (!AppPlatform.isAndroid) return AppPlatform.canReadWifiIdentity;
     final locStatus = await Permission.location.status;
     final nearbyStatus = await Permission.nearbyWifiDevices.status;
     if (locStatus.isGranted || nearbyStatus.isGranted) return true;
@@ -65,6 +84,11 @@ class PermissionService {
   /// Request notification permission (Android 13+)
   static Future<bool> requestNotificationPermission(
       BuildContext context) async {
+    // On the desktops NotificationService.init() already asked the OS through
+    // the notification plugin itself, so there is nothing further to request.
+    if (!AppPlatform.hasRuntimePermissions) {
+      return AppPlatform.canPostNotifications;
+    }
     final status = await Permission.notification.status;
     if (status.isGranted) return true;
 
@@ -165,6 +189,13 @@ class PermissionService {
 
   /// Check all permissions and return status map
   static Future<Map<String, bool>> checkAllPermissions() async {
+    if (!AppPlatform.hasRuntimePermissions) {
+      return {
+        'sms': AppPlatform.canReadSms,
+        'location': AppPlatform.canReadWifiIdentity,
+        'notification': AppPlatform.canPostNotifications,
+      };
+    }
     return {
       'sms': await Permission.sms.isGranted,
       'location': await Permission.location.isGranted,

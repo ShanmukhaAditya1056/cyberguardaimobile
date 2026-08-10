@@ -1,0 +1,254 @@
+name: Cross-platform build & test
+
+# Builds the Flutter app for every platform it claims to support and runs both
+# test suites.
+#
+# iOS is deliberately absent: the target was removed (see docs/PLATFORMS.md).
+# If it is restored, add `- target: ios / os: macos-latest` to the matrix and
+# `ios) flutter build ios --debug --no-codesign ;;` to the case below.
+#
+# Why this exists: the Android E2E workflow proves the Android build works, and
+# nothing proved the other five did. The desktop probes are written against
+# each OS's own tooling and cannot be exercised on a foreign runner, so this
+# does the next best thing — it compiles each target on its native runner and
+# runs the probe report where the OS matches, which is how the three Windows
+# inventory defects were caught in the first place.
+#
+# `flutter analyze` and the unit suites are platform-independent and run once
+# on Linux rather than five times.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cross-platform-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.41.8'
+  NODE_VERSION: '20'
+
+jobs:
+  # ── Platform-independent checks, run once ────────────────────────────────
+  analyze:
+    name: Analyze & unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore API key placeholder
+        shell: bash
+        run: bash tool/ci_restore_api_keys.sh
+
+      - run: flutter pub get
+
+      - name: flutter analyze
+        run: flutter analyze
+
+      - name: flutter test
+        run: flutter test --reporter expanded
+
+  # ── The MERN stack ───────────────────────────────────────────────────────
+  web:
+    name: Web (MERN)
+    runs-on: ubuntu-latest
+    services:
+      # The main suite needs no database on purpose, so it runs on a clean
+      # checkout. The e2e harness does, and it is worth running here because it
+      # covers the per-account isolation checks nothing else does.
+      mongo:
+        image: mongo:7
+        ports: ['27017:27017']
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+        working-directory: web
+
+      - name: Server tests (no database)
+        run: npm test --workspace server
+        working-directory: web
+
+      - name: End-to-end (real MongoDB)
+        run: npm run test:e2e --workspace server
+        working-directory: web
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/cyberguard_ci
+          JWT_SECRET: ci-only-not-a-real-secret
+
+      - name: Client build
+        run: npm run build
+        working-directory: web
+
+  # ── Native builds, one runner per platform ───────────────────────────────
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Don't cancel the other four when one fails — knowing that Linux is the
+      # only broken target is the useful signal.
+      fail-fast: false
+      matrix:
+        include:
+          - target: android
+            os: ubuntu-latest
+          - target: linux
+            os: ubuntu-latest
+          - target: windows
+            os: windows-latest
+          - target: macos
+            os: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        if: matrix.target == 'android'
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Linux desktop toolchain
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          # libsecret-1-dev backs flutter_secure_storage_linux, which holds the
+          # Hive encryption key — the build fails at CMake without it.
+          sudo apt-get install -y clang cmake ninja-build pkg-config \
+            libgtk-3-dev libsecret-1-dev libjsoncpp-dev
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore API key placeholder
+        shell: bash
+        run: bash tool/ci_restore_api_keys.sh
+
+      - run: flutter pub get
+
+      - name: Build
+        shell: bash
+        env:
+          # firebase_core downloads the Firebase C++ SDK on Windows, and that
+          # SDK's CMakeLists still declares `cmake_minimum_required` below 3.5.
+          # CMake 4 — which the windows runner ships — removed compatibility
+          # with it and refuses to configure. This is the escape hatch CMake
+          # itself names in the error, and it applies to the downloaded SDK
+          # only; this project's own CMakeLists already requires 3.14.
+          #
+          # Anyone building on Windows with CMake 4 locally needs the same
+          # variable set — see docs/PLATFORMS.md.
+          CMAKE_POLICY_VERSION_MINIMUM: '3.5'
+        run: |
+          # pipefail matters: without it `tee` returns 0 and a failed build
+          # would be reported as a success.
+          set -o pipefail
+          case "${{ matrix.target }}" in
+            android) flutter build apk --debug ;;
+            linux)   flutter build linux --debug ;;
+            windows) flutter build windows --debug ;;
+            macos)   flutter build macos --debug ;;
+          esac 2>&1 | tee build.log
+
+      # Job logs need an authenticated token to read, but check-run annotations
+      # do not. Re-emitting the tail of a failed build as an ::error:: puts the
+      # actual compiler or CocoaPods message somewhere anyone looking at the run
+      # can retrieve it — including tooling that has no credentials.
+      - name: Surface the build failure
+        if: failure()
+        shell: bash
+        run: |
+          [ -f build.log ] || { echo "::error::build.log missing — the build died before producing output"; exit 0; }
+
+          # Tailing the log does not work for CocoaPods: it writes megabytes of
+          # CDN progress after the actual failure, so the last N bytes are all
+          # ETag noise and the `[!]` block that names the conflicting pods is
+          # far further back. Search the whole log for the lines that mark a
+          # real error instead, and emit only those — short enough that the
+          # annotation is not truncated.
+          #
+          # \r is stripped first because CocoaPods draws progress with carriage
+          # returns, which otherwise collapse the whole log into one line.
+          tr -d '\r' < build.log > clean.log
+
+          grep -n -E '^\[!\]|^Error:|error:|CMake Error|FAILURE:|Could not|conflict|was resolved to|depends on|required by' clean.log \
+            | grep -v -E 'ETag|podspec.json|CDN: trunk|Returning local' \
+            | tail -40 > focus.log || true
+
+          if [ ! -s focus.log ]; then
+            echo "no error-shaped lines matched; falling back to the tail"
+            tail -c 1500 clean.log > focus.log
+          fi
+
+          # % must be escaped before newlines become %0A, or the escaping eats
+          # its own encoding.
+          msg=$(sed 's/%/%25/g' focus.log | sed ':a;N;$!ba;s/\n/%0A/g')
+          echo "::error title=${{ matrix.target }} build failed::${msg}"
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.target }}
+          path: build.log
+          retention-days: 7
+
+  # ── Desktop probes against a real OS ─────────────────────────────────────
+  probe:
+    name: Probe report on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore API key placeholder
+        shell: bash
+        run: bash tool/ci_restore_api_keys.sh
+
+      - run: flutter pub get
+
+      # Runs on the plain Dart VM — the probes carry no Flutter imports — so
+      # this needs none of the native toolchains the build job installs.
+      #
+      # `continue-on-error` because a CI runner is not a real desktop: it has
+      # no Wi-Fi adapter, and its software inventory is whatever the image
+      # ships. A failure here is a signal to read the log, not a broken build.
+      # The value is the output: it catches parser breakage when a runner image
+      # updates the OS tools underneath us.
+      - name: Probe report
+        continue-on-error: true
+        run: dart run tool/probe_report.dart

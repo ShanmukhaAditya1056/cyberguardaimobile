@@ -50,10 +50,22 @@ class UrlExtractor {
     return u;
   }
 
-  /// Check if URL has suspicious encoded characters
+  /// Whether the URL hides structure behind encoding or a second scheme.
+  ///
+  /// Percent-encoding is matched case-insensitively. It was written as `%2F` /
+  /// `%3A`, but the only caller — `PhishingRepository.analyzeUrl` — runs
+  /// [normalize] first, which lowercases, so those two branches could never
+  /// match and the rule silently scored nothing for the life of the app. RFC
+  /// 3986 permits either case in an escape sequence, so a fixed-case check was
+  /// never right regardless of the lowercasing.
+  ///
+  /// The `//` clause looks for a *second* occurrence, past the scheme's own —
+  /// `https://a.com/?next=https://evil.tk` — which is the redirect-wrapper
+  /// shape this is meant to catch.
   static bool hasEncodedTricks(String url) {
-    return url.contains('%2F') ||
-        url.contains('%3A') ||
+    final lower = url.toLowerCase();
+    return lower.contains('%2f') ||
+        lower.contains('%3a') ||
         url.contains('@') ||
         url.contains('//') && url.indexOf('//') != url.lastIndexOf('//');
   }

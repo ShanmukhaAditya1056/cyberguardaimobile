@@ -52,6 +52,11 @@ dependencies:
   share_plus: ^11.0.0
   clipboard: ^0.1.3
   path_provider: ^2.1.3
+  # Hands a vetted URL to the system browser. On Android the Smart Link
+  # Interceptor does this through its own channel so it can exclude CyberGuard
+  # from the chooser and avoid looping back into itself; every other platform
+  # has no interceptor to loop through, so this is the hand-off there.
+  url_launcher: ^6.3.0
   intl: ^0.20.2
   flutter_local_notifications: ^17.1.2
   uuid: ^4.3.3
@@ -69,7 +74,14 @@ dependencies:
   image_picker: ^1.0.7
 
   # Screenshot AI scanner — on-device OCR (feature: Screenshot Scanner)
-  google_mlkit_text_recognition: ^0.13.1
+  #
+  # Held at >=0.15.0 for iOS, not for any Dart-side feature. 0.13.x wraps
+  # GoogleMLKit 6.x, whose pods pin GoogleUtilities ~> 7, while firebase_core 3
+  # pulls GoogleUtilities ~> 8 — CocoaPods cannot satisfy both and `pod install`
+  # fails to resolve. 0.15+ moved to GoogleMLKit 7.x, which is on GoogleUtilities
+  # 8 and agrees with Firebase. The Dart API this app uses (TextRecognizer,
+  # InputImage.fromFilePath, processImage) is unchanged across the bump.
+  google_mlkit_text_recognition: ^0.15.0
 
   # Localisation (feature #15)
   flutter_localizations:

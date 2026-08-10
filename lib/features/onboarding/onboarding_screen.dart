@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../core/platform/app_platform.dart';
 import '../../data/services/hive_service.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../shared/widgets/blink_card.dart';
@@ -89,9 +90,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   Future<void> _grantPermissionsAndFinish() async {
     setState(() => _isGrantingPermissions = true);
     try {
-      await Permission.sms.request();
-      await Permission.location.request();
-      await Permission.notification.request();
+      // Only Android and iOS have runtime permissions to request. On the
+      // desktops there is nothing to prompt for, and permission_handler has no
+      // Linux implementation, so this would throw instead of returning.
+      if (AppPlatform.hasRuntimePermissions) {
+        if (AppPlatform.canReadSms) await Permission.sms.request();
+        await Permission.location.request();
+        await Permission.notification.request();
+      }
     } finally {
       if (mounted) {
         final settings = HiveService.getSettings();

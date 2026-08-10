@@ -46,6 +46,43 @@ ml_training/models/saved/**/*.bin
 ml_training/models/saved/**/*.h5
 ml_training/models/saved/distilbert_checkpoints/
 
+# ── Native platform build output ─────────────────────────────────────────────
+# The platform folders themselves are tracked (they carry real configuration:
+# entitlements, Info.plist usage strings, the Podfile, window sizing). Only the
+# per-machine build artefacts below are not.
+
+# iOS / macOS — CocoaPods installs into these on first build, and the lockfile
+# pins pod versions that differ by developer machine and Xcode version.
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/Flutter/ephemeral/
+ios/Runner/GeneratedPluginRegistrant.*
+macos/Pods/
+macos/Flutter/ephemeral/
+macos/Flutter/GeneratedPluginRegistrant.swift
+**/*.xcworkspace/xcuserdata/
+**/*.xcodeproj/xcuserdata/
+**/DerivedData/
+
+# Linux / Windows — CMake regenerates both from the plugin list on every build.
+linux/flutter/ephemeral/
+linux/flutter/generated_plugin_registrant.*
+linux/flutter/generated_plugins.cmake
+windows/flutter/ephemeral/
+windows/flutter/generated_plugin_registrant.*
+windows/flutter/generated_plugins.cmake
+
+# ── MERN web stack ───────────────────────────────────────────────────────────
+web/node_modules/
+web/*/node_modules/
+web/client/dist/
+# Carries JWT_SECRET, the Mongo connection string and the HIBP key.
+# web/server/.env.example is the tracked template.
+web/server/.env
+web/**/.vite/
+
 # Node — E2E automation dependencies
 automation/node_modules/
 

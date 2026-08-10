@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../../core/platform/app_platform.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../provider/phishing_provider.dart';
@@ -35,6 +36,10 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   }
 
   Future<void> _ensurePermission() async {
+    // macOS grants camera access through the sandbox entitlement plus its own
+    // TCC prompt, which the scanner triggers when it starts the session —
+    // permission_handler has no macOS implementation to ask through.
+    if (!AppPlatform.hasRuntimePermissions) return;
     final status = await Permission.camera.status;
     if (!status.isGranted) {
       await Permission.camera.request();
@@ -303,12 +308,17 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                           color: Colors.white70, fontFamily: 'Inter'),
                     ),
                     const SizedBox(height: 16),
-                    FilledButton(
-                      onPressed: () async {
-                        await openAppSettings();
-                      },
-                      child: Text(l.qrOpenSettings),
-                    ),
+                    // permission_handler's `openAppSettings()` only knows how
+                    // to reach the per-app settings page on Android and iOS.
+                    // macOS users get the gallery route below instead, which
+                    // needs no camera at all.
+                    if (AppPlatform.hasRuntimePermissions)
+                      FilledButton(
+                        onPressed: () async {
+                          await openAppSettings();
+                        },
+                        child: Text(l.qrOpenSettings),
+                      ),
                   ],
                 ),
               ),

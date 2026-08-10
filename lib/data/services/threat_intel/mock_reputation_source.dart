@@ -29,6 +29,14 @@ class MockReputationSource implements ThreatIntelSource {
     'sbi-secure-login.top',
     'free-jio-recharge.tk',
     'hdfc-netbanking-update.click',
+    // Deliberately innocuous-looking: no brand name, no throwaway TLD, no
+    // phishing keyword, few hyphens — so the local engine scores it clean.
+    // Every other entry above trips the local rules too, which means they all
+    // produce unanimous verdicts and none of them can exercise arbitration.
+    // This one is the case the whole feature exists for: a domain a feed has
+    // already seen in the wild but the on-device model has no reason to
+    // suspect. Without it the override path is unreachable outside unit tests.
+    'account-services-portal.com',
   };
 
   const MockReputationSource({

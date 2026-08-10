@@ -92,9 +92,70 @@ With no config:
   permission rationale strings in `lib/core/constants/app_constants.dart` and
   the `settingsLocalStorage` copy need revisiting.
 
-- **Sign-in is not a gate.** Nothing redirects to `/login`. It is reachable
-  from Settings → Account, and the screen always offers "Continue without an
-  account". Making it mandatory would break the offline-first promise.
+- **Sign-in is a gate.** `app_router.dart` redirects every route outside
+  `_publicRoutes` (`/`, `/onboarding`, `/login`) to `/login` when there is no
+  session, enforced at the router so no deep link or notification tap can slip
+  past it.
 
-- **iOS** is not wired up. Add `GoogleService-Info.plist` and the reversed
-  client ID URL scheme to `Info.plist` if you target iOS.
+  The single bypass: when the build carries no Firebase credentials, signing in
+  is *impossible*, so enforcing the gate would brick the app permanently — on
+  CI and on any clean checkout. There the gate stands down. This is why the
+  desktop builds, where Firebase cannot be configured at all, run without a
+  sign-in requirement.
+
+## iOS
+
+The iOS target exists and builds; Firebase on it is optional in the same way it
+is on Android — without the config file `AuthService` reports itself
+unconfigured and every other feature still works.
+
+To enable it:
+
+1. In the Firebase console, add an **iOS app to the same project** the Android
+   app uses (`google-services.json` names it under `project_info.project_id`).
+   Sharing one project is what lets an account sign in on either platform.
+
+2. Set the bundle ID to **exactly** the app's `PRODUCT_BUNDLE_IDENTIFIER`:
+
+   ```
+   com.cyberguard.ai
+   ```
+
+   This is the step that is easy to get wrong, and it fails quietly. Firebase
+   matches `BUNDLE_ID` in the plist against the running app's identifier; a
+   nickname like `cyberguardios` produces a valid-looking file that throws at
+   `Firebase.initializeApp()` and leaves sign-in permanently unavailable with
+   no obvious cause. Verify with:
+
+   ```bash
+   plutil -p ios/Runner/GoogleService-Info.plist | grep BUNDLE_ID
+   grep -o "PRODUCT_BUNDLE_IDENTIFIER = [^;]*" ios/Runner.xcodeproj/project.pbxproj | sort -u
+   ```
+
+3. Download `GoogleService-Info.plist` and put it at
+   `ios/Runner/GoogleService-Info.plist`. It is gitignored, like its Android
+   counterpart, because it carries project-specific keys.
+
+4. **For Google sign-in only** (skip if you use email/password alone): add the
+   plist's `REVERSED_CLIENT_ID` to `ios/Runner/Info.plist` as a URL scheme.
+   Without it the Google flow leaves the app and never returns:
+
+   ```xml
+   <key>CFBundleURLTypes</key>
+   <array>
+     <dict>
+       <key>CFBundleURLSchemes</key>
+       <array>
+         <!-- REVERSED_CLIENT_ID from GoogleService-Info.plist -->
+         <string>com.googleusercontent.apps.NNNNNN-xxxxxxxx</string>
+       </array>
+     </dict>
+   </array>
+   ```
+
+   The value is deliberately not committed: it identifies your Firebase
+   project, which is why the plist itself is ignored too.
+
+Note that a `GoogleService-Info.plist` cannot affect whether the iOS target
+*builds* — it is read at runtime, long after CocoaPods has resolved and the
+compiler has run.

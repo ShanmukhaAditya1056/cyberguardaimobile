@@ -363,7 +363,18 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ env.API_LEVEL }}
+          # The key was `avd-${API_LEVEL}` alone, which is a trap: an AVD is
+          # only valid for the target, arch and emulator build it was created
+          # under, and none of those were in the key. Once an image is cached
+          # that the current runner cannot boot, `Create AVD snapshot` is
+          # skipped on the cache hit, so the bad image is restored on every
+          # subsequent run and never regenerated — the failure is permanent and
+          # identical each time, which is exactly what this job did.
+          #
+          # `runner.image-version` is not exposed, so ImageOS/ImageVersion from
+          # the runner environment stand in: they change when GitHub rolls a new
+          # image, which is when a cached AVD is most likely to stop working.
+          key: avd-${{ env.API_LEVEL }}-google_apis-x86_64-${{ env.ImageOS }}-${{ env.ImageVersion }}
 
       - name: Create AVD snapshot
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -409,7 +420,8 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Install APK"
-            adb install -r -g "$CG_APP_PATH"
+            ls -l "$CG_APP_PATH" || echo "APK NOT AT EXPECTED PATH: $CG_APP_PATH"
+            adb install -r -g "$CG_APP_PATH" || { APK_INSTALL_EXIT=$?; echo "::error title=E2E setup::adb install failed (exit ${APK_INSTALL_EXIT}). Every test would fail on a missing app, so the suite is not run."; exit 1; }
             adb shell pm list packages | grep cyberguard
             echo "::endgroup::"
 
@@ -427,13 +439,44 @@ jobs:
               fi
               sleep 1
             done
-            curl -sf http://127.0.0.1:4723/status || { echo "Appium never became healthy"; exit 1; }
+            if ! curl -sf http://127.0.0.1:4723/status > /dev/null; then
+              # Previously a bare `exit 1`, which killed the script before any
+              # report, log or artifact existed — the job then looked like a
+              # failing test suite when Appium had simply never come up, and the
+              # reason was invisible outside the job log. Surface it instead.
+              echo "Appium never became healthy"
+              APPIUM_TAIL=$(tail -c 1200 ../appium-server.log 2>/dev/null | tr -d '\r' | sed 's/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g')
+              echo "::error title=E2E setup::Appium never became healthy on 127.0.0.1:4723.%0A%0Aappium-server.log tail:%0A${APPIUM_TAIL:-<log absent — Appium produced no output at all>}"
+              exit 1
+            fi
             echo "::endgroup::"
 
             echo "::group::Run suite"
-            CG_TEST_EMAIL="${{ secrets.CG_TEST_EMAIL }}" \n            CG_TEST_PASSWORD="${{ secrets.CG_TEST_PASSWORD }}" \n            npm test
+            # These were once written as literal `\n` inside this block
+            # scalar, which YAML does not interpret as a line break. bash then
+            # saw `CG_TEST_EMAIL=... n CG_TEST_PASSWORD=... n npm test`, tried
+            # to execute a command called `n`, and exited 127 — so the suite
+            # never ran at all and the job failed for a reason that looked like
+            # a test failure. Real line continuations below.
+            # Redirected to a file rather than piped to tee, so $? stays the
+            # suite's own exit code (a pipe would give tee's, and PIPESTATUS is
+            # not portable to the /bin/sh this script runs under).
+            CG_TEST_EMAIL="${{ secrets.CG_TEST_EMAIL }}" \
+            CG_TEST_PASSWORD="${{ secrets.CG_TEST_PASSWORD }}" \
+            npm test > ../e2e-console.log 2>&1
             SUITE_EXIT=$?
+            cat ../e2e-console.log
             echo "::endgroup::"
+
+            if [ $SUITE_EXIT -ne 0 ]; then
+              # Job logs need an authenticated token to read; annotations do
+              # not. Emit the error-shaped lines so the failure is diagnosable
+              # from the run itself.
+              FOCUS=$(grep -E 'Error|error:|failing|AssertionError|Fatal|No tests|not executed|pass rate|Cannot find|ECONNREFUSED' \
+                        ../e2e-console.log 2>/dev/null | tail -25 \
+                      | tr -d '\r' | sed 's/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g')
+              echo "::error title=E2E suite failed (exit ${SUITE_EXIT})::${FOCUS:-<no error-shaped lines; see the e2e-console artifact>}"
+            fi
 
             kill $APPIUM_PID 2>/dev/null || true
             echo "SUITE_EXIT=$SUITE_EXIT" >> "$GITHUB_ENV"
@@ -498,6 +541,7 @@ jobs:
           path: |
             automation/logs/
             appium-server.log
+            e2e-console.log
           retention-days: 30
           if-no-files-found: warn
 
