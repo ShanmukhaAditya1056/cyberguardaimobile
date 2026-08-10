@@ -45,6 +45,21 @@ function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
 endfunction()
 
+# permission_handler_windows includes <experimental/coroutine>, which MSVC
+# 14.51 (VS 2026) turns into a hard error rather than a warning:
+#
+#   error C2338: static assertion failed: 'error STL1011: The /await compiler
+#   option, <experimental/coroutine> ... are deprecated by Microsoft and will
+#   be REMOVED SOON ... You can define
+#   _SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS to suppress this
+#   error for now.'
+#
+# This is the define Microsoft's own message names. It is set at directory
+# scope, before the plugin subdirectories are added below, so it reaches them —
+# none of this project's own code uses coroutines. Remove it once
+# permission_handler ships a Windows plugin built on C++20 <coroutine>.
+add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 # Flutter library and tool build rules.
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})

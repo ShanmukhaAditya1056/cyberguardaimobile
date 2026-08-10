@@ -74,7 +74,14 @@ dependencies:
   image_picker: ^1.0.7
 
   # Screenshot AI scanner — on-device OCR (feature: Screenshot Scanner)
-  google_mlkit_text_recognition: ^0.13.1
+  #
+  # Held at >=0.15.0 for iOS, not for any Dart-side feature. 0.13.x wraps
+  # GoogleMLKit 6.x, whose pods pin GoogleUtilities ~> 7, while firebase_core 3
+  # pulls GoogleUtilities ~> 8 — CocoaPods cannot satisfy both and `pod install`
+  # fails to resolve. 0.15+ moved to GoogleMLKit 7.x, which is on GoogleUtilities
+  # 8 and agrees with Firebase. The Dart API this app uses (TextRecognizer,
+  # InputImage.fromFilePath, processImage) is unchanged across the bump.
+  google_mlkit_text_recognition: ^0.15.0
 
   # Localisation (feature #15)
   flutter_localizations:
