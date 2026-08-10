@@ -431,7 +431,15 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Run suite"
-            CG_TEST_EMAIL="${{ secrets.CG_TEST_EMAIL }}" \n            CG_TEST_PASSWORD="${{ secrets.CG_TEST_PASSWORD }}" \n            npm test
+            # These were once written as literal `\n` inside this block
+            # scalar, which YAML does not interpret as a line break. bash then
+            # saw `CG_TEST_EMAIL=... n CG_TEST_PASSWORD=... n npm test`, tried
+            # to execute a command called `n`, and exited 127 — so the suite
+            # never ran at all and the job failed for a reason that looked like
+            # a test failure. Real line continuations below.
+            CG_TEST_EMAIL="${{ secrets.CG_TEST_EMAIL }}" \
+            CG_TEST_PASSWORD="${{ secrets.CG_TEST_PASSWORD }}" \
+            npm test
             SUITE_EXIT=$?
             echo "::endgroup::"
 
