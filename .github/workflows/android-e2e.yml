@@ -363,7 +363,18 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ env.API_LEVEL }}
+          # The key was `avd-${API_LEVEL}` alone, which is a trap: an AVD is
+          # only valid for the target, arch and emulator build it was created
+          # under, and none of those were in the key. Once an image is cached
+          # that the current runner cannot boot, `Create AVD snapshot` is
+          # skipped on the cache hit, so the bad image is restored on every
+          # subsequent run and never regenerated — the failure is permanent and
+          # identical each time, which is exactly what this job did.
+          #
+          # `runner.image-version` is not exposed, so ImageOS/ImageVersion from
+          # the runner environment stand in: they change when GitHub rolls a new
+          # image, which is when a cached AVD is most likely to stop working.
+          key: avd-${{ env.API_LEVEL }}-google_apis-x86_64-${{ env.ImageOS }}-${{ env.ImageVersion }}
 
       - name: Create AVD snapshot
         if: steps.avd-cache.outputs.cache-hit != 'true'
