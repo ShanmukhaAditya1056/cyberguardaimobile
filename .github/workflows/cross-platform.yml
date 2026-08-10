@@ -151,6 +151,17 @@ jobs:
 
       - name: Build
         shell: bash
+        env:
+          # firebase_core downloads the Firebase C++ SDK on Windows, and that
+          # SDK's CMakeLists still declares `cmake_minimum_required` below 3.5.
+          # CMake 4 — which the windows runner ships — removed compatibility
+          # with it and refuses to configure. This is the escape hatch CMake
+          # itself names in the error, and it applies to the downloaded SDK
+          # only; this project's own CMakeLists already requires 3.14.
+          #
+          # Anyone building on Windows with CMake 4 locally needs the same
+          # variable set — see docs/PLATFORMS.md.
+          CMAKE_POLICY_VERSION_MINIMUM: '3.5'
         run: |
           # pipefail matters: without it `tee` returns 0 and a failed build
           # would be reported as a success.
@@ -174,13 +185,22 @@ jobs:
         shell: bash
         run: |
           [ -f build.log ] || { echo "::error::build.log missing — the build died before producing output"; exit 0; }
-          # % must be escaped first or it eats the newline encoding that follows,
-          # and \r from the Windows toolchain would truncate the annotation.
-          msg=$(tail -c 3500 build.log \
-                | sed 's/%/%25/g' \
-                | tr -d '\r' \
-                | sed ':a;N;$!ba;s/\n/%0A/g')
-          echo "::error title=${{ matrix.target }} build failed::${msg}"
+
+          # A single annotation is capped well below the size of a CocoaPods
+          # resolution failure, which truncated the useful half of the iOS
+          # error last time. The tail is emitted in ordered chunks instead.
+          #
+          # % must be escaped before newlines become %0A, or the escaping eats
+          # its own encoding; \r from the Windows toolchain truncates an
+          # annotation at the first line if it survives.
+          tail -c 12000 build.log | tr -d '\r' > tail.log
+          split -b 2500 -d tail.log chunk_
+          i=0
+          for f in chunk_*; do
+            i=$((i + 1))
+            msg=$(sed 's/%/%25/g' "$f" | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=${{ matrix.target }} build failed (part ${i})::${msg}"
+          done
 
       - name: Upload build log
         if: failure()

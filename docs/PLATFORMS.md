@@ -285,9 +285,33 @@ Two prerequisites, both needing administrator rights:
 2. **Visual Studio** with the **"Desktop development with C++"** workload,
    including all default components. Without it: "Unable to find suitable
    Visual Studio toolchain." The Build Tools SKU is enough; the full IDE is
-   not required.
+   not required — note that Visual Studio *Code* is a different product and
+   ships no compiler, so having it installed does not satisfy this.
+
+   ```
+   winget install --id Microsoft.VisualStudio.2022.BuildTools --override "--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+   ```
 
 Confirm both with `flutter doctor`.
+
+**On CMake 4.x, set `CMAKE_POLICY_VERSION_MINIMUM` first:**
+
+```powershell
+$env:CMAKE_POLICY_VERSION_MINIMUM = '3.5'
+flutter build windows --release
+```
+
+`firebase_core` downloads the Firebase C++ SDK during the build, and that SDK's
+own `CMakeLists.txt` still declares a `cmake_minimum_required` below 3.5. CMake
+4 removed compatibility with that and refuses to configure, so the build fails
+inside a downloaded dependency rather than in this project — whose own
+CMakeLists already requires 3.14. The variable is the escape hatch CMake names
+in its error message. `cross-platform.yml` sets it for the Windows job.
+
+Worth knowing this cost buys nothing here: as described under
+[Why the gaps exist](#why-the-gaps-exist), Firebase auth cannot be configured
+on Windows without a `firebase_options.dart` that this repo does not carry. The
+SDK is compiled and then never successfully initialised.
 
 ### Linux
 
