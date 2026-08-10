@@ -421,13 +421,8 @@ jobs:
 
             echo "::group::Install APK"
             ls -l "$CG_APP_PATH" || echo "APK NOT AT EXPECTED PATH: $CG_APP_PATH"
-            adb install -r -g "$CG_APP_PATH"
-            APK_INSTALL_EXIT=$?
+            adb install -r -g "$CG_APP_PATH" || { APK_INSTALL_EXIT=$?; echo "::error title=E2E setup::adb install failed (exit ${APK_INSTALL_EXIT}). Every test would fail on a missing app, so the suite is not run."; exit 1; }
             adb shell pm list packages | grep cyberguard
-            if [ $APK_INSTALL_EXIT -ne 0 ]; then
-              echo "::error title=E2E setup::adb install failed (exit ${APK_INSTALL_EXIT}). Every test would fail on a missing app, so the suite is not run."
-              exit 1
-            fi
             echo "::endgroup::"
 
             echo "::group::Start Appium"
