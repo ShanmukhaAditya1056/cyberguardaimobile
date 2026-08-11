@@ -389,6 +389,12 @@ jobs:
           CG_PASS_THRESHOLD: '95'
           # Hard guarantee: no test may reach a third-party service from CI.
           CG_ALLOW_NETWORK_TESTS: 'false'
+          # Passed as step env rather than as an inline `VAR=… command` prefix:
+          # the action runs each script line in its own shell, so a prefix that
+          # relied on a line continuation never reached the command it was
+          # meant for.
+          CG_TEST_EMAIL: ${{ secrets.CG_TEST_EMAIL }}
+          CG_TEST_PASSWORD: ${{ secrets.CG_TEST_PASSWORD }}
         with:
           api-level: ${{ env.API_LEVEL }}
           target: google_apis
@@ -397,57 +403,21 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            set +e
-            adb wait-for-device
-            adb shell input keyevent 82 || true
-
-            echo "::group::Device information"
-            adb shell getprop ro.build.version.release
-            adb shell getprop ro.build.version.sdk
-            adb devices -l
-            echo "::endgroup::"
-
-            echo "::group::Install APK"
-            adb install -r -g "$CG_APP_PATH"
-            adb shell pm list packages | grep cyberguard
-            echo "::endgroup::"
-
-            echo "::group::Start Appium"
-            cd automation
-            npx appium --allow-cors --relaxed-security --log-timestamp \
-              --log ../appium-server.log &
-            APPIUM_PID=$!
-            echo "APPIUM_PID=$APPIUM_PID" >> "$GITHUB_ENV"
-
-            for i in $(seq 1 30); do
-              if curl -sf http://127.0.0.1:4723/status > /dev/null; then
-                echo "Appium is up after ${i}s"
-                break
-              fi
-              sleep 1
-            done
-            curl -sf http://127.0.0.1:4723/status || { echo "Appium never became healthy"; exit 1; }
-            echo "::endgroup::"
-
-            echo "::group::Run suite"
-            # These were once written as literal `\n` inside this block scalar,
-            # which YAML does not interpret as a line break. bash then saw
-            # `CG_TEST_EMAIL=... n CG_TEST_PASSWORD=... n npm test`, tried to
-            # execute a command called `n`, and exited 127 — so the suite never
-            # ran at all, and the job failed in a way that looked like a test
-            # failure. These are real line continuations.
-            CG_TEST_EMAIL="${{ secrets.CG_TEST_EMAIL }}" \
-            CG_TEST_PASSWORD="${{ secrets.CG_TEST_PASSWORD }}" \
-            npm test
-            SUITE_EXIT=$?
-            echo "::endgroup::"
-
-            kill $APPIUM_PID 2>/dev/null || true
-            echo "SUITE_EXIT=$SUITE_EXIT" >> "$GITHUB_ENV"
-            # Do not fail the emulator step — artifacts are uploaded first and
-            # the gate is applied at the end of the job.
-            exit 0
+          # ONE line, on purpose.
+          #
+          # This action runs its `script:` input one line per shell — the job
+          # log shows a separate `/usr/bin/sh -c <line>` for each. Nothing
+          # carries across: `cd` does not persist, `&` backgrounding dies with
+          # its line, `$!` comes back empty, and `for`/`if` blocks and
+          # backslash continuations are torn apart. That is what broke this
+          # step for a long time — `npx appium … --log-timestamp \` ran alone
+          # and Appium rejected the trailing backslash as an argument, while
+          # `cd automation` had no effect on the following line so npx pulled a
+          # different Appium from the registry.
+          #
+          # A single command gets a single shell, and the real script lives in
+          # a file where ordinary shell semantics apply.
+          script: bash tool/e2e_on_emulator.sh
 
       - name: Publish job summary
         if: always()
@@ -506,6 +476,7 @@ jobs:
           path: |
             automation/logs/
             appium-server.log
+            e2e-console.log
           retention-days: 30
           if-no-files-found: warn
 
