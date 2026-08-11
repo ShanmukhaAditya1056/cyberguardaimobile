@@ -1,20 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { api } from '../lib/api.js';
+import { Icon } from '../components/icons.jsx';
 import {
   Banner,
   EmptyState,
   PageHeader,
+  RiskBadge,
   ShapBars,
   Spinner,
   Tabs,
   formatDate,
 } from '../components/ui.jsx';
 
-/** `_GlassTabBar` on the app's phishing screen, emoji and all. */
+/** URL and pasted-message tabs — same engine, two input shapes. */
 const TABS = [
-  { key: 'url', label: '🔗  URL Scanner' },
-  { key: 'text', label: '💬  SMS Scanner' },
+  { key: 'url', label: 'URL scanner' },
+  { key: 'text', label: 'Message scanner' },
 ];
 
 function Verdict({ result }) {
@@ -196,20 +198,24 @@ export default function Phishing() {
         ) : (
           <ul className="list">
             {history.map((scan) => (
-              <li key={scan._id}>
-                <div style={{ minWidth: 0 }}>
-                  <div className="mono">{scan.input}</div>
-                  <div className="muted">
-                    {scan.verdict} · {scan.confidence}% ·{' '}
-                    {formatDate(scan.createdAt)}
+              <li key={scan._id} className="scan-row">
+                <div className="scan-body">
+                  <span className="mono">{scan.input}</span>
+                  <div className="hint">
+                    {scan.confidence}% confidence · {formatDate(scan.createdAt)}
                   </div>
+                </div>
+                <div className="scan-verdict">
+                  <RiskBadge level={scan.verdict} />
                 </div>
                 <button
                   type="button"
-                  className="link"
+                  className="icon-btn"
+                  aria-label={`Delete the scan of ${scan.input}`}
+                  title="Delete"
                   onClick={() => remove(scan._id)}
                 >
-                  Delete
+                  <Icon name="delete_outline" size={16} />
                 </button>
               </li>
             ))}

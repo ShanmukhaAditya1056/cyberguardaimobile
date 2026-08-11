@@ -70,6 +70,19 @@ const PATHS = {
     'M3 3h6v2H5v4H3Zm12 0h6v6h-2V5h-4Zm6 12v6h-6v-2h4v-4ZM3 15h2v4h4v2H3Zm4-8h4v4H7Zm6 6h4v4h-4Zm0-6h4v4h-4Zm-6 6h4v4H7Z',
   logout:
     'M17 8.4 15.6 9.8 17.2 11.5H9v2h8.2l-1.6 1.7L17 16.6 21 12.5ZM5 5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7v-2H5Z',
+
+  // Console chrome — the web build's own navigation rail and status marks.
+  // The phone has no persistent nav, so these have no Flutter counterpart.
+  grid_view:
+    'M3 3h8v8H3Zm10 0h8v8h-8ZM3 13h8v8H3Zm10 0h8v8h-8Z',
+  check_circle:
+    'M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm-1.4 14.6L6 12l1.4-1.4 3.2 3.2 6-6L18 9.2Z',
+  error_circle:
+    'M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 15h-2v-2h2Zm0-4h-2V7h2Z',
+  delete_outline:
+    'M7 21a2 2 0 0 1-2-2V6H4V4h5V3h6v1h5v2h-1v13a2 2 0 0 1-2 2Zm10-15H7v13h10ZM9 17h2V8H9Zm4 0h2V8h-2Z',
+  cloud_off:
+    'M2.8 3.5 1.4 4.9l2.9 2.9A5.5 5.5 0 0 0 6 18.5h11.2l2.3 2.3 1.4-1.4Zm16.6 12.1A4 4 0 0 0 18 8.5h-1.3A6 6 0 0 0 8.6 5.4L10 6.8a4 4 0 0 1 5 3.7v1h1a2 2 0 0 1 1.6 3.2Z',
 };
 
 /**

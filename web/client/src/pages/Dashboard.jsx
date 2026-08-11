@@ -1,11 +1,11 @@
 /**
- * The app's dashboard, section for section.
+ * The console overview.
  *
- * `_DashboardContent` in `lib/features/dashboard/view/dashboard_screen.dart`
- * builds, in order: score header, stats row, "Protection Modules" grid,
- * "Cyber Defense" grid, the 7-day chart, then this week's scans grouped by
- * day. This file builds the same sequence with the same spacing, and each
- * section is named after the Dart widget it stands in for.
+ * Same sections as the app's dashboard and in the same order — posture, stats,
+ * modules, defence, the 7-day trend, then this week's scans by day — because
+ * that order reflects how the data actually nests, not because the layouts
+ * match. They deliberately do not: this is a wide, dense console, and the
+ * phone is a single column of tiles.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -18,6 +18,7 @@ import {
   EmptyState,
   HeroScore,
   ModuleCard,
+  RiskBadge,
   SectionTitle,
   Spinner,
   StatsRow,
@@ -34,8 +35,6 @@ const MODULES = [
     title: 'Phishing',
     subtitle: 'URL & SMS scanner',
     icon: 'link',
-    tile: 'var(--tile-blue)',
-    accent: 'var(--accent-blue)',
     to: '/phishing',
   },
   {
@@ -43,8 +42,6 @@ const MODULES = [
     title: 'Malware',
     subtitle: 'App security',
     icon: 'bug_report',
-    tile: 'var(--tile-orange)',
-    accent: 'var(--accent-orange)',
     to: '/malware',
   },
   {
@@ -52,8 +49,6 @@ const MODULES = [
     title: 'Breach',
     subtitle: 'Data leak monitor',
     icon: 'lock_person',
-    tile: 'var(--tile-rose)',
-    accent: 'var(--accent-rose)',
     to: '/breach',
   },
   {
@@ -61,8 +56,6 @@ const MODULES = [
     title: 'Wi-Fi',
     subtitle: 'Network analyser',
     icon: 'wifi',
-    tile: 'var(--tile-green)',
-    accent: 'var(--accent-green)',
     to: '/wifi',
   },
 ];
@@ -72,12 +65,12 @@ const MODULES = [
  * routes, so every tile deep-links into the matching tab.
  */
 const DEFENSE = [
-  { label: 'Threat Fusion', icon: 'travel_explore', accent: 'var(--blue)', to: '/defense' },
+  { label: 'Threat Fusion', icon: 'travel_explore', to: '/defense' },
   // The app's Screenshot Scanner OCRs an image; the browser has no on-device
   // OCR, so its stand-in takes the text directly. Same classifier, same tile.
-  { label: 'Screenshot Scan', icon: 'image_search', accent: 'var(--safe)', to: '/defense?tab=message' },
-  { label: 'Predictive Risk', icon: 'online_prediction', accent: 'var(--warning)', to: '/defense?tab=risk' },
-  { label: 'Arbitration Log', icon: 'balance', accent: 'var(--critical)', to: '/defense?tab=arbitration' },
+  { label: 'Screenshot Scan', icon: 'image_search', to: '/defense?tab=message' },
+  { label: 'Predictive Risk', icon: 'online_prediction', to: '/defense?tab=risk' },
+  { label: 'Arbitration Log', icon: 'balance', to: '/defense?tab=arbitration' },
 ];
 
 /** `_ScanRow._moduleIcons`. */
@@ -87,12 +80,6 @@ const SCAN_ICONS = {
   breach: 'mark_email_unread',
   wifi: 'wifi',
   link_intercept: 'shield',
-};
-
-/** `_ScanRow._verdictLabels` — the rest are just capitalised. */
-const VERDICT_LABELS = {
-  threats_found: 'Threats',
-  link_intercept: 'Blocked',
 };
 
 /** Mirrors `ScanResultModel._threatVerdicts` / the server's THREAT_VERDICTS. */
@@ -150,22 +137,30 @@ function ScoreChart({ points }) {
   );
 }
 
-/** `_ScanRow`. */
+/**
+ * One row of scan history.
+ *
+ * The input is set in mono because it is machine-generated and often hostile:
+ * `rn` against `m`, `l` against `I`, a Cyrillic `а` against a Latin one. A
+ * proportional face is where those hide, and this list is exactly where
+ * someone is trying to tell two near-identical strings apart.
+ *
+ * The verdict is a badge rather than a bare word so it carries the same three
+ * signals as everywhere else — glyph, word, hue — and reads at a glance down a
+ * column.
+ */
 function ScanRow({ scan }) {
   const isThreat = THREAT_VERDICTS.has(String(scan.verdict).toLowerCase());
-  const tone = isThreat ? 'var(--danger)' : 'var(--safe)';
-  const label =
-    VERDICT_LABELS[scan.verdict] ??
-    (scan.verdict ? scan.verdict[0].toUpperCase() + scan.verdict.slice(1) : '—');
-
   return (
-    <div className="scan-row" style={{ '--tone': tone }}>
+    <div className="scan-row">
       <div className="scan-icon">
         <Icon name={SCAN_ICONS[scan.type] ?? 'security'} size={16} />
       </div>
       <div className="scan-body">
-        <div className="scan-input">{scan.input || scan.type}</div>
-        <div className="scan-verdict">{label}</div>
+        <span className="mono">{scan.input || scan.type}</span>
+      </div>
+      <div className="scan-verdict">
+        <RiskBadge level={isThreat ? scan.verdict : 'low'} />
       </div>
       <div className="scan-time">{timeOnly(scan.createdAt)}</div>
     </div>
@@ -220,7 +215,7 @@ export default function Dashboard() {
   if (loading || !data) {
     return (
       <div className="empty">
-        <Spinner dark />
+        <Spinner />
       </div>
     );
   }

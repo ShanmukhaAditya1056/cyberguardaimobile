@@ -40,6 +40,24 @@ npm run dev
 - API → <http://localhost:4000>
 - Client → <http://localhost:5173>
 
+### One login for the app and the browser
+
+Set `FIREBASE_PROJECT_ID` in `server/.env` to the project the Android app
+authenticates against — the `project_id` in `android/app/google-services.json` —
+and copy `client/.env.example` to `client/.env.local` with the config from
+**Firebase console → that project → Add app → Web**.
+
+The browser then signs in through Firebase and trades the resulting ID token
+for this API's session cookie exactly once, at `POST /api/auth/session`. An
+account created on the phone signs in here, and one created here signs in on
+the phone. The token is never stored — the cookie remains the only credential
+the page holds, and it is httpOnly.
+
+Leave both unset and nothing breaks: the local email/password accounts below
+remain the way in, and the sign-in screen says plainly that they are not shared
+with the app. That is also the state CI runs in, which is why the test suites
+need no Firebase credentials.
+
 Vite proxies `/api` to the server, so the browser stays on one origin in
 development and the session cookie behaves exactly as it will in production.
 Pointing the client straight at `:4000` would make every request cross-origin
@@ -194,6 +212,11 @@ account endpoint has no k-anonymity equivalent), but only the masked form and
 the SHA-1 prefix are returned, and only the prefix is written to history — the
 same substitution the app makes before writing to Hive.
 
+**Firebase never hands the page a stored token.** When shared login is on, the
+ID token exists for one request — the exchange at `/api/auth/session` — and is
+then dropped. What persists is the same httpOnly cookie the local accounts use,
+so enabling shared login does not widen what an XSS could reach.
+
 **Sessions are httpOnly cookies, not localStorage.** A tool whose job is
 judging hostile input must assume an XSS will eventually land somewhere in its
 UI, and a token in localStorage is readable by any script on the page.
@@ -230,6 +253,7 @@ See `server/.env.example`. Two notes:
 |---|---|---|
 | `GET` | `/api/health` | — |
 | `POST` | `/api/auth/register` · `/login` · `/logout` | — |
+| `POST` | `/api/auth/session` (Firebase ID token → cookie) | — |
 | `GET` | `/api/auth/me` | required |
 | `PATCH` | `/api/auth/settings` | required |
 | `POST` | `/api/phishing/scan` · `/scan-text` | optional |

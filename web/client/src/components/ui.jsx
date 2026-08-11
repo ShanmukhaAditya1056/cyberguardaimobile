@@ -1,305 +1,169 @@
 /**
- * Shared presentation pieces, mirroring the widgets in `lib/shared/widgets/`
- * and `lib/features/dashboard/widgets/` so a finding looks the same whichever
- * platform surfaced it.
+ * The console's presentation pieces.
  *
- * Each export names the Dart widget it stands in for. When the app's visual
- * language changes, the pair should change together — that is the point of
- * keeping the names aligned rather than inventing web-native equivalents.
+ * These no longer mirror the app's widgets one-for-one, and deliberately so:
+ * the phone is a light consumer tool read a screen at a time, this is a dark
+ * console read a table at a time. What the two builds share is the *verdict* —
+ * the same engines, the same numbers, the same severity vocabulary — not the
+ * chrome around it.
+ *
+ * Every export keeps the signature the pages already call, so the rewrite is
+ * confined to this file and index.css.
  */
 
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Icon } from './icons.jsx';
 
-/* ── SmartBackButton + a module screen's AppBar ──────────────────────────── */
+/* ── Severity ─────────────────────────────────────────────────────────────
+   The engines emit four ordered levels — low, medium, high, critical — plus
+   the words "safe" and "dangerous" from the phishing path. Everything is
+   normalised here so one vocabulary reaches the screen. */
+
+const SEVERITY_ALIASES = {
+  safe: 'low',
+  clean: 'low',
+  suspicious: 'medium',
+  warning: 'medium',
+  dangerous: 'high',
+  phishing: 'high',
+};
+
+export function normalizeSeverity(level) {
+  const key = String(level ?? '').toLowerCase();
+  return SEVERITY_ALIASES[key] ?? (['low', 'medium', 'high', 'critical'].includes(key) ? key : 'low');
+}
+
+const SEVERITY_ICON = {
+  low: 'check_circle',
+  medium: 'info_outline',
+  high: 'warning_amber',
+  critical: 'priority_high',
+};
+
+const SEVERITY_WORD = {
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  critical: 'Critical',
+};
 
 /**
- * The header every module screen carries: back arrow, title, optional actions.
+ * Severity, carried three ways at once: a glyph, a word, and a coloured dot.
  *
- * `SmartBackButton` pops the navigation stack when it can and falls back to
- * `/dashboard` when it cannot — reached by deep link, say. `navigate(-1)` has
- * no equivalent fallback (it is a no-op on the first entry in the history), so
- * the same guard is reproduced with the history length.
+ * Never fewer than three. `critical` measures 3.62:1 on the console surface —
+ * fine for a dot, short of the 4.5 small text needs — so the hue sits on the
+ * dot while the label wears an ink token. That also means the badge survives
+ * greyscale printing, forced-colors mode, and every form of colour blindness,
+ * none of which the hue alone would.
  */
-export function PageHeader({ title, actions }) {
-  const navigate = useNavigate();
+export function RiskBadge({ level }) {
+  const key = normalizeSeverity(level);
+  return (
+    <span className={`sev ${key}`}>
+      <span className="dot" aria-hidden="true" />
+      <Icon name={SEVERITY_ICON[key]} size={12} />
+      {SEVERITY_WORD[key]}
+    </span>
+  );
+}
+
+/** Maps a 0-100 score to a severity token. High score = low risk. */
+export function severityForScore(score) {
+  if (score >= 80) return 'low';
+  if (score >= 60) return 'medium';
+  if (score >= 35) return 'high';
+  return 'critical';
+}
+
+export function scoreColor(score) {
+  return `var(--sev-${severityForScore(score)})`;
+}
+
+/** Kept for call sites that predate the console palette; same ramp now. */
+export const tileScoreColor = scoreColor;
+
+export function scoreLabel(score) {
+  if (score >= 80) return 'PROTECTED';
+  if (score >= 60) return 'FAIR';
+  if (score >= 35) return 'AT RISK';
+  return 'CRITICAL';
+}
+
+/* ── Page furniture ───────────────────────────────────────────────────────── */
+
+/**
+ * A page's heading.
+ *
+ * The back button the phone carries is gone: the rail keeps every destination
+ * one click away, so there is nothing to go back *to*. It survives only as the
+ * deep-link fallback below when a page is opened without history.
+ */
+export function PageHeader({ title, sub, actions }) {
   return (
     <div className="page-header">
-      <button
-        type="button"
-        className="icon-btn"
-        aria-label="Back"
-        onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/dashboard'))}
-      >
-        <Icon name="arrow_back" size={24} />
-      </button>
-      <h1>{title}</h1>
-      {actions}
+      <div>
+        <h1>{title}</h1>
+        {sub && <div className="sub">{sub}</div>}
+      </div>
+      {actions && <div className="actions">{actions}</div>}
     </div>
   );
 }
 
-/** Colour band for a 0-100 score, matching `ScoreCalculator.primaryColor`. */
-export function scoreColor(score) {
-  if (score >= 70) return 'var(--safe)';
-  if (score >= 40) return 'var(--warning)';
-  return 'var(--danger)';
+export function BackButton() {
+  const navigate = useNavigate();
+  return (
+    <button
+      type="button"
+      className="icon-btn"
+      aria-label="Back"
+      onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/dashboard'))}
+    >
+      <Icon name="arrow_back" size={20} />
+    </button>
+  );
 }
-
-/**
- * The band used on the tinted tiles, which is a different ramp from
- * `scoreColor` — `_ModuleCardWidgetState._scoreColor` picks deeper shades so
- * the number stays legible against a pastel tile.
- */
-export function tileScoreColor(score) {
-  if (score >= 70) return 'var(--score-good)';
-  if (score >= 40) return 'var(--score-mid)';
-  return 'var(--score-bad)';
-}
-
-export function scoreLabel(score) {
-  if (score >= 70) return 'PROTECTED';
-  if (score >= 40) return 'AT RISK';
-  return 'CRITICAL';
-}
-
-/* ── SectionTitle ────────────────────────────────────────────────────────── */
 
 export function SectionTitle({ title, actionLabel, actionTo }) {
   return (
-    <div className="section">
-      <h2 className="section-title">{title}</h2>
+    <div className="section-title">
+      <span>{title}</span>
       {actionLabel && actionTo && (
         <Link className="section-action" to={actionTo}>
-          {actionLabel}
-          <Icon name="chevron_right" size={18} />
+          {actionLabel} →
         </Link>
       )}
     </div>
   );
 }
 
-/* ── _ScoreHeader ────────────────────────────────────────────────────────── */
+/* ── Score display ────────────────────────────────────────────────────────── */
 
 /**
- * Greeting, headline, tile and accent for the current score.
+ * The headline score.
  *
- * The four bands and their exact colours come from `_ScoreHeader._palette`.
- * The copy is the app's own — `scoreGreeting*` / `scoreHeadline*` in
- * `lib/l10n/app_en.arb`, emoji included. The web build has no localisation
- * layer yet, so the English strings are inlined rather than paraphrased;
- * writing new copy here would put two different sentences on the same tile.
+ * The number is real text beside the arc, not painted inside it, so a screen
+ * reader gets the value and it stays legible at any zoom — the ring is
+ * decoration layered on top of a readable figure, never the only carrier.
  */
-function heroPalette(score, neverScanned) {
-  if (neverScanned) {
-    return {
-      tile: 'var(--tile-blue)',
-      accent: 'var(--accent-blue)',
-      greeting: 'Hi there 👋',
-      headline: "Let's secure your phone",
-      icon: 'rocket_launch',
-    };
-  }
-  if (score >= 70) {
-    return {
-      tile: 'var(--tile-green)',
-      accent: 'var(--score-good)',
-      greeting: "You're protected",
-      headline: 'Everything looks healthy',
-      icon: 'verified_user',
-    };
-  }
-  if (score >= 40) {
-    return {
-      tile: 'var(--tile-orange)',
-      accent: 'var(--score-mid)',
-      greeting: 'A few things to check ⚠️',
-      headline: 'Take a quick look',
-      icon: 'warning_amber',
-    };
-  }
-  return {
-    tile: 'var(--tile-rose)',
-    accent: 'var(--score-bad)',
-    greeting: 'Action needed 🚨',
-    headline: 'Critical issues found',
-    icon: 'priority_high',
-  };
-}
-
-/** The 110px ring inside the hero tile — `_MiniScoreRing` / `_MiniRingPainter`. */
-function MiniRing({ score, accent, placeholder }) {
-  const size = 110;
-  const stroke = 9;
-  const radius = size / 2 - 6;
+export function ScoreRing({ score, label, size = 116 }) {
+  const stroke = 8;
+  const radius = (size - stroke - 6) / 2;
   const circumference = 2 * Math.PI * radius;
-  const pct = placeholder ? 0 : Math.min(100, Math.max(0, score)) / 100;
+  const pct = Math.min(100, Math.max(0, score ?? 0)) / 100;
+  const color = scoreColor(score ?? 0);
 
   return (
-    <div className="hero-ring">
+    <div className="score-ring" style={{ width: size, height: size }}>
       <svg width={size} height={size} aria-hidden="true" focusable="false">
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.7)"
+          stroke="var(--surface-3)"
           strokeWidth={stroke}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={accent}
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference * (1 - pct)}
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-          style={{ transition: 'stroke-dashoffset 1.1s cubic-bezier(0.22,1,0.36,1)' }}
-        />
-      </svg>
-      <div className="hero-ring-value">{placeholder ? '—' : score}</div>
-      {/* `scoreLabel` before the first scan, `scoreSuffix` after it. */}
-      <div className="hero-ring-suffix">{placeholder ? 'score' : '/100'}</div>
-    </div>
-  );
-}
-
-export function HeroScore({ score, neverScanned, lastScanAt }) {
-  const p = heroPalette(score, neverScanned);
-  return (
-    <section
-      className="hero"
-      style={{ '--tile': p.tile, '--accent': p.accent }}
-      aria-label={`Security score ${neverScanned ? 'not yet measured' : `${score} out of 100`}`}
-    >
-      <MiniRing score={score} accent={p.accent} placeholder={neverScanned} />
-      <div className="hero-body">
-        <div className="hero-greeting">
-          <Icon name={p.icon} size={14} />
-          <span>{p.greeting}</span>
-        </div>
-        <div className="hero-headline">{p.headline}</div>
-        <div className="hero-pill">
-          <Icon name="schedule" size={11} />
-          <span>{lastScanAt ? `Scanned ${timeAgo(lastScanAt)}` : 'Never scanned'}</span>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── StatsRow ────────────────────────────────────────────────────────────── */
-
-export function StatsRow({ totalScans, threatsFound, lastScanAt }) {
-  const items = [
-    {
-      label: 'Total Scans',
-      value: String(totalScans ?? 0),
-      icon: 'shield_outlined',
-      tile: 'var(--tile-blue)',
-      accent: 'var(--accent-blue)',
-    },
-    {
-      label: 'Threats',
-      value: String(threatsFound ?? 0),
-      icon: threatsFound > 0 ? 'warning_amber' : 'task_alt',
-      tile: threatsFound > 0 ? 'var(--tile-rose)' : 'var(--tile-green)',
-      accent: threatsFound > 0 ? 'var(--score-bad)' : 'var(--score-good)',
-    },
-    {
-      label: 'Last Scan',
-      value: lastScanAt ? timeAgo(lastScanAt) : 'Never',
-      icon: 'schedule',
-      tile: 'var(--tile-amber)',
-      accent: 'var(--accent-amber)',
-    },
-  ];
-
-  return (
-    <div className="stats">
-      {items.map((s) => (
-        <div
-          className="stat"
-          key={s.label}
-          style={{ '--tile': s.tile, '--accent': s.accent }}
-        >
-          <div className="stat-icon">
-            <Icon name={s.icon} size={15} />
-          </div>
-          <div className="stat-value">{s.value}</div>
-          <div className="stat-label">{s.label}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ── ModuleGrid ──────────────────────────────────────────────────────────── */
-
-export function ModuleCard({ title, subtitle, icon, tile, accent, score, to }) {
-  return (
-    <Link className="module" to={to} style={{ '--tile': tile, '--accent': accent }}>
-      <div className="module-top">
-        <div className="module-icon">
-          <Icon name={icon} size={22} />
-        </div>
-        <div className="module-arrow">
-          <Icon name="arrow_outward" size={16} />
-        </div>
-      </div>
-      <div>
-        <div className="module-title">{title}</div>
-        <div className="module-sub">{subtitle}</div>
-      </div>
-      <div className="module-score" style={{ '--score': tileScoreColor(score) }}>
-        <span className="module-score-dot" />
-        <span className="module-score-value">{score}</span>
-        <span className="module-score-max">/100</span>
-      </div>
-    </Link>
-  );
-}
-
-/* ── _DefenseGrid ────────────────────────────────────────────────────────── */
-
-export function DefenseTile({ label, icon, accent, to }) {
-  return (
-    <Link className="card defense" to={to} style={{ '--accent': accent, marginBottom: 0 }}>
-      <div className="defense-icon">
-        <Icon name={icon} size={20} />
-      </div>
-      <span className="defense-label">{label}</span>
-    </Link>
-  );
-}
-
-/* ── ScoreRing (the full-size one on result screens) ─────────────────────── */
-
-/**
- * The number is rendered as text alongside, not only inside the ring, so the
- * value is available to a screen reader and legible at any zoom level — the
- * arc is decoration on top of it.
- */
-export function ScoreRing({ score, label, size = 120 }) {
-  const radius = (size - 14) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
-  const color = scoreColor(score);
-
-  return (
-    <div className="score-ring">
-      <svg width={size} height={size} aria-hidden="true" focusable="false">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="var(--divider)"
-          strokeWidth="9"
         />
         <circle
           cx={size / 2}
@@ -307,92 +171,177 @@ export function ScoreRing({ score, label, size = 120 }) {
           r={radius}
           fill="none"
           stroke={color}
-          strokeWidth="9"
+          strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          strokeDashoffset={circumference * (1 - pct)}
+          style={{ transition: 'stroke-dashoffset 0.9s cubic-bezier(0.22,1,0.36,1)' }}
         />
       </svg>
-      <div>
-        <div className="score-value" style={{ color }}>
-          {score}
-          <span style={{ fontSize: '16px', color: 'var(--text-light)' }}>/100</span>
+      <div className="score-value">{score ?? '—'}</div>
+      <div className="score-label">{label ?? scoreLabel(score ?? 0)}</div>
+    </div>
+  );
+}
+
+export function HeroScore({ score, neverScanned, lastScanAt }) {
+  const value = neverScanned ? null : score;
+  return (
+    <section
+      className="hero"
+      aria-label={
+        neverScanned ? 'Security score not yet measured' : `Security score ${score} out of 100`
+      }
+    >
+      <ScoreRing score={value} label={neverScanned ? 'NO DATA' : undefined} />
+      <div className="hero-body">
+        <div className="section-title" style={{ marginBottom: 6 }}>
+          Security posture
         </div>
-        <div className="score-label" style={{ color }}>
-          {label ?? scoreLabel(score)}
+        <div className="hero-value">
+          {neverScanned ? '—' : score}
+          <span className="unit"> /100</span>
         </div>
+        <p className="muted" style={{ marginTop: 8 }}>
+          {neverScanned
+            ? 'Nothing scanned yet. Run any scanner and this becomes a live figure.'
+            : scoreNarrative(score)}
+        </p>
+        <div className="hint" style={{ marginTop: 8 }}>
+          <Icon name="schedule" size={12} /> {lastScanAt ? `Last scan ${timeAgo(lastScanAt)}` : 'Never scanned'}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function scoreNarrative(score) {
+  if (score >= 80) return 'No outstanding findings. Keep scanning new links and apps as they arrive.';
+  if (score >= 60) return 'Mostly healthy, with a few findings worth reviewing below.';
+  if (score >= 35) return 'Several findings need attention. Start with the highest severity.';
+  return 'Critical findings are open. Address these before anything else.';
+}
+
+/* ── Stats ────────────────────────────────────────────────────────────────── */
+
+export function Stat({ label, value, unit, icon }) {
+  return (
+    <div className="stat">
+      <div className="stat-label">
+        {icon && <Icon name={icon} size={13} className="stat-icon" />}
+        {label}
+      </div>
+      <div className="stat-value">
+        {value}
+        {unit && <span className="unit">{unit}</span>}
       </div>
     </div>
   );
 }
 
-/* ── RiskBadge ───────────────────────────────────────────────────────────── */
-
-const BADGE_ICON = {
-  critical: 'priority_high',
-  high: 'warning_amber',
-  medium: 'info_outline',
-  low: 'task_alt',
-  safe: 'verified_user',
-};
-
-export function RiskBadge({ level }) {
-  const key = String(level).toLowerCase();
+export function StatsRow({ totalScans, threatsFound, lastScanAt }) {
   return (
-    <span className={`badge ${key}`}>
-      <Icon name={BADGE_ICON[key] ?? 'info_outline'} size={12} />
-      {key}
-    </span>
+    <div className="stats">
+      <Stat label="Total scans" value={totalScans ?? 0} icon="shield_outlined" />
+      <Stat
+        label="Threats found"
+        value={threatsFound ?? 0}
+        icon={threatsFound > 0 ? 'warning_amber' : 'task_alt'}
+      />
+      <Stat label="Last scan" value={lastScanAt ? timeAgo(lastScanAt) : 'Never'} icon="schedule" />
+    </div>
   );
 }
 
-/* ── ShapBar ─────────────────────────────────────────────────────────────── */
+/* ── Navigation cards ─────────────────────────────────────────────────────── */
+
+export function ModuleCard({ title, subtitle, icon, score, to }) {
+  const sev = severityForScore(score);
+  return (
+    <Link className={`card sev-edge ${sev}`} to={to} style={{ display: 'block' }}>
+      <div className="spread" style={{ marginBottom: 12 }}>
+        <span className="scan-icon">
+          <Icon name={icon} size={17} />
+        </span>
+        <RiskBadge level={sev} />
+      </div>
+      <div style={{ fontWeight: 600 }}>{title}</div>
+      <div className="hint">{subtitle}</div>
+      <div className="stat-value" style={{ fontSize: 22, marginTop: 10 }}>
+        {score}
+        <span className="unit">/100</span>
+      </div>
+    </Link>
+  );
+}
+
+export function DefenseTile({ label, icon, to }) {
+  return (
+    <Link className="card" to={to} style={{ display: 'block' }}>
+      <span className="scan-icon" style={{ marginBottom: 10 }}>
+        <Icon name={icon} size={17} />
+      </span>
+      <div style={{ fontWeight: 600 }}>{label}</div>
+    </Link>
+  );
+}
+
+/* ── Explanations ─────────────────────────────────────────────────────────── */
 
 /**
- * Direction is encoded in the label ("raises risk" / "lowers risk") as well as
- * in the bar colour, so the explanation still reads correctly for someone who
- * cannot distinguish the red and green.
+ * SHAP contributions.
+ *
+ * Magnitude, so one hue rather than a palette, and the direction is stated in
+ * words — "raises risk" / "lowers risk" — because a bar that is merely longer
+ * does not say which way it pushed.
  */
 export function ShapBars({ reasons }) {
   if (!reasons?.length) return null;
+  const rows = reasons.map((r, i) => ({
+    key: `${typeof r === 'string' ? r : r.feature}-${i}`,
+    feature: typeof r === 'string' ? r : r.feature,
+    contribution: typeof r === 'string' ? 0.5 : Math.abs(r.contribution ?? 0.5),
+    positive: typeof r === 'string' ? true : r.positive !== false,
+  }));
+
   return (
     <div className="shap">
-      {reasons.map((r, i) => {
-        const contribution = typeof r === 'string' ? 0.5 : r.contribution;
-        const feature = typeof r === 'string' ? r : r.feature;
-        const positive = typeof r === 'string' ? true : r.positive;
-        return (
-          <div className="shap-row" key={`${feature}-${i}`}>
-            <div className="shap-head">
-              <span>{feature}</span>
-              <span className="muted">{positive ? 'raises risk' : 'lowers risk'}</span>
-            </div>
-            <div className="shap-track">
-              <div
-                className={`shap-fill ${positive ? 'up' : 'down'}`}
-                style={{ width: `${Math.round(contribution * 100)}%` }}
-              />
+      <div className="shap-head">Why this verdict</div>
+      {rows.map((r) => (
+        <div className="shap-row" key={r.key}>
+          <div>
+            <div>{r.feature}</div>
+            <div className="shap-track" style={{ marginTop: 5 }}>
+              <span style={{ width: `${Math.round(Math.min(1, r.contribution) * 100)}%` }} />
             </div>
           </div>
-        );
-      })}
+          <span className="hint" style={{ textAlign: 'right' }}>
+            {r.positive ? 'raises risk' : 'lowers risk'}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
 
 export function CheckList({ checks }) {
+  if (!checks?.length) return null;
   return (
-    <div>
+    <div className="list">
       {checks.map((c) => (
-        <div className={`check ${c.passed ? 'pass' : 'fail'}`} key={c.name}>
-          <span className="check-icon" aria-hidden="true">
-            {c.passed ? '✓' : '✕'}
+        <div className="scan-row" key={c.name}>
+          <span
+            className="scan-icon"
+            style={{ color: c.passed ? 'var(--sev-low)' : 'var(--sev-high)' }}
+          >
+            <Icon name={c.passed ? 'check_circle' : 'error_circle'} size={16} />
           </span>
-          <div>
-            <strong>{c.name}</strong>
-            <span className="visually-hidden">{c.passed ? ' passed' : ' failed'}</span>
-            <div className="muted">{c.detail}</div>
+          <div className="scan-body">
+            <div style={{ fontWeight: 500 }}>
+              {c.name}
+              <span className="visually-hidden">{c.passed ? ' — passed' : ' — failed'}</span>
+            </div>
+            {c.detail && <div className="hint">{c.detail}</div>}
           </div>
         </div>
       ))}
@@ -400,31 +349,55 @@ export function CheckList({ checks }) {
   );
 }
 
+/* ── Feedback ─────────────────────────────────────────────────────────────── */
+
+const BANNER_ICON = {
+  info: 'info_outline',
+  success: 'check_circle',
+  warn: 'warning_amber',
+  error: 'error_circle',
+};
+
 export function Banner({ kind = 'info', children }) {
   if (!children) return null;
   return (
     <div className={`banner ${kind}`} role={kind === 'error' ? 'alert' : 'status'}>
-      {children}
+      <Icon name={BANNER_ICON[kind] ?? 'info_outline'} size={16} className="glyph" />
+      <div>{children}</div>
     </div>
   );
 }
 
-/* ── EmptyState ──────────────────────────────────────────────────────────── */
-
-export function EmptyState({ title, hint }) {
+export function EmptyState({ title, hint, icon = 'shield_outlined' }) {
   return (
     <div className="empty">
-      <strong className="empty-title">{title}</strong>
-      {hint && <div className="empty-hint">{hint}</div>}
+      <Icon name={icon} size={30} className="glyph" />
+      <h3>{title}</h3>
+      {hint && <p>{hint}</p>}
     </div>
   );
 }
 
-export function Spinner({ dark = false }) {
-  return <span className={dark ? 'spinner dark' : 'spinner'} aria-hidden="true" />;
+export function Spinner() {
+  return <span className="spinner" aria-hidden="true" />;
 }
 
-/* ── Tab bar (_GlassTabBar) ──────────────────────────────────────────────── */
+/**
+ * A placeholder shaped like the content that is coming.
+ *
+ * Preferred over a spinner wherever the layout is known, because the page does
+ * not jump when the data lands — and on a console, a reflow is what makes you
+ * misread the row you were already looking at.
+ */
+export function Skeleton({ rows = 3, height = 48 }) {
+  return (
+    <div className="stack" aria-hidden="true">
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="skel" style={{ height }} />
+      ))}
+    </div>
+  );
+}
 
 export function Tabs({ tabs, active, onSelect }) {
   return (
@@ -444,7 +417,7 @@ export function Tabs({ tabs, active, onSelect }) {
   );
 }
 
-/* ── DateFormatter ───────────────────────────────────────────────────────── */
+/* ── Dates ────────────────────────────────────────────────────────────────── */
 
 export function formatDate(value) {
   if (!value) return '—';
@@ -454,14 +427,12 @@ export function formatDate(value) {
   });
 }
 
-/** `DateFormatter.timeOnly` — 24-hour HH:mm, as the app renders it. */
 export function timeOnly(value) {
   if (!value) return '—';
   const d = new Date(value);
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-/** `DateFormatter.timeAgo` — same thresholds, same wording, same pluralisation. */
 export function timeAgo(value) {
   if (!value) return 'Never';
   const ms = Date.now() - new Date(value).getTime();
@@ -481,7 +452,7 @@ export function timeAgo(value) {
 }
 
 /**
- * `DateFormatter.dayLabel` — the heading above each day's scans.
+ * The heading above each day's scans.
  *
  * Compares calendar days rather than elapsed hours, so a scan at 23:00 is
  * "Yesterday" at 01:00 the next morning rather than "Today".

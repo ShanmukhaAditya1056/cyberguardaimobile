@@ -34,6 +34,29 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:4000',
         changeOrigin: true,
+        // Vite's default handler turns an upstream connection failure into a
+        // bare 500. Every fetch in the client then fails to parse the body and
+        // reports a JSON error, which reads like nineteen broken endpoints
+        // rather than one API that is not up yet. Answer with JSON naming the
+        // real cause instead.
+        configure: (proxy) => {
+          proxy.on('error', (err, _req, res) => {
+            if (!res || res.writableEnded) return;
+            const refused = err.code === 'ECONNREFUSED';
+            res.writeHead(refused ? 503 : 502, {
+              'content-type': 'application/json',
+              'retry-after': '2',
+            });
+            res.end(
+              JSON.stringify({
+                error: refused
+                  ? 'The API is not running — start it with `npm run dev` in web/.'
+                  : `Proxy error talking to the API: ${err.code ?? err.message}`,
+                upstream: 'http://127.0.0.1:4000',
+              }),
+            );
+          });
+        },
       },
     },
   },

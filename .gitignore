@@ -55,6 +55,11 @@ web/client/dist/
 # Carries JWT_SECRET, the Mongo connection string and the HIBP key.
 # web/server/.env.example is the tracked template.
 web/server/.env
+# The browser's Firebase config. Not secret — it ships in every web bundle —
+# but it identifies one specific project, so it is untracked for the same
+# reason android/app/google-services.json is. .env.example is the template.
+web/client/.env.local
+web/client/.env*.local
 web/**/.vite/
 
 # Node — E2E automation dependencies

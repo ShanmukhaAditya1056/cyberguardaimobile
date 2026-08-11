@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { useAuth } from './context/AuthContext.jsx';
 import { Spinner } from './components/ui.jsx';
@@ -17,9 +17,9 @@ import Wifi from './pages/Wifi.jsx';
 /**
  * Sign-in gate.
  *
- * Mandatory, matching the mobile app's route guard. The scanners themselves
- * work without an account — every engine runs on the submitted input alone —
- * but history, the unified score and the Evil Twin check all need somewhere to
+ * Mandatory, matching the app's route guard. The scanners themselves work
+ * without an account — every engine runs on the submitted input alone — but
+ * history, the unified score and the Evil Twin check all need somewhere to
  * store per-user state, and without an account there is nowhere.
  */
 function RequireAuth({ children }) {
@@ -29,7 +29,10 @@ function RequireAuth({ children }) {
   if (loading) {
     return (
       <div className="auth-wrap">
-        <Spinner dark /> <span style={{ marginLeft: 10 }}>Checking your session…</span>
+        <div className="row">
+          <Spinner />
+          <span>Checking your session…</span>
+        </div>
       </div>
     );
   }
@@ -40,53 +43,95 @@ function RequireAuth({ children }) {
 }
 
 /**
- * The dashboard's `SliverAppBar`: brand on the left, alerts bell with its
- * unread count and the settings gear on the right.
+ * Navigation.
  *
- * The app has no persistent nav bar — `CyberGuardBottomNav` exists in
- * `lib/shared/widgets/` but nothing mounts it, and it is still painted in the
- * retired dark-glass style. Copying it would have made the web build look
- * *less* like the shipped app, not more. Navigation is the same as on the
- * phone: the dashboard's module grid is the hub, and every module screen
- * carries a back arrow.
+ * The phone has no persistent nav — its dashboard's module grid is the hub and
+ * each module carries a back arrow, which suits a thumb and one screen at a
+ * time. A desktop console does not: every destination stays visible, because
+ * the whole point of the wider viewport is not having to go back first.
+ *
+ * Under 900px this same markup becomes a bottom bar (see index.css). Not a
+ * hamburger — six destinations *are* the app, and hiding them would put two
+ * taps in front of every navigation.
  */
-function AppBar() {
+const NAV = [
+  { to: '/dashboard', label: 'Overview', icon: 'grid_view' },
+  { to: '/phishing', label: 'Phishing', icon: 'link' },
+  { to: '/malware', label: 'Apps', icon: 'bug_report' },
+  { to: '/wifi', label: 'Wi-Fi', icon: 'wifi' },
+  { to: '/breach', label: 'Breaches', icon: 'lock_person' },
+  { to: '/defense', label: 'Defence', icon: 'travel_explore' },
+];
+
+function Rail() {
   const { unreadAlerts } = useDashboard();
-  const navigate = useNavigate();
 
   return (
-    <header className="appbar">
-      <a
-        className="brand"
-        href="/dashboard"
-        onClick={(e) => {
-          e.preventDefault();
-          navigate('/dashboard');
-        }}
+    <nav className="rail" aria-label="Main">
+      <NavLink to="/dashboard" className="rail-brand">
+        <span className="rail-mark" aria-hidden="true">
+          <Icon name="shield" size={16} />
+        </span>
+        CyberGuard
+      </NavLink>
+
+      <div className="rail-section">Scanners</div>
+      {NAV.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          className={({ isActive }) => (isActive ? 'rail-link active' : 'rail-link')}
+        >
+          <Icon name={item.icon} size={18} />
+          {item.label}
+        </NavLink>
+      ))}
+
+      <div className="rail-section">Account</div>
+      <NavLink
+        to="/alerts"
+        className={({ isActive }) => (isActive ? 'rail-link active' : 'rail-link')}
       >
-        CyberGuard AI
-      </a>
-      <span className="appbar-spacer" />
-      <button
-        type="button"
-        className="icon-btn"
-        aria-label={unreadAlerts > 0 ? `Alerts, ${unreadAlerts} unread` : 'Alerts'}
-        onClick={() => navigate('/alerts')}
-      >
-        <Icon name="notifications_outlined" size={24} />
+        <Icon name="notifications_outlined" size={18} />
+        Alerts
         {unreadAlerts > 0 && (
-          <span className="badge-dot" aria-hidden="true">
-            {unreadAlerts > 9 ? '9+' : unreadAlerts}
+          <span className="count" aria-label={`${unreadAlerts} unread`}>
+            {unreadAlerts > 99 ? '99+' : unreadAlerts}
           </span>
         )}
-      </button>
-      <button
-        type="button"
-        className="icon-btn"
-        aria-label="Settings"
-        onClick={() => navigate('/settings')}
+      </NavLink>
+      <NavLink
+        to="/settings"
+        className={({ isActive }) => (isActive ? 'rail-link active' : 'rail-link')}
       >
-        <Icon name="settings_outlined" size={24} />
+        <Icon name="settings_outlined" size={18} />
+        Settings
+      </NavLink>
+    </nav>
+  );
+}
+
+/** Shows which account is signed in, and how — local or shared with the app. */
+function Topbar() {
+  const { user, usesFirebase, logout } = useAuth();
+  const name = user?.displayName || user?.email || '';
+
+  return (
+    <header className="topbar">
+      <span className="topbar-title">Security console</span>
+      <span className="topbar-spacer" />
+      <span
+        className="hint"
+        title={
+          usesFirebase
+            ? 'Signed in through Firebase — the same account as the Android app.'
+            : 'A local account on this server. It is not shared with the app.'
+        }
+      >
+        {name}
+      </span>
+      <button type="button" className="icon-btn" onClick={logout} aria-label="Sign out">
+        <Icon name="logout" size={18} />
       </button>
     </header>
   );
@@ -95,8 +140,11 @@ function AppBar() {
 function Shell({ children }) {
   return (
     <div className="app">
-      <AppBar />
-      <main className="content">{children}</main>
+      <Rail />
+      <div>
+        <Topbar />
+        <main className="content">{children}</main>
+      </div>
     </div>
   );
 }

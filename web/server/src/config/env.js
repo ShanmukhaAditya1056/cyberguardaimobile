@@ -71,4 +71,25 @@ export const config = {
    */
   hibpApiKey: process.env.HIBP_API_KEY ?? '',
   hibpUserAgent: process.env.HIBP_USER_AGENT ?? 'CyberGuard-AI-Web',
+
+  /**
+   * Firebase, so the browser and the phone share one account.
+   *
+   * Optional, and deliberately so — it mirrors `AuthService.isConfigured` in
+   * the app, where a checkout with no `google-services.json` still builds and
+   * runs with auth simply unavailable. Unset here, `/api/auth/session` reports
+   * itself unconfigured and the local email/password accounts remain the way
+   * in. That is the state CI runs in, which is why the server suites need no
+   * Firebase credentials.
+   *
+   * Verifying an ID token needs only the project ID: the signing keys are
+   * Google's public certificates. A service account is required only for admin
+   * operations this server never performs, so it stays optional.
+   */
+  firebase: {
+    projectId: process.env.FIREBASE_PROJECT_ID ?? '',
+    // Either a path to a service-account JSON file or the JSON itself, for
+    // hosts that only offer environment variables.
+    serviceAccount: process.env.FIREBASE_SERVICE_ACCOUNT ?? '',
+  },
 };

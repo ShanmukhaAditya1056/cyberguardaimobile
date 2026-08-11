@@ -73,7 +73,7 @@ const SCAM_REASON = {
 };
 
 const bandColor = (band) =>
-  band === 'high' ? 'var(--danger)' : band === 'medium' ? 'var(--warning)' : 'var(--safe)';
+  band === 'high' ? 'var(--sev-high)' : band === 'medium' ? 'var(--sev-medium)' : 'var(--sev-low)';
 
 function FusionTab() {
   const [url, setUrl] = useState('');
@@ -356,13 +356,13 @@ function ArbitrationTab() {
               </div>
               <div style={{ marginLeft: 24 }}>
                 <div className="muted">Conflicts</div>
-                <strong style={{ fontSize: '1.3rem', color: 'var(--warning)' }}>
+                <strong style={{ fontSize: '1.3rem', color: 'var(--sev-medium)' }}>
                   {data.summary.conflicts}
                 </strong>
               </div>
               <div style={{ marginLeft: 24 }}>
                 <div className="muted">Overrides</div>
-                <strong style={{ fontSize: '1.3rem', color: 'var(--critical)' }}>
+                <strong style={{ fontSize: '1.3rem', color: 'var(--sev-critical)' }}>
                   {data.summary.overrides}
                 </strong>
               </div>
@@ -386,7 +386,7 @@ function ArbitrationTab() {
                         {formatDate(e.createdAt)}
                       </div>
                       {e.overrideApplied && (
-                        <div style={{ marginTop: 6, color: 'var(--critical)' }}>
+                        <div style={{ marginTop: 6, color: 'var(--sev-critical)' }}>
                           {e.overrideReason}
                         </div>
                       )}

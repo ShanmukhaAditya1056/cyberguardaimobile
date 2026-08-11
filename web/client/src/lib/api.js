@@ -60,6 +60,12 @@ export const api = {
   auth: {
     register: (body) => request('/auth/register', { method: 'POST', body }),
     login: (body) => request('/auth/login', { method: 'POST', body }),
+    /**
+     * Trades a Firebase ID token for the session cookie. Called once, right
+     * after Firebase sign-in — this is the only moment a bearer credential is
+     * in play, and it is never stored.
+     */
+    session: (idToken) => request('/auth/session', { method: 'POST', body: { idToken } }),
     logout: () => request('/auth/logout', { method: 'POST' }),
     me: () => request('/auth/me'),
     updateSettings: (body) => request('/auth/settings', { method: 'PATCH', body }),

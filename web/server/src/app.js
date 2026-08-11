@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { config } from './config/env.js';
 import { status as modelStatus } from './engines/modelStore.js';
 import { errorHandler, notFound } from './middleware/errors.js';
+import { isConfigured as firebaseConfigured } from './services/firebaseAdmin.js';
 import authRoutes from './routes/auth.js';
 import breachRoutes from './routes/breach.js';
 import dashboardRoutes from './routes/dashboard.js';
@@ -15,7 +16,13 @@ import malwareRoutes from './routes/malware.js';
 import phishingRoutes from './routes/phishing.js';
 import wifiRoutes from './routes/wifi.js';
 
-export function createApp() {
+/**
+ * @param {() => {ready: boolean, reason?: string}} readiness
+ *   Reports whether the process can serve a real request yet. Defaults to
+ *   always-ready, which is what the test suites and the e2e harness want: they
+ *   drive the app in-process and never wait on a boot sequence.
+ */
+export function createApp(readiness = () => ({ ready: true })) {
   const app = express();
 
   // Behind a reverse proxy the client IP arrives in X-Forwarded-For. Without
@@ -60,10 +67,20 @@ export function createApp() {
     }),
   );
 
-  app.get('/api/health', (_req, res) => {
+  // Health answers before the app is ready, because "not ready yet" is exactly
+  // what it is for. Every other route waits.
+  app.get('/api/health', async (_req, res) => {
     const engines = modelStatus();
+    const { ready, reason } = readiness();
     res.json({
       ok: true,
+      ready,
+      ...(ready ? {} : { bootStage: reason }),
+      // Whether an account made on the phone can sign in here. The client
+      // reads this to decide between the Firebase sign-in and the local
+      // email/password form, rather than discovering the answer from a failed
+      // request.
+      firebaseAuth: await firebaseConfigured(),
       // Every scanner degrades to its rules engine when a model is missing, so
       // an engine that failed to load is reported rather than hidden — a
       // deployment silently running rules-only would look identical otherwise.
@@ -76,6 +93,21 @@ export function createApp() {
       },
       modelErrors: engines.errors,
       hibpKeyConfigured: Boolean(config.hibpApiKey),
+    });
+  });
+
+  // The socket opens before the models are parsed and Mongo is connected, so a
+  // request can arrive mid-boot. Answering it with a 503 that names the stage
+  // is honest and retryable; the alternative — not listening until ready — is a
+  // refused connection, which every client and dev proxy reports as an opaque
+  // failure with no indication that waiting would help.
+  app.use('/api', (_req, res, next) => {
+    const { ready, reason } = readiness();
+    if (ready) return next();
+    res.set('Retry-After', '2');
+    return res.status(503).json({
+      error: 'Starting up — retry in a moment.',
+      bootStage: reason,
     });
   });
 

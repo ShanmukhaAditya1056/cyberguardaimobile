@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { api } from '../lib/api.js';
+import { Icon } from '../components/icons.jsx';
 import {
   Banner,
   EmptyState,
@@ -98,37 +99,57 @@ export default function Alerts() {
         ) : (
           <ul className="list">
             {alerts.map((alert) => (
-              <li key={alert._id}>
-                <div style={{ minWidth: 0 }}>
-                  <div className="row" style={{ gap: 8 }}>
+              <li
+                key={alert._id}
+                className="scan-row"
+                style={{ alignItems: 'flex-start' }}
+              >
+                {/* Unread is carried by an accent bar rather than by weight
+                    alone — bold-vs-semibold is not a difference you can see
+                    when scanning a column of twenty. */}
+                <span
+                  className="scan-icon"
+                  style={{
+                    background: alert.isRead ? 'var(--surface-2)' : 'var(--accent-wash)',
+                    color: alert.isRead ? 'var(--ink-3)' : 'var(--accent)',
+                  }}
+                  aria-hidden="true"
+                >
+                  <Icon name="notifications_outlined" size={15} />
+                </span>
+                <div className="scan-body">
+                  <div className="row" style={{ gap: 8, marginBottom: 3 }}>
                     <RiskBadge level={alert.type} />
-                    <strong
-                      style={{ fontWeight: alert.isRead ? 500 : 800 }}
-                    >
+                    <strong style={{ fontWeight: alert.isRead ? 500 : 700 }}>
                       {alert.title}
                     </strong>
+                    {!alert.isRead && <span className="visually-hidden">(unread)</span>}
                   </div>
-                  <div style={{ marginTop: 4 }}>{alert.description}</div>
-                  <div className="muted" style={{ marginTop: 4 }}>
+                  <div className="muted">{alert.description}</div>
+                  <div className="hint" style={{ marginTop: 3 }}>
                     {alert.module} · {formatDate(alert.createdAt)}
                   </div>
                 </div>
-                <div className="row">
+                <div className="row" style={{ flex: 'none' }}>
                   {!alert.isRead && (
                     <button
                       type="button"
-                      className="link"
+                      className="icon-btn"
+                      title="Mark read"
+                      aria-label={`Mark "${alert.title}" as read`}
                       onClick={() => markRead(alert._id)}
                     >
-                      Mark read
+                      <Icon name="check_circle" size={16} />
                     </button>
                   )}
                   <button
                     type="button"
-                    className="link"
+                    className="icon-btn"
+                    title="Delete"
+                    aria-label={`Delete the alert "${alert.title}"`}
                     onClick={() => remove(alert._id)}
                   >
-                    Delete
+                    <Icon name="delete_outline" size={16} />
                   </button>
                 </div>
               </li>
