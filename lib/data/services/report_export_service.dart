@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:csv/csv.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -22,8 +25,14 @@ class ReportExportService {
   static const _dangerColor = PdfColor.fromInt(0xFFE23744);
   static const _warningColor = PdfColor.fromInt(0xFFF4831F);
 
-  /// Build the PDF, save to temp, and open the share sheet.
-  static Future<File> exportPdf() async {
+  /// Renders the report and returns the PDF bytes.
+  ///
+  /// Split out from [exportPdf] so the document can be built — and therefore
+  /// tested — without a share sheet or a filesystem. "Export is not working"
+  /// has two very different causes, a document that fails to render and a
+  /// share intent that never opens, and they are indistinguishable from the
+  /// UI until these are separable.
+  static Future<Uint8List> buildPdfBytes() async {
     final settings = HiveService.getSettings();
     final alerts = HiveService.getAlerts();
     final scanResults = HiveService.getScanResults();
@@ -58,25 +67,20 @@ class ReportExportService {
       ),
     );
 
-    final bytes = await doc.save();
-    final dir = await getTemporaryDirectory();
-    final stamp = DateTime.now()
-        .toIso8601String()
-        .substring(0, 19)
-        .replaceAll(':', '-');
-    final file = File('${dir.path}/cyberguard_report_$stamp.pdf');
-    await file.writeAsBytes(bytes);
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path, mimeType: 'application/pdf')],
-        subject: 'CyberGuard AI Security Report',
-      ),
-    );
+    return doc.save();
+  }
+
+  /// Builds the PDF, writes it beside the app's cache, and opens the share
+  /// sheet. Returns the file so a caller can report where it went.
+  static Future<File> exportPdf() async {
+    final bytes = await buildPdfBytes();
+    final file = await _writeToCache(bytes, 'pdf');
+    await _share(file, 'application/pdf', 'CyberGuard AI Security Report');
     return file;
   }
 
   /// CSV export: one row per scan result. Useful for spreadsheet review.
-  static Future<File> exportCsv() async {
+  static String buildCsv() {
     final scans = HiveService.getScanResults();
     final alerts = HiveService.getAlerts();
 
@@ -102,21 +106,47 @@ class ReportExportService {
           ]),
     ];
 
-    final csv = const ListToCsvConverter().convert(rows);
+    return const ListToCsvConverter().convert(rows);
+  }
+
+  static Future<File> exportCsv() async {
+    final file = await _writeToCache(
+      Uint8List.fromList(utf8.encode(buildCsv())),
+      'csv',
+    );
+    await _share(file, 'text/csv', 'CyberGuard AI Security Data');
+    return file;
+  }
+
+  /// Writes the report into the app's cache directory.
+  ///
+  /// The cache dir specifically: it is one of the paths share_plus declares in
+  /// its FileProvider, so the receiving app can actually read the URI. A file
+  /// written anywhere else is shared as a URI the target has no grant for, and
+  /// the share sheet opens onto an error — or nothing at all.
+  static Future<File> _writeToCache(Uint8List bytes, String extension) async {
     final dir = await getTemporaryDirectory();
     final stamp = DateTime.now()
         .toIso8601String()
         .substring(0, 19)
         .replaceAll(':', '-');
-    final file = File('${dir.path}/cyberguard_report_$stamp.csv');
-    await file.writeAsString(csv);
-    await SharePlus.instance.share(
+    final file = File('${dir.path}/cyberguard_report_$stamp.$extension');
+    await file.writeAsBytes(bytes, flush: true);
+    return file;
+  }
+
+  static Future<void> _share(File file, String mime, String subject) async {
+    final result = await SharePlus.instance.share(
       ShareParams(
-        files: [XFile(file.path, mimeType: 'text/csv')],
-        subject: 'CyberGuard AI Security Data',
+        files: [XFile(file.path, mimeType: mime)],
+        subject: subject,
       ),
     );
-    return file;
+    // `unavailable` means no app on the device could receive the file. That is
+    // a real dead end for the user and must not be swallowed as success.
+    if (result.status == ShareResultStatus.unavailable) {
+      throw StateError('No app on this device can open a $mime file.');
+    }
   }
 
   // ─── PDF section builders ────────────────────────────────────────────────
@@ -322,12 +352,21 @@ class ReportExportService {
               style: const pw.TextStyle(color: _textMed, fontSize: 11))
         else ...[
           for (final a in critical.isEmpty ? alerts.take(5) : critical)
+            // Square corners, and the severity accent stays a left BorderSide.
+            //
+            // `pdf` asserts `borderRadius == null` unless the Border is
+            // uniform, so the original rounded card with a left-only edge
+            // threw at save() — and only when there was an alert to draw,
+            // which is why a fresh install exported fine and every real one
+            // failed. Dropping the radius is the fix that cannot go wrong:
+            // rebuilding the accent as a stretched bar inside a Row instead
+            // gives it unbounded height inside a MultiPage, and pagination
+            // then never converges (TooManyPagesException).
             pw.Container(
               margin: const pw.EdgeInsets.only(bottom: 6),
               padding: const pw.EdgeInsets.all(8),
               decoration: pw.BoxDecoration(
                 color: PdfColor.fromInt(0xFFFAFAFA),
-                borderRadius: pw.BorderRadius.circular(6),
                 border: pw.Border(
                     left: pw.BorderSide(
                         color: a.type == 'critical'
@@ -349,8 +388,8 @@ class ReportExportService {
                       ),
                       pw.Text(
                         '${a.module.toUpperCase()} · ${DateFormatter.timeAgo(a.timestamp)}',
-                        style: const pw.TextStyle(
-                            color: _textMed, fontSize: 9),
+                        style:
+                            const pw.TextStyle(color: _textMed, fontSize: 9),
                       ),
                     ],
                   ),
@@ -522,9 +561,19 @@ class ReportExportService {
               child: pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('• ',
-                      style: const pw.TextStyle(
-                          color: _brandBlue, fontSize: 11)),
+                  // A drawn dot, not "•". The built-in Helvetica the pdf
+                  // package falls back to has no glyph for U+2022, so the
+                  // character was dropped silently and every recommendation
+                  // rendered with a hanging indent and no marker.
+                  pw.Container(
+                    width: 3,
+                    height: 3,
+                    margin: const pw.EdgeInsets.only(top: 4, right: 6),
+                    decoration: const pw.BoxDecoration(
+                      color: _brandBlue,
+                      shape: pw.BoxShape.circle,
+                    ),
+                  ),
                   pw.Expanded(
                     child: pw.Text(tip,
                         style: const pw.TextStyle(

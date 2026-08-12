@@ -948,6 +948,12 @@ abstract class AppLocalizations {
   /// **'Network analyser'**
   String get moduleSubtitleWifi;
 
+  /// Shown on a module tile instead of a score when that module has never been run
+  ///
+  /// In en, this message translates to:
+  /// **'not scanned'**
+  String get moduleNotScanned;
+
   /// No description provided for @statTotalScans.
   ///
   /// In en, this message translates to:
@@ -2699,6 +2705,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Signing you in…'**
   String get authSigningIn;
+
+  /// No description provided for @verifyEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your email address'**
+  String get verifyEmailTitle;
+
+  /// No description provided for @verifyEmailBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a link to {email}. Click it to confirm this address is yours.'**
+  String verifyEmailBody(String email);
+
+  /// No description provided for @verifyEmailResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend link'**
+  String get verifyEmailResend;
+
+  /// No description provided for @verifyEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification link sent. Check your inbox and spam folder.'**
+  String get verifyEmailSent;
+
+  /// No description provided for @verifyEmailFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the link. Try again in a few minutes.'**
+  String get verifyEmailFailed;
+
+  /// No description provided for @verifyEmailDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Email confirmed. Thanks!'**
+  String get verifyEmailDone;
 }
 
 class _AppLocalizationsDelegate

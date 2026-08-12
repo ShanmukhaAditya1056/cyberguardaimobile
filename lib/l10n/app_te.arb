@@ -141,6 +141,7 @@
   "moduleSubtitleBreach": "డేటా లీక్ మానిటర్",
   "moduleTitleWifi": "వైఫై",
   "moduleSubtitleWifi": "నెట్‌వర్క్ విశ్లేషకుడు",
+  "moduleNotScanned": "స్కాన్ కాలేదు",
   "statTotalScans": "మొత్తం స్కాన్లు",
   "statThreats": "బెదిరింపులు",
   "statLastScan": "చివరి స్కాన్",
@@ -439,5 +440,11 @@
   "authTabSignIn": "సైన్ ఇన్",
   "authTabRegister": "నమోదు",
   "authSecuredNote": "ఎండ్-టు-ఎండ్ ఎన్క్రిప్టెడ్ సైన్-ఇన్ ద్వారా రక్షించబడింది",
-  "authSigningIn": "సైన్ ఇన్ చేస్తోంది…"
+  "authSigningIn": "సైన్ ఇన్ చేస్తోంది…",
+  "verifyEmailTitle": "మీ ఇమెయిల్ చిరునామాను నిర్ధారించండి",
+  "verifyEmailBody": "{email} కు ఒక లింక్ పంపాము. ఈ చిరునామా మీదేనని నిర్ధారించడానికి దానిపై క్లిక్ చేయండి.",
+  "verifyEmailResend": "లింక్ మళ్లీ పంపు",
+  "verifyEmailSent": "ధృవీకరణ లింక్ పంపబడింది. మీ ఇన్‌బాక్స్ మరియు స్పామ్ చూడండి.",
+  "verifyEmailFailed": "లింక్ పంపలేకపోయాం. కొన్ని నిమిషాల్లో మళ్లీ ప్రయత్నించండి.",
+  "verifyEmailDone": "ఇమెయిల్ నిర్ధారించబడింది. ధన్యవాదాలు!"
 }

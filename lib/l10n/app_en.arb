@@ -183,6 +183,10 @@
   "moduleSubtitleBreach": "Data leak monitor",
   "moduleTitleWifi": "Wi-Fi",
   "moduleSubtitleWifi": "Network analyser",
+  "moduleNotScanned": "not scanned",
+  "@moduleNotScanned": {
+    "description": "Shown on a module tile instead of a score when that module has never been run"
+  },
   "statTotalScans": "Total Scans",
   "statThreats": "Threats",
   "statLastScan": "Last Scan",
@@ -741,5 +745,14 @@
   "authTabSignIn": "Sign In",
   "authTabRegister": "Register",
   "authSecuredNote": "Protected by end-to-end encrypted sign-in",
-  "authSigningIn": "Signing you in…"
+  "authSigningIn": "Signing you in…",
+  "verifyEmailTitle": "Confirm your email address",
+  "verifyEmailBody": "We sent a link to {email}. Click it to confirm this address is yours.",
+  "@verifyEmailBody": {
+    "placeholders": { "email": { "type": "String" } }
+  },
+  "verifyEmailResend": "Resend link",
+  "verifyEmailSent": "Verification link sent. Check your inbox and spam folder.",
+  "verifyEmailFailed": "Could not send the link. Try again in a few minutes.",
+  "verifyEmailDone": "Email confirmed. Thanks!"
 }

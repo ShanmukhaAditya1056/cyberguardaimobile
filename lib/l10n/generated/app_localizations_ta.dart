@@ -480,6 +480,9 @@ class AppLocalizationsTa extends AppLocalizations {
   String get moduleSubtitleWifi => 'வலையமைப்பு பகுப்பாய்வு';
 
   @override
+  String get moduleNotScanned => 'ஸ்கேன் இல்லை';
+
+  @override
   String get statTotalScans => 'மொத்த ஸ்கேன்கள்';
 
   @override
@@ -1490,4 +1493,26 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get authSigningIn => 'உள்நுழைகிறது…';
+
+  @override
+  String get verifyEmailTitle => 'உங்கள் மின்னஞ்சல் முகவரியை உறுதிப்படுத்தவும்';
+
+  @override
+  String verifyEmailBody(String email) {
+    return '$email க்கு ஒரு இணைப்பை அனுப்பியுள்ளோம். இந்த முகவரி உங்களுடையது என்பதை உறுதிப்படுத்த அதைக் கிளிக் செய்யவும்.';
+  }
+
+  @override
+  String get verifyEmailResend => 'இணைப்பை மீண்டும் அனுப்பு';
+
+  @override
+  String get verifyEmailSent =>
+      'சரிபார்ப்பு இணைப்பு அனுப்பப்பட்டது. உங்கள் இன்பாக்ஸ் மற்றும் ஸ்பேமைப் பாருங்கள்.';
+
+  @override
+  String get verifyEmailFailed =>
+      'இணைப்பை அனுப்ப முடியவில்லை. சில நிமிடங்களில் மீண்டும் முயற்சிக்கவும்.';
+
+  @override
+  String get verifyEmailDone => 'மின்னஞ்சல் உறுதிப்படுத்தப்பட்டது. நன்றி!';
 }

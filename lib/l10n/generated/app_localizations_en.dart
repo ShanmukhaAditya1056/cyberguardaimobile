@@ -477,6 +477,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moduleSubtitleWifi => 'Network analyser';
 
   @override
+  String get moduleNotScanned => 'not scanned';
+
+  @override
   String get statTotalScans => 'Total Scans';
 
   @override
@@ -1467,4 +1470,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authSigningIn => 'Signing you in…';
+
+  @override
+  String get verifyEmailTitle => 'Confirm your email address';
+
+  @override
+  String verifyEmailBody(String email) {
+    return 'We sent a link to $email. Click it to confirm this address is yours.';
+  }
+
+  @override
+  String get verifyEmailResend => 'Resend link';
+
+  @override
+  String get verifyEmailSent =>
+      'Verification link sent. Check your inbox and spam folder.';
+
+  @override
+  String get verifyEmailFailed =>
+      'Could not send the link. Try again in a few minutes.';
+
+  @override
+  String get verifyEmailDone => 'Email confirmed. Thanks!';
 }

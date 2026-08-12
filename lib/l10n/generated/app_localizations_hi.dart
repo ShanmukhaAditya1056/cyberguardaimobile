@@ -474,6 +474,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get moduleSubtitleWifi => 'नेटवर्क विश्लेषक';
 
   @override
+  String get moduleNotScanned => 'स्कैन नहीं';
+
+  @override
   String get statTotalScans => 'कुल स्कैन';
 
   @override
@@ -1468,4 +1471,26 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get authSigningIn => 'साइन इन किया जा रहा है…';
+
+  @override
+  String get verifyEmailTitle => 'अपना ईमेल पता सत्यापित करें';
+
+  @override
+  String verifyEmailBody(String email) {
+    return 'हमने $email पर एक लिंक भेजा है। यह पता आपका है, इसकी पुष्टि के लिए उस पर क्लिक करें।';
+  }
+
+  @override
+  String get verifyEmailResend => 'लिंक फिर भेजें';
+
+  @override
+  String get verifyEmailSent =>
+      'सत्यापन लिंक भेजा गया। अपना इनबॉक्स और स्पैम देखें।';
+
+  @override
+  String get verifyEmailFailed =>
+      'लिंक नहीं भेजा जा सका। कुछ मिनट बाद फिर कोशिश करें।';
+
+  @override
+  String get verifyEmailDone => 'ईमेल की पुष्टि हो गई। धन्यवाद!';
 }

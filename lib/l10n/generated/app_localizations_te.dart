@@ -475,6 +475,9 @@ class AppLocalizationsTe extends AppLocalizations {
   String get moduleSubtitleWifi => 'నెట్‌వర్క్ విశ్లేషకుడు';
 
   @override
+  String get moduleNotScanned => 'స్కాన్ కాలేదు';
+
+  @override
   String get statTotalScans => 'మొత్తం స్కాన్లు';
 
   @override
@@ -1480,4 +1483,26 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get authSigningIn => 'సైన్ ఇన్ చేస్తోంది…';
+
+  @override
+  String get verifyEmailTitle => 'మీ ఇమెయిల్ చిరునామాను నిర్ధారించండి';
+
+  @override
+  String verifyEmailBody(String email) {
+    return '$email కు ఒక లింక్ పంపాము. ఈ చిరునామా మీదేనని నిర్ధారించడానికి దానిపై క్లిక్ చేయండి.';
+  }
+
+  @override
+  String get verifyEmailResend => 'లింక్ మళ్లీ పంపు';
+
+  @override
+  String get verifyEmailSent =>
+      'ధృవీకరణ లింక్ పంపబడింది. మీ ఇన్‌బాక్స్ మరియు స్పామ్ చూడండి.';
+
+  @override
+  String get verifyEmailFailed =>
+      'లింక్ పంపలేకపోయాం. కొన్ని నిమిషాల్లో మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get verifyEmailDone => 'ఇమెయిల్ నిర్ధారించబడింది. ధన్యవాదాలు!';
 }

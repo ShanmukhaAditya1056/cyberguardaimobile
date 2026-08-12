@@ -32,6 +32,19 @@ class DashboardState {
   /// history, so it reflects individual scans rather than daily rollups.
   final List<ScanResultModel> weekScans;
 
+  /// Which modules have actually been run at least once.
+  ///
+  /// The per-module scores below default to 85 in [SettingsModel] and are
+  /// persisted, so a fresh install has a full set of plausible numbers that
+  /// were never measured. Showing those as findings is the one thing a
+  /// security tool must not do — it tells someone they are protected on the
+  /// strength of a default. Anything not in this set renders as "not scanned"
+  /// rather than as a score.
+  ///
+  /// Derived from stored scans rather than from a flag, so it stays true
+  /// across reinstalls of the same data and needs no Hive migration.
+  final Set<String> measuredModules;
+
   final bool isLoading;
   final String? error;
 
@@ -45,6 +58,7 @@ class DashboardState {
     required this.scoreHistory,
     required this.recentAlerts,
     required this.weekScans,
+    required this.measuredModules,
     required this.isLoading,
     this.error,
   });
@@ -63,6 +77,7 @@ class DashboardState {
         scoreHistory: [],
         recentAlerts: [],
         weekScans: [],
+        measuredModules: const {},
         isLoading: false,
       );
 
@@ -76,6 +91,7 @@ class DashboardState {
     List<ScoreEntryModel>? scoreHistory,
     List<AlertModel>? recentAlerts,
     List<ScanResultModel>? weekScans,
+    Set<String>? measuredModules,
     bool? isLoading,
     String? error,
   }) {
@@ -89,6 +105,7 @@ class DashboardState {
       scoreHistory: scoreHistory ?? this.scoreHistory,
       recentAlerts: recentAlerts ?? this.recentAlerts,
       weekScans: weekScans ?? this.weekScans,
+      measuredModules: measuredModules ?? this.measuredModules,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
@@ -115,9 +132,22 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       final now = DateTime.now();
       final weekStart =
           DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
-      final weekScans = HiveService.getScanResults()
-          .where((s) => s.timestamp.isAfter(weekStart))
-          .toList();
+      final allScans = HiveService.getScanResults();
+      final weekScans =
+          allScans.where((s) => s.timestamp.isAfter(weekStart)).toList();
+
+      // A module counts as measured once it has produced a stored result.
+      // Wi-Fi is the exception: it writes WifiScanModel to its own box rather
+      // than a ScanResultModel, so asking the scan-results box alone would
+      // report it as never run no matter how many networks were analysed.
+      final measured = <String>{
+        for (final scan in allScans)
+          if (scan.type == 'phishing' ||
+              scan.type == 'malware' ||
+              scan.type == 'breach')
+            scan.type,
+        if (HiveService.getWifiScans().isNotEmpty) 'wifi',
+      };
 
       final unified = ScoreCalculator.calculate(
         phishingScore: settings.phishingScore,
@@ -141,6 +171,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         scoreHistory: scoreHistory,
         recentAlerts: alerts,
         weekScans: weekScans,
+        measuredModules: measured,
         isLoading: false,
       );
     } catch (e) {

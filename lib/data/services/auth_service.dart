@@ -98,6 +98,18 @@ class AuthService {
     }
   }
 
+  /// Registers, then sends a verification link to the address given.
+  ///
+  /// The link is fire-and-forget: the account exists either way, and the app
+  /// stays usable while it is unverified. Blocking every feature behind a
+  /// click in an inbox would strand anyone whose mail is slow or filtered, on
+  /// an app whose scanners work perfectly well without an account at all.
+  /// [isEmailVerified] is what a caller checks when it wants the stronger
+  /// guarantee.
+  ///
+  /// Google sign-in deliberately gets no equivalent. Google has already
+  /// verified the address before it hands over a credential, so a second
+  /// confirmation would ask someone to prove what the provider just proved.
   static Future<AuthResult> registerWithEmail(
     String email,
     String password,
@@ -108,11 +120,57 @@ class AuthService {
         email: email.trim(),
         password: password,
       );
+      try {
+        await cred.user?.sendEmailVerification();
+      } catch (_) {
+        // Quota exceeded, or offline. The account is already created, so
+        // failing the whole registration here would be worse than letting
+        // them ask for the link again from the banner.
+      }
       return AuthResult.success(cred.user);
     } on FirebaseAuthException catch (e) {
       return AuthResult.failed(_mapCode(e.code));
     } catch (_) {
       return const AuthResult.failed(AuthFailure.unknown);
+    }
+  }
+
+  /// Whether the signed-in account has confirmed its address.
+  ///
+  /// True for Google accounts without any extra step, since Google verifies
+  /// before issuing the credential.
+  static bool get isEmailVerified => currentUser?.emailVerified ?? false;
+
+  /// True only for an account that signed in with a password and has not yet
+  /// clicked its link — the one case where the verification banner belongs.
+  static bool get needsEmailVerification =>
+      _configured && currentUser != null && !isEmailVerified;
+
+  /// Re-sends the verification link. Returns false when the send failed, so
+  /// the UI can say so rather than claiming an email is on its way.
+  static Future<bool> resendEmailVerification() async {
+    if (!_configured) return false;
+    try {
+      await currentUser?.sendEmailVerification();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Re-reads the account from Firebase and reports whether it is now
+  /// verified.
+  ///
+  /// `emailVerified` is baked into the cached ID token, so it stays false
+  /// locally after the user clicks the link until the token is refreshed.
+  /// Without this reload the banner would never go away on its own.
+  static Future<bool> refreshEmailVerified() async {
+    if (!_configured) return false;
+    try {
+      await currentUser?.reload();
+      return isEmailVerified;
+    } catch (_) {
+      return false;
     }
   }
 

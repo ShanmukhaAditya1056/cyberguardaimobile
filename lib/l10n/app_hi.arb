@@ -141,6 +141,7 @@
   "moduleSubtitleBreach": "डेटा लीक मॉनिटर",
   "moduleTitleWifi": "वाई-फ़ाई",
   "moduleSubtitleWifi": "नेटवर्क विश्लेषक",
+  "moduleNotScanned": "स्कैन नहीं",
   "statTotalScans": "कुल स्कैन",
   "statThreats": "ख़तरे",
   "statLastScan": "अंतिम स्कैन",
@@ -439,5 +440,11 @@
   "authTabSignIn": "साइन इन",
   "authTabRegister": "पंजीकरण",
   "authSecuredNote": "एंड-टू-एंड एन्क्रिप्टेड साइन-इन से सुरक्षित",
-  "authSigningIn": "साइन इन किया जा रहा है…"
+  "authSigningIn": "साइन इन किया जा रहा है…",
+  "verifyEmailTitle": "अपना ईमेल पता सत्यापित करें",
+  "verifyEmailBody": "हमने {email} पर एक लिंक भेजा है। यह पता आपका है, इसकी पुष्टि के लिए उस पर क्लिक करें।",
+  "verifyEmailResend": "लिंक फिर भेजें",
+  "verifyEmailSent": "सत्यापन लिंक भेजा गया। अपना इनबॉक्स और स्पैम देखें।",
+  "verifyEmailFailed": "लिंक नहीं भेजा जा सका। कुछ मिनट बाद फिर कोशिश करें।",
+  "verifyEmailDone": "ईमेल की पुष्टि हो गई। धन्यवाद!"
 }

@@ -21,6 +21,7 @@ class ModuleGrid extends StatelessWidget {
         accent: const Color(0xFF3B82F6),
         tileColor: const Color(0xFFE0EBFF),
         score: state.phishingScore,
+        measured: state.measuredModules.contains('phishing'),
         route: '/phishing',
       ),
       _ModuleData(
@@ -30,6 +31,7 @@ class ModuleGrid extends StatelessWidget {
         accent: const Color(0xFFEA580C),
         tileColor: const Color(0xFFFFE7D6),
         score: state.malwareScore,
+        measured: state.measuredModules.contains('malware'),
         route: '/malware',
       ),
       _ModuleData(
@@ -39,6 +41,7 @@ class ModuleGrid extends StatelessWidget {
         accent: const Color(0xFFE11D48),
         tileColor: const Color(0xFFFFD9DE),
         score: state.breachScore,
+        measured: state.measuredModules.contains('breach'),
         route: '/breach',
       ),
       _ModuleData(
@@ -48,6 +51,7 @@ class ModuleGrid extends StatelessWidget {
         accent: const Color(0xFF10B981),
         tileColor: const Color(0xFFD4F5E2),
         score: state.wifiScore,
+        measured: state.measuredModules.contains('wifi'),
         route: '/wifi',
       ),
     ];
@@ -80,6 +84,7 @@ class _ModuleData {
   final Color accent;
   final Color tileColor;
   final int score;
+  final bool measured;
   final String route;
 
   const _ModuleData({
@@ -89,6 +94,7 @@ class _ModuleData {
     required this.accent,
     required this.tileColor,
     required this.score,
+    required this.measured,
     required this.route,
   });
 }
@@ -319,7 +325,7 @@ class _ModuleCardWidgetState extends State<_ModuleCardWidget>
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '$score',
+                      data.measured ? '$score' : '—',
                       style: TextStyle(
                         fontFamily: 'Inter',
                         color: scoreColor,
@@ -328,9 +334,11 @@ class _ModuleCardWidgetState extends State<_ModuleCardWidget>
                       ),
                     ),
                     const SizedBox(width: 2),
-                    const Text(
-                      '/100',
-                      style: TextStyle(
+                    Text(
+                      data.measured
+                          ? '/100'
+                          : AppLocalizations.of(context)!.moduleNotScanned,
+                      style: const TextStyle(
                         fontFamily: 'Inter',
                         color: Color(0xFF64748B),
                         fontSize: 10,
