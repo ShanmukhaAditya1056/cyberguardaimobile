@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -28,15 +30,21 @@ class _EmailVerificationBannerState extends State<EmailVerificationBanner>
   bool _visible = AuthService.needsEmailVerification;
   bool _sending = false;
 
+  StreamSubscription<void>? _authSub;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _recheck();
+    // Sign-in and sign-out both change who this banner is about. Without this
+    // it would keep reporting the previous account until the next rebuild.
+    _authSub = AuthService.authStateChanges.listen((_) => _recheck());
   }
 
   @override
   void dispose() {
+    _authSub?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -54,6 +62,12 @@ class _EmailVerificationBannerState extends State<EmailVerificationBanner>
       if (mounted && _visible) setState(() => _visible = false);
       return;
     }
+
+    // Show as well as hide. `_visible` is seeded at construction, and right
+    // after registration the dashboard can build before Firebase has finished
+    // populating currentUser — so the seed reads false and, without this, the
+    // banner would never appear for the one account that needs it.
+    if (mounted && !_visible) setState(() => _visible = true);
     // `emailVerified` is baked into the cached ID token, so it stays false
     // locally until the token is refreshed.
     final verified = await AuthService.refreshEmailVerified();
