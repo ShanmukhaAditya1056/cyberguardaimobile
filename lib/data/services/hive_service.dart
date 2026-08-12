@@ -163,6 +163,31 @@ class HiveService {
     await _settingsBox.put('settings', settings);
   }
 
+  /// Records a module's score after that module has actually run.
+  ///
+  /// This is the write the dashboard tiles read on their next load. Without
+  /// it the tiles kept reporting `SettingsModel`'s default of 85 no matter
+  /// what any scanner found — scanning a device full of dangerous apps left
+  /// the Malware tile reading 85, and the Wi-Fi tile only ever moved because
+  /// the dashboard's own quick scan happened to write it.
+  ///
+  /// `lastScanDate` is stamped here too, because a module producing a score
+  /// *is* the app having scanned; leaving that to the caller is how the two
+  /// drifted apart.
+  static Future<void> updateModuleScore(String module, int score) async {
+    final s = getSettings();
+    final clamped = score.clamp(0, 100);
+    await saveSettings(
+      s.copyWith(
+        phishingScore: module == 'phishing' ? clamped : null,
+        malwareScore: module == 'malware' ? clamped : null,
+        breachScore: module == 'breach' ? clamped : null,
+        wifiScore: module == 'wifi' ? clamped : null,
+        lastScanDate: DateTime.now(),
+      ),
+    );
+  }
+
   // ── Scan Results ──────────────────────────────────────────────────────────
 
   static Box<ScanResultModel> get _scanBox =>

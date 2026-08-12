@@ -40,21 +40,31 @@ class PermissionService {
     return result.isGranted;
   }
 
-  /// Request the permissions needed to read the connected Wi-Fi's SSID:
-  ///  - ACCESS_FINE_LOCATION (Android 9–12 path)
-  ///  - NEARBY_WIFI_DEVICES (Android 13+ path; permission_handler maps this
-  ///    to `Permission.nearbyWifiDevices` and silently no-ops on API < 33)
+  /// Requests whatever this Android version needs to read the connected
+  /// Wi-Fi's SSID — and nothing more.
   ///
-  /// Returns true if either path is satisfied. Without one of these the
-  /// system returns "<unknown ssid>" and SSID surfaces as "Unknown" in the
-  /// UI, regardless of the user's actual network.
+  /// On Android 13+ that is NEARBY_WIFI_DEVICES alone, declared with
+  /// `neverForLocation` in the manifest. The user is asked for "nearby
+  /// devices", never for location, and the device-wide Location toggle does
+  /// not have to be on.
+  ///
+  /// On Android 12 and below the platform offers no such route: the SSID is
+  /// location-gated and ACCESS_FINE_LOCATION is the only way to read it.
+  /// Nothing in this app reads a position either way.
+  ///
+  /// Without a grant the system returns "<unknown ssid>" and the network
+  /// surfaces as "Unknown" whatever the user is actually connected to.
   static Future<bool> requestLocationPermission(BuildContext context) async {
-    // Android gates the SSID behind either of two permissions; a host with no
-    // permission model has nothing to prompt for.
+    // A host with no permission model has nothing to prompt for.
     if (!AppPlatform.isAndroid) return AppPlatform.canReadWifiIdentity;
+
+    // `nearbyWifiDevices` reports denied rather than throwing below API 33,
+    // so this is safe to check first on every version.
+    final nearby = await Permission.nearbyWifiDevices.request();
+    if (nearby.isGranted) return true;
+
     final locStatus = await Permission.location.status;
-    final nearbyStatus = await Permission.nearbyWifiDevices.status;
-    if (locStatus.isGranted || nearbyStatus.isGranted) return true;
+    if (locStatus.isGranted) return true;
 
     if (context.mounted) {
       final l = AppLocalizations.of(context)!;
@@ -68,13 +78,12 @@ class PermissionService {
       if (!shouldRequest) return false;
     }
 
-    // Ask for both. The platform will silently skip whichever doesn't apply.
-    final results = await [
-      Permission.location,
-      Permission.nearbyWifiDevices,
-    ].request();
-    return results[Permission.location]?.isGranted == true ||
-        results[Permission.nearbyWifiDevices]?.isGranted == true;
+    // Only reached on Android 12 and below, or if the nearby-devices prompt
+    // above was declined. ACCESS_FINE_LOCATION is capped at API 32 in the
+    // manifest, so on 13+ this request cannot succeed and correctly returns
+    // false rather than showing a location prompt the OS would refuse.
+    final location = await Permission.location.request();
+    return location.isGranted;
   }
 
   /// Request notification permission (Android 13+)

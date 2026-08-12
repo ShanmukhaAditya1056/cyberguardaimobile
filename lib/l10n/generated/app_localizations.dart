@@ -2741,6 +2741,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Email confirmed. Thanks!'**
   String get verifyEmailDone;
+
+  /// No description provided for @qrRetryCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get qrRetryCamera;
+
+  /// No description provided for @qrGalleryStillWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still upload a QR image from your gallery.'**
+  String get qrGalleryStillWorks;
 }
 
 class _AppLocalizationsDelegate

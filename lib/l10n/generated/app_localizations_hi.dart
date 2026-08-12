@@ -1493,4 +1493,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get verifyEmailDone => 'ईमेल की पुष्टि हो गई। धन्यवाद!';
+
+  @override
+  String get qrRetryCamera => 'फिर कोशिश करें';
+
+  @override
+  String get qrGalleryStillWorks =>
+      'आप गैलरी से QR इमेज अब भी अपलोड कर सकते हैं।';
 }

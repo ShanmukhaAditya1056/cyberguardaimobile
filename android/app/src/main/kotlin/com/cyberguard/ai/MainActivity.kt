@@ -512,10 +512,18 @@ class MainActivity : FlutterActivity() {
                 if (!hasWifiNamePermission()) {
                     return wifiUnavailable(
                         "permission_required",
-                        "Allow the location / nearby-devices permission to read the Wi-Fi network name",
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                            "Allow the nearby-devices permission to read the Wi-Fi network name"
+                        else
+                            "Allow the location permission to read the Wi-Fi network name",
                     )
                 }
-                if (!isLocationServiceOn()) {
+                // The device-wide Location toggle only gates the SSID on the
+                // legacy path. With NEARBY_WIFI_DEVICES granted on Android 13+
+                // the name is readable regardless, so telling that user to
+                // switch Location on would be asking for something that
+                // changes nothing.
+                if (!hasNearbyWifiPermission() && !isLocationServiceOn()) {
                     return wifiUnavailable(
                         "location_off",
                         "Turn on Location in system settings — Android hides the Wi-Fi name while it is off, even with the permission granted",
@@ -601,13 +609,21 @@ class MainActivity : FlutterActivity() {
     /// NEARBY_WIFI_DEVICES is the Android 13+ route; ACCESS_FINE_LOCATION
     /// covers everything before it (and still works after).
     private fun hasWifiNamePermission(): Boolean {
-        val fine = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED
-        if (fine) return true
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            checkSelfPermission(Manifest.permission.NEARBY_WIFI_DEVICES) ==
+        // Checked first: on Android 13+ this is the only permission the app
+        // asks for, and ACCESS_FINE_LOCATION is capped at API 32 in the
+        // manifest so it can never be granted there.
+        if (hasNearbyWifiPermission()) return true
+        return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
     }
+
+    /// The Android 13+ path. Declared with `neverForLocation`, so granting it
+    /// reveals the network's identity without granting any location access
+    /// and without requiring the device Location toggle.
+    private fun hasNearbyWifiPermission(): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.NEARBY_WIFI_DEVICES) ==
+            PackageManager.PERMISSION_GRANTED
 
     /// The device-wide Location toggle, which is separate from the app's
     /// permission grant. Android returns "<unknown ssid>" while this is off.

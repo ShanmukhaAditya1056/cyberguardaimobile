@@ -263,6 +263,12 @@ class PhishingRepository {
     );
     await HiveService.saveScanResult(scanModel);
 
+    // The tile reflects the recent run of scans, not just this one. A single
+    // bad link should not permanently mark the module as compromised, and a
+    // single good one should not clear a run of bad ones — so the score is
+    // the share of recent scans that came back clean.
+    await HiveService.updateModuleScore('phishing', _recentPhishingScore());
+
     if (result.isPhishing) {
       final alert = AlertModel(
         id: _uuid.v4(),
@@ -285,5 +291,18 @@ class PhishingRepository {
 
   Future<void> deleteHistory(String id) async {
     await HiveService.deleteScanResult(id);
+  }
+
+  /// Phishing module score: how clean the last 20 scans were.
+  ///
+  /// 100 when nothing recent was phishing, falling as the proportion rises.
+  /// Bounded to the recent window so the number tracks current behaviour
+  /// rather than sinking permanently after one bad link months ago.
+  int _recentPhishingScore() {
+    final recent =
+        HiveService.getScanResults(type: 'phishing').take(20).toList();
+    if (recent.isEmpty) return 100;
+    final bad = recent.where((r) => r.verdict == 'phishing').length;
+    return (100 - ((bad / recent.length) * 100)).round().clamp(0, 100);
   }
 }

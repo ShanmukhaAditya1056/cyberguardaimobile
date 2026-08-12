@@ -25,6 +25,14 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   bool _handled = false;
   bool _torchOn = false;
 
+  /// Whether the camera may be opened. The scanner is not built until this is
+  /// true, so the widget never races the permission dialog.
+  bool _cameraGranted = false;
+
+  /// Distinguishes "still asking" from "asked and refused", so the refusal
+  /// state is not flashed on screen while the dialog is up.
+  bool _permissionChecked = false;
+
   @override
   void initState() {
     super.initState();
@@ -35,14 +43,53 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
     _ensurePermission();
   }
 
+  /// Asks for the camera, then starts the scanner.
+  ///
+  /// The start is the part that used to be missing. `MobileScanner` opens the
+  /// camera the moment it is attached, which happens on the first build —
+  /// before the permission dialog has been answered. That attempt was refused,
+  /// and granting the permission afterwards restarted nothing, so the user saw
+  /// a permanently black viewfinder having done exactly what was asked of
+  /// them. The scanner is now withheld until the answer is known, and started
+  /// explicitly once it is yes.
   Future<void> _ensurePermission() async {
     // A host with no runtime-permission model has nothing to prompt for; the
     // scanner surfaces its own error if the camera is genuinely unavailable.
-    if (!AppPlatform.hasRuntimePermissions) return;
-    final status = await Permission.camera.status;
-    if (!status.isGranted) {
-      await Permission.camera.request();
+    if (!AppPlatform.hasRuntimePermissions) {
+      if (mounted) setState(() => _cameraGranted = true);
+      return;
     }
+
+    var status = await Permission.camera.status;
+    if (!status.isGranted) {
+      status = await Permission.camera.request();
+    }
+    if (!mounted) return;
+
+    setState(() {
+      _cameraGranted = status.isGranted;
+      _permissionChecked = true;
+    });
+
+    if (status.isGranted) {
+      try {
+        await _controller.start();
+      } catch (_) {
+        // Already running, or the hardware is genuinely unavailable — the
+        // widget's own errorBuilder reports the latter.
+      }
+    }
+  }
+
+  /// Re-checks after a trip to system settings, so returning with the
+  /// permission granted brings the viewfinder up without a manual restart.
+  Future<void> _recheckAfterSettings() async {
+    final status = await Permission.camera.status;
+    if (!mounted || !status.isGranted) return;
+    setState(() => _cameraGranted = true);
+    try {
+      await _controller.start();
+    } catch (_) {/* already running */}
   }
 
   @override
@@ -288,6 +335,20 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
       ),
       body: Stack(
         children: [
+          // Only mounted once the camera is actually allowed. Attaching it
+          // earlier is what made granting the permission appear to do nothing:
+          // the widget opened the camera on its first build, was refused, and
+          // had no reason to try again.
+          if (!_cameraGranted)
+            _CameraGate(
+              checked: _permissionChecked,
+              onOpenSettings: () async {
+                await openAppSettings();
+                await _recheckAfterSettings();
+              },
+              onRetry: _ensurePermission,
+            )
+          else
           MobileScanner(
             controller: _controller,
             onDetect: _onDetect,
@@ -315,6 +376,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                       FilledButton(
                         onPressed: () async {
                           await openAppSettings();
+                          await _recheckAfterSettings();
                         },
                         child: Text(l.qrOpenSettings),
                       ),
@@ -364,6 +426,89 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// What fills the viewfinder before the camera is allowed to open.
+///
+/// It exists so the screen has something honest to show while the permission
+/// dialog is up, and something actionable if the answer was no — rather than
+/// a black rectangle that looks like a broken camera.
+class _CameraGate extends StatelessWidget {
+  final bool checked;
+  final VoidCallback onOpenSettings;
+  final VoidCallback onRetry;
+
+  const _CameraGate({
+    required this.checked,
+    required this.onOpenSettings,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+
+    // Still waiting on the dialog: say nothing about refusal yet.
+    if (!checked) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.white70),
+      );
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.no_photography_outlined,
+                color: Colors.white70, size: 48),
+            const SizedBox(height: 14),
+            Text(
+              l.qrCameraUnavailable,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontFamily: 'Inter',
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Wrap(
+              spacing: 10,
+              alignment: WrapAlignment.center,
+              children: [
+                FilledButton(
+                  onPressed: onRetry,
+                  child: Text(l.qrRetryCamera),
+                ),
+                if (AppPlatform.hasRuntimePermissions)
+                  TextButton(
+                    onPressed: onOpenSettings,
+                    child: Text(
+                      l.qrOpenSettings,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            // The gallery route needs no camera at all, so it stays offered
+            // even when the permission is permanently denied.
+            Text(
+              l.qrGalleryStillWorks,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white38,
+                fontFamily: 'Inter',
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -754,5 +754,7 @@
   "verifyEmailResend": "Resend link",
   "verifyEmailSent": "Verification link sent. Check your inbox and spam folder.",
   "verifyEmailFailed": "Could not send the link. Try again in a few minutes.",
-  "verifyEmailDone": "Email confirmed. Thanks!"
+  "verifyEmailDone": "Email confirmed. Thanks!",
+  "qrRetryCamera": "Try again",
+  "qrGalleryStillWorks": "You can still upload a QR image from your gallery."
 }

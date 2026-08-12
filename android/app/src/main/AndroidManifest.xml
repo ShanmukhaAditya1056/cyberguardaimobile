@@ -6,14 +6,30 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <!-- Android 13+ (API 33) requires NEARBY_WIFI_DEVICES to read the
-         connected SSID; without it WifiInfo.getSsid() returns
-         "<unknown ssid>" even when ACCESS_FINE_LOCATION is granted. We do
-         NOT pair this with the "neverForLocation" flag because we still
-         want SSID/BSSID, which Google considers location-derivable. -->
-    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"/>
+    <!-- Location is requested ONLY to read the Wi-Fi network name, and only
+         on Android 12 and below, where the platform gives no other way to get
+         it. maxSdkVersion stops Android 13+ devices from ever being asked for
+         a location permission this app has no use for: nothing here reads a
+         position, and the only caller is the Wi-Fi scanner. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"
+        android:maxSdkVersion="32"/>
+
+    <!-- Android 13+ route to the SSID. `neverForLocation` is the whole point:
+         it declares that these results are never used to derive a physical
+         position, which means the OS asks for "nearby devices" instead of
+         "location", and the device-wide Location toggle no longer has to be
+         on for WifiInfo.getSsid() to return a real name.
+
+         An earlier comment here claimed the flag had to be omitted to keep
+         SSID/BSSID. That is not so — the flag strips location *derivation*
+         from scan results, not the connected network's identity, and this is
+         the path Android 13 added for connectivity apps exactly like this
+         one. Omitting it was why the app asked for Location at all and why
+         the name read "Unknown" whenever that system toggle was off. -->
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
+        android:usesPermissionFlags="neverForLocation"/>
     <uses-permission android:name="android.permission.READ_SMS"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"

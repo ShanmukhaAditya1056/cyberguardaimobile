@@ -76,7 +76,51 @@ class WifiRepository {
 
   WifiRepository(this._platform);
 
-  Future<WifiAnalysisResult> analyzeCurrentNetwork() async {
+  /// How long a scan of the same access point stays good for.
+  ///
+  /// Re-analysing the network you are already sitting on, seconds apart,
+  /// cannot tell you anything new: its encryption, name and hardware address
+  /// have not changed. Within this window the stored result is returned as-is.
+  static const _rescanWindow = Duration(minutes: 5);
+
+  /// Signal strength, in bands rather than raw dBm.
+  ///
+  /// RSSI drifts by several dBm from one second to the next while nothing
+  /// about the network changes, and feeding that straight into the score is
+  /// what made repeat scans of one network disagree with each other. The
+  /// bands are the ones a user would recognise — excellent / good / fair /
+  /// weak — and the score only moves when the band does, which is a real
+  /// change rather than noise.
+  ///
+  /// The *displayed* RSSI stays the true measurement; only scoring is banded.
+  static int quantiseRssi(int rssi) {
+    if (rssi >= -50) return -40;
+    if (rssi >= -60) return -55;
+    if (rssi >= -70) return -65;
+    if (rssi >= -80) return -75;
+    return -90;
+  }
+
+  /// DNS latency, in bands, for the same reason.
+  ///
+  /// A network measured at 195 ms and then 205 ms is the same network; the
+  /// old code flipped a pass/fail check and moved the ML feature between
+  /// those two readings.
+  static int quantiseLatency(int latencyMs) {
+    if (latencyMs <= 0) return 0;
+    if (latencyMs < 50) return 25;
+    if (latencyMs < 120) return 80;
+    if (latencyMs < 250) return 180;
+    return 400;
+  }
+
+  /// Analyses the connected network.
+  ///
+  /// Pass [force] to bypass [_rescanWindow] and re-measure — what the Rescan
+  /// button does. Without it, a scan of the same access point inside the
+  /// window returns the stored result, so pressing Scan repeatedly reports
+  /// one stable answer instead of a new number each time.
+  Future<WifiAnalysisResult> analyzeCurrentNetwork({bool force = false}) async {
     // 1. Get real network data
     final wifiData = await _platform.getWifiDetails();
     final status = wifiData['status'] as String? ?? 'connected';
@@ -121,10 +165,29 @@ class WifiRepository {
     // the platform knows it, which is more useful than a yes/no.
     final securityLabel = wifiData['securityLabel'] as String?;
 
+    // 1b. Already scanned this access point a moment ago? Reuse it.
+    //
+    // Keyed on the BSSID, not the name: two access points can advertise the
+    // same SSID, and it is precisely the change of BSSID under a familiar
+    // name that the Evil Twin check exists to catch. Reusing by name would
+    // hide exactly the event worth seeing.
+    if (!force && bssid.isNotEmpty) {
+      final recent = HiveService.getWifiScans().where((scan) {
+        return scan.bssid == bssid &&
+            DateTime.now().difference(scan.timestamp) < _rescanWindow;
+      }).firstOrNull;
+      if (recent != null) return _fromStored(recent);
+    }
+
     // 2. DNS health check using real lookup
     final dnsResult = await _testDns();
     final dnsHealthy = dnsResult.healthy;
     final latencyMs = dnsResult.latencyMs;
+
+    // Banded copies for scoring only. Everything the user sees keeps the true
+    // measurement; these exist so the same network scores the same twice.
+    final scoringRssi = quantiseRssi(rssi);
+    final scoringLatency = quantiseLatency(latencyMs);
 
     // 3. BSSID consistency check
     final storedBssid = HiveService.getStoredBssid(ssid);
@@ -189,8 +252,11 @@ class WifiRepository {
           icon: 'router',
         ),
       WifiCheckResult(
+        // Judged on the band, reported with the real number: a reading either
+        // side of a threshold must not flip this check back and forth while
+        // the network is unchanged.
         name: 'Latency',
-        passed: latencyMs < 200,
+        passed: scoringLatency < 250,
         detail: latencyMs == 0
             ? 'Latency check failed'
             : latencyMs < 100
@@ -216,7 +282,7 @@ class WifiRepository {
       isEncrypted: isSecured,
       dnsHealthy: dnsHealthy,
       bssidConsistent: !bssidChanged,
-      rssi: rssi,
+      rssi: scoringRssi,
       isPublic: !isSecured,
     );
 
@@ -254,10 +320,10 @@ class WifiRepository {
     if (_wifiMl.isReady) {
       final encCode = isSecured ? 2 : 0; // 0=open, 2=WPA2/WPA3-ish
       final feats = WifiMlService.extractFeatures(
-        rssi: rssi,
+        rssi: scoringRssi,
         encryptionCode: encCode,
         isPublic: !isSecured,
-        dnsResponseMs: dnsHealthy ? latencyMs.clamp(5, 200) : 800,
+        dnsResponseMs: dnsHealthy ? scoringLatency.clamp(5, 400) : 800,
         bssidChanges: bssidChanged ? 1 : 0,
         rssiVariance: 1.0,
         frequencyGhz: frequency > 4000 ? 5.0 : 2.4,
@@ -301,6 +367,48 @@ class WifiRepository {
   /// returns the result. Shared by both exits from [analyzeCurrentNetwork] so
   /// a host that can only run the reachability checks still gets its scan
   /// written to history and still triggers an alert.
+  /// Rebuilds a result from a scan already stored, for the reuse path.
+  ///
+  /// Nothing is written and no alert is raised: both happened when this scan
+  /// was first recorded, and doing them again would file a duplicate alert
+  /// every time someone reopened the screen.
+  ///
+  /// The stored `checks` are flattened strings — "Latency:pass" — so the
+  /// detail text cannot be recovered. Rather than invent one, each check is
+  /// rebuilt with its name, its real outcome, and a note saying when it was
+  /// measured, so the screen never presents a stale reading as a fresh one.
+  WifiAnalysisResult _fromStored(WifiScanModel scan) {
+    final age = DateTime.now().difference(scan.timestamp);
+    final measured = age.inMinutes < 1
+        ? 'measured moments ago'
+        : 'measured ${age.inMinutes} min ago';
+
+    return WifiAnalysisResult(
+      ssid: scan.ssid,
+      bssid: scan.bssid,
+      rssi: scan.rssi,
+      trustScore: scan.trustScore,
+      riskLevel: scan.riskLevel,
+      checks: [
+        for (final raw in scan.checks)
+          WifiCheckResult(
+            name: raw.split(':').first,
+            passed: raw.endsWith(':pass'),
+            detail: measured,
+            icon: 'history',
+          ),
+      ],
+      ipAddress: scan.ipAddress,
+      frequency: scan.frequency,
+      linkSpeed: scan.linkSpeed,
+      isEncrypted: scan.isEncrypted,
+      dnsHealthy: scan.dnsHealthy,
+      latencyMs: scan.latencyMs,
+      bssidChanged: false,
+      identityAvailable: scan.ssid.isNotEmpty && scan.ssid != 'Unknown',
+    );
+  }
+
   Future<WifiAnalysisResult> _buildResult({
     required String ssid,
     required String bssid,
@@ -335,6 +443,11 @@ class WifiRepository {
       latencyMs: latencyMs,
     );
     await HiveService.saveWifiScan(scanModel);
+    // The dashboard tile reads this on its next load. Writing it here rather
+    // than in the caller means every route into a Wi-Fi scan updates the tile
+    // — previously only the dashboard's own quick scan did, so scanning from
+    // the Wi-Fi screen left the tile showing a stale number.
+    await HiveService.updateModuleScore('wifi', trustScore);
 
     if (riskLevel == 'critical' || riskLevel == 'high') {
       final failed = checks.where((c) => !c.passed).map((c) => c.name).join(', ');

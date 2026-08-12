@@ -446,5 +446,7 @@
   "verifyEmailResend": "लिंक फिर भेजें",
   "verifyEmailSent": "सत्यापन लिंक भेजा गया। अपना इनबॉक्स और स्पैम देखें।",
   "verifyEmailFailed": "लिंक नहीं भेजा जा सका। कुछ मिनट बाद फिर कोशिश करें।",
-  "verifyEmailDone": "ईमेल की पुष्टि हो गई। धन्यवाद!"
+  "verifyEmailDone": "ईमेल की पुष्टि हो गई। धन्यवाद!",
+  "qrRetryCamera": "फिर कोशिश करें",
+  "qrGalleryStillWorks": "आप गैलरी से QR इमेज अब भी अपलोड कर सकते हैं।"
 }

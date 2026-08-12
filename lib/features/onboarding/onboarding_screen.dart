@@ -94,7 +94,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       // would throw rather than return a status.
       if (AppPlatform.hasRuntimePermissions) {
         if (AppPlatform.canReadSms) await Permission.sms.request();
-        await Permission.location.request();
+
+        // Nearby-devices first: on Android 13+ it is the only thing that
+        // unlocks the Wi-Fi name, and it grants no location access. Location
+        // is asked for only when that is unavailable — below API 33, where
+        // the platform offers no other route to the SSID. Requesting location
+        // unconditionally, as this used to, prompted modern users for a
+        // permission the app does not use and the manifest now caps at 32.
+        final nearby = await Permission.nearbyWifiDevices.request();
+        if (!nearby.isGranted) await Permission.location.request();
+
         await Permission.notification.request();
       }
     } finally {

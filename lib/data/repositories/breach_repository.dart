@@ -96,6 +96,13 @@ class BreachRepository {
     );
     await HiveService.saveScanResult(scanResult);
 
+    // Breach is the one module where the answer is genuinely binary: the
+    // credential is in a public dump or it is not. The tile still needs a
+    // number, so the two states map to the ends of the scale rather than to
+    // an invented gradient — 100 clean, 20 breached, which lands in the
+    // critical band and drags the unified score accordingly.
+    await HiveService.updateModuleScore('breach', isBreached ? 20 : 100);
+
     if (isBreached) {
       final alert = AlertModel(
         id: _uuid.v4(),

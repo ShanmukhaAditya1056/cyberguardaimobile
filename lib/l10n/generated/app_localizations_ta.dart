@@ -1515,4 +1515,11 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get verifyEmailDone => 'மின்னஞ்சல் உறுதிப்படுத்தப்பட்டது. நன்றி!';
+
+  @override
+  String get qrRetryCamera => 'மீண்டும் முயற்சிக்கவும்';
+
+  @override
+  String get qrGalleryStillWorks =>
+      'கேலரியிலிருந்து QR படத்தை இப்போதும் பதிவேற்றலாம்.';
 }

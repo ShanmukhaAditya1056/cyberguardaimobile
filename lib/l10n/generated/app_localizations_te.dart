@@ -1505,4 +1505,11 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get verifyEmailDone => 'ఇమెయిల్ నిర్ధారించబడింది. ధన్యవాదాలు!';
+
+  @override
+  String get qrRetryCamera => 'మళ్లీ ప్రయత్నించండి';
+
+  @override
+  String get qrGalleryStillWorks =>
+      'గ్యాలరీ నుండి QR చిత్రాన్ని ఇప్పటికీ అప్‌లోడ్ చేయవచ్చు.';
 }
